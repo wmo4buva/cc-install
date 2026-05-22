@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  claude-code:
+    build: .
+    container_name: cc-install
+    image: cc-install:latest
+
+    # Persistent volumes
+    volumes:
+      - ./workspace:/home/claudeuser/workspace
+      - claude-config:/home/claudeuser/.claude
+
+    # Port mappings
+    ports:
+      - "8080:8080"  # code-server web interface
+
+    # Resource limits (adjust based on faculty laptop specs)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+    # Keep container running
+    command: tail -f /dev/null
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      - CODE_SERVER_CONFIG=/home/claudeuser/.config/code-server/config.yaml
+
+volumes:
+  claude-config:
+    driver: local

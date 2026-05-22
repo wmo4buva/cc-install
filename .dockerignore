@@ -1,0 +1,27 @@
+# Exclude workspace data from Docker build context
+workspace/
+
+# Git files
+.git/
+.gitignore
+
+# Documentation (copied separately)
+README.md
+ATTRIBUTION.md
+
+# Scripts (copied separately)
+*.sh
+*.ps1
+
+# IDE files
+.vscode/
+.idea/
+
+# macOS files
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*~
