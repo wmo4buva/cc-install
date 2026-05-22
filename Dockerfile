@@ -36,7 +36,7 @@ USER claudeuser
 WORKDIR /home/claudeuser
 
 # Install Claude Code CLI
-RUN curl -fsSL https://console.anthropic.com/install.sh | bash
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Ensure Claude Code is in PATH
 ENV PATH="/home/claudeuser/.local/bin:${PATH}"
