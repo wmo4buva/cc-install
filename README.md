@@ -28,7 +28,7 @@ Make sure Docker Desktop is **running** before proceeding with installation.
 Open Terminal and run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BattenIT/cc-install/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/BattenIT/cc-install/main/scripts/installers/install.sh | bash
 ```
 
 ### Windows
@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/BattenIT/cc-install/main/install.sh
 Open PowerShell and run:
 
 ```powershell
-irm https://raw.githubusercontent.com/BattenIT/cc-install/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/BattenIT/cc-install/main/scripts/installers/install.ps1 | iex
 ```
 
 ### What Happens During Installation?
@@ -62,28 +62,30 @@ cd cc-install
 
 Launch Claude Code in your terminal:
 
-**macOS / Linux:**
+**Easiest:**
 ```bash
-./run_claude.sh
+./claude              # macOS/Linux
 ```
 
-**Windows:**
-```powershell
-.\run_claude.ps1
+**Or use full path:**
+```bash
+./scripts/launchers/run_claude.sh    # macOS/Linux
+.\scripts\launchers\run_claude.ps1   # Windows
 ```
 
 ### Option 2: VS Code Server (Browser-Based IDE)
 
 Open VS Code Server in your web browser:
 
-**macOS / Linux:**
+**Easiest:**
 ```bash
-./run_vscode.sh
+./vscode              # macOS/Linux
 ```
 
-**Windows:**
-```powershell
-.\run_vscode.ps1
+**Or use full path:**
+```bash
+./scripts/launchers/run_vscode.sh    # macOS/Linux
+.\scripts\launchers\run_vscode.ps1   # Windows
 ```
 
 This will:

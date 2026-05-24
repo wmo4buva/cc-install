@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Quick launcher for VS Code Server
+# Usage: ./vscode
+cd "$(dirname "$0")" && ./scripts/launchers/run_vscode.sh

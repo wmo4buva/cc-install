@@ -20,20 +20,23 @@ cc-install/
 │   ├── docker-compose.yml ............. Container orchestration
 │   └── .dockerignore .................. Build exclusions
 │
-├── 💻 Installation Scripts
-│   ├── install.sh ..................... One-line installer (macOS/Linux)
-│   ├── install.ps1 .................... One-line installer (Windows)
-│   └── install-shortcut.sh ............ Install `ccdocker` command
+├── 🚀 Quick Launchers (Root Level)
+│   ├── claude ......................... Launch Claude Code CLI (simple!)
+│   └── vscode ......................... Launch VS Code Server (simple!)
 │
-├── 🚀 Launcher Scripts
-│   ├── run_claude.sh / .ps1 ........... Launch Claude Code CLI
-│   └── run_vscode.sh / .ps1 ........... Launch VS Code Server (browser)
-│
-├── 🛠️ Maintenance Scripts
-│   ├── update.sh / .ps1 ............... Update to latest versions
-│   ├── backup.sh / .ps1 ............... Backup workspace
-│   ├── restore.sh / .ps1 .............. Restore from backup
-│   └── uninstall.sh / .ps1 ............ Complete removal
+├── 📁 scripts/
+│   ├── installers/
+│   │   ├── install.sh ................. One-line installer (macOS/Linux)
+│   │   ├── install.ps1 ................ One-line installer (Windows)
+│   │   └── install-shortcut.sh ........ Install `ccdocker` command
+│   ├── launchers/
+│   │   ├── run_claude.sh / .ps1 ....... Full Claude Code launcher
+│   │   └── run_vscode.sh / .ps1 ....... Full VS Code launcher
+│   └── maintenance/
+│       ├── update.sh / .ps1 ........... Update to latest versions
+│       ├── backup.sh / .ps1 ........... Backup workspace
+│       ├── restore.sh / .ps1 .......... Restore from backup
+│       └── uninstall.sh / .ps1 ........ Complete removal
 │
 ├── 📝 Attribution & Legal
 │   ├── ATTRIBUTION.md ................. Credits to DAAF and third-party software
@@ -89,8 +92,8 @@ ccdocker stop         # Stop container
 
 Or use scripts directly:
 ```bash
-./run_claude.sh       # Launch Claude Code
-./run_vscode.sh       # Launch VS Code in browser
+./claude              # Launch Claude Code (easiest!)
+./vscode              # Launch VS Code in browser
 ```
 
 ## 📚 Documentation Summary

@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SHORTCUT_NAME="cc"
 BIN_DIR="$HOME/.local/bin"
 
@@ -21,7 +21,7 @@ mkdir -p "$BIN_DIR"
 cat > "$BIN_DIR/$SHORTCUT_NAME" << EOF
 #!/usr/bin/env bash
 # Claude Code Docker Shortcut
-cd "$INSTALL_DIR" && ./run_claude.sh "\$@"
+cd "$INSTALL_DIR" && ./scripts/launchers/run_claude.sh "\$@"
 EOF
 
 chmod +x "$BIN_DIR/$SHORTCUT_NAME"
