@@ -37,3 +37,7 @@ logs/
 # Environment files
 .env
 .env.local
+
+# Documentation builds (if added later)
+docs/_build/
+docs/.doctrees/
