@@ -31,6 +31,12 @@ Start here if you're maintaining or contributing to this project:
   - Development workflow
   - Future enhancements
 
+- **[SKILLS_INSTALLATION.md](SKILLS_INSTALLATION.md)** - Skills setup guide
+  - How to add pre-installed skills
+  - Implementation approaches
+  - Testing checklist
+  - License considerations
+
 ### Reference Materials
 
 - **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - One-page cheat sheet
@@ -51,12 +57,18 @@ Start here if you're maintaining or contributing to this project:
   - Issues found and fixed
   - Known limitations
 
-### Attribution & Legal
+### Attribution & Planning
 
 - **[ATTRIBUTION.md](../ATTRIBUTION.md)** - Credits and licenses
   - Credit to DAAF project
   - Third-party software
   - License information
+
+- **[ROADMAP.md](../ROADMAP.md)** - Future features and releases
+  - v1.1.0: Skills edition (pre-installed skills)
+  - v1.2.0: Faculty edition (FBS-specific features)
+  - v2.0.0: Enterprise edition (fleet management, SSO)
+  - Community feedback and contribution guidelines
 
 ## 🗂️ Quick Navigation
 

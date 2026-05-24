@@ -38,9 +38,10 @@ cc-install/
 │       ├── restore.sh / .ps1 .......... Restore from backup
 │       └── uninstall.sh / .ps1 ........ Complete removal
 │
-├── 📝 Attribution & Legal
+├── 📝 Attribution & Planning
 │   ├── ATTRIBUTION.md ................. Credits to DAAF and third-party software
-│   └── CLAUDE.md ...................... Developer guidance for this repository
+│   ├── CLAUDE.md ...................... Developer guidance for this repository
+│   └── ROADMAP.md ..................... Future features and release plan
 │
 └── 💾 Data Directories (gitignored)
     ├── workspace/ ..................... User files (persistent)
