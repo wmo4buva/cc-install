@@ -167,6 +167,18 @@ This will:
 .\run_claude.ps1 bash
 ```
 
+## Pre-Installed Skills
+
+This installation comes with powerful Claude Code skills pre-installed for enhanced productivity:
+
+- **Anthropic Official Skills** - Official skill collection from Anthropic
+- **Andrej Karpathy Guidelines** - AI/ML best practices and coding patterns
+- **Superpowers by Jesse Vincent** - Advanced workflow and productivity skills
+
+These skills are automatically available when you launch Claude Code. You can list them with `/skills` or invoke them with `/<skill-name>`.
+
+---
+
 ## First-Time Setup
 
 When you first launch Claude Code, you'll be prompted to configure it:
