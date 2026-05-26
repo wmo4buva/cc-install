@@ -42,10 +42,6 @@ The installer will:
 
 ### Step 2: Run One Command
 
-<table>
-<tr>
-<td width="50%">
-
 #### 🍎 **macOS / Linux**
 
 Open **Terminal** and paste:
@@ -53,9 +49,6 @@ Open **Terminal** and paste:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh | bash
 ```
-
-</td>
-<td width="50%">
 
 #### 🪟 **Windows**
 
@@ -65,10 +58,6 @@ Open **PowerShell** and paste:
 irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
 ```
 
-</td>
-</tr>
-</table>
-
 ⏱️ **Installation takes 5-10 minutes** • ☕ Grab a coffee while it builds!
 
 ---
@@ -77,12 +66,6 @@ irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installer
 
 After installation completes, you can launch from anywhere:
 
-<table>
-<tr>
-<td width="50%">
-
-#### 🍎 **macOS / Linux**
-
 ```bash
 ccdocker    # Launch Claude Code CLI
 ```
@@ -92,25 +75,6 @@ Or use VS Code Server:
 ```bash
 ccvscode    # Opens http://localhost:8080
 ```
-
-</td>
-<td width="50%">
-
-#### 🪟 **Windows**
-
-```powershell
-ccdocker    # Launch Claude Code CLI
-```
-
-Or use VS Code Server:
-
-```powershell
-ccvscode    # Opens http://localhost:8080
-```
-
-</td>
-</tr>
-</table>
 
 ---
 
