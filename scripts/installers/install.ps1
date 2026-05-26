@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$RepoUrl = "https://raw.githubusercontent.com/BattenIT/cc-install/main"
+$RepoUrl = "https://raw.githubusercontent.com/wmo4buva/cc-install/main"
 $Interactive = [Environment]::UserInteractive
 
 # Exit trap for interactive sessions
@@ -122,28 +122,53 @@ function Test-PreflightChecks {
 function Get-Files {
     Write-Info "Step 1/4: Downloading required files..."
 
-    $files = @(
+    # Root files
+    $rootFiles = @(
         "Dockerfile",
         "docker-compose.yml",
         ".dockerignore",
-        "run_claude.ps1",
-        "run_vscode.ps1",
-        "update.ps1",
-        "backup.ps1",
-        "uninstall.ps1",
-        "README.md"
+        "README.md",
+        "claude",
+        "vscode"
     )
 
-    foreach ($file in $files) {
+    # Launcher scripts
+    $launcherFiles = @(
+        "scripts/launchers/run_claude.ps1",
+        "scripts/launchers/run_vscode.ps1"
+    )
+
+    # Maintenance scripts
+    $maintenanceFiles = @(
+        "scripts/maintenance/update.ps1",
+        "scripts/maintenance/backup.ps1",
+        "scripts/maintenance/uninstall.ps1",
+        "scripts/maintenance/restore.ps1"
+    )
+
+    $allFiles = $rootFiles + $launcherFiles + $maintenanceFiles
+
+    foreach ($file in $allFiles) {
         Write-VerboseMsg "Downloading $file..."
 
         if ($DryRun) {
             Write-Host "[DRY RUN] Would download $file" -ForegroundColor Gray
+            # Create directory structure if needed
+            $dir = Split-Path -Path $file -Parent
+            if ($dir -and -not (Test-Path $dir)) {
+                New-Item -Path $dir -ItemType Directory -Force | Out-Null
+            }
             New-Item -Path $file -ItemType File -Force | Out-Null
             continue
         }
 
         try {
+            # Create directory structure if needed
+            $dir = Split-Path -Path $file -Parent
+            if ($dir -and -not (Test-Path $dir)) {
+                New-Item -Path $dir -ItemType Directory -Force | Out-Null
+            }
+
             $url = "$RepoUrl/$file"
             Invoke-WebRequest -Uri $url -OutFile $file -ErrorAction Stop
         }
@@ -274,19 +299,21 @@ function Show-SuccessMessage {
     Write-Host "Next Steps:" -ForegroundColor Blue
     Write-Host ""
     Write-Host "  1. Launch Claude Code CLI:" -ForegroundColor Green
-    Write-Host "     .\run_claude.ps1" -ForegroundColor Yellow
+    Write-Host "     .\claude" -ForegroundColor Yellow
+    Write-Host "     or: .\scripts\launchers\run_claude.ps1" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  2. Or open VS Code Server in your browser:" -ForegroundColor Green
-    Write-Host "     .\run_vscode.ps1" -ForegroundColor Yellow
+    Write-Host "     .\vscode" -ForegroundColor Yellow
+    Write-Host "     or: .\scripts\launchers\run_vscode.ps1" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  3. Your files will be stored in:" -ForegroundColor Green
     Write-Host "     $InstallDir\workspace\" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Useful Commands:" -ForegroundColor Blue
     Write-Host ""
-    Write-Host "  .\update.ps1      - Update to latest versions" -ForegroundColor Yellow
-    Write-Host "  .\backup.ps1      - Backup your workspace" -ForegroundColor Yellow
-    Write-Host "  .\uninstall.ps1   - Remove everything" -ForegroundColor Yellow
+    Write-Host "  .\scripts\maintenance\update.ps1      - Update to latest versions" -ForegroundColor Yellow
+    Write-Host "  .\scripts\maintenance\backup.ps1      - Backup your workspace" -ForegroundColor Yellow
+    Write-Host "  .\scripts\maintenance\uninstall.ps1   - Remove everything" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "First-Time Setup:" -ForegroundColor Blue
     Write-Host ""

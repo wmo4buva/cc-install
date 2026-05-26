@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Configuration
-REPO_URL="https://raw.githubusercontent.com/BattenIT/cc-install/main"
+REPO_URL="https://raw.githubusercontent.com/wmo4buva/cc-install/main"
 INSTALL_DIR="${CC_INSTALL_DIR:-cc-install}"
 VERBOSE="${CC_INSTALL_VERBOSE:-0}"
 DRY_RUN="${CC_INSTALL_DRY_RUN:-0}"
@@ -157,19 +157,52 @@ preflight_checks() {
 download_files() {
     log_info "Step 1/4: Downloading required files..."
 
-    local files=(
+    # Root files
+    local root_files=(
         "Dockerfile"
         "docker-compose.yml"
         ".dockerignore"
-        "run_claude.sh"
-        "run_vscode.sh"
-        "update.sh"
-        "backup.sh"
-        "uninstall.sh"
         "README.md"
+        "claude"
+        "vscode"
     )
 
-    for file in "${files[@]}"; do
+    # Launcher scripts
+    local launcher_files=(
+        "scripts/launchers/run_claude.sh"
+        "scripts/launchers/run_vscode.sh"
+    )
+
+    # Maintenance scripts
+    local maintenance_files=(
+        "scripts/maintenance/update.sh"
+        "scripts/maintenance/backup.sh"
+        "scripts/maintenance/uninstall.sh"
+        "scripts/maintenance/restore.sh"
+    )
+
+    # Download root files
+    for file in "${root_files[@]}"; do
+        log_verbose "Downloading $file..."
+        if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
+            log_error "Failed to download $file"
+            exit 1
+        fi
+    done
+
+    # Download launcher scripts
+    mkdir -p scripts/launchers
+    for file in "${launcher_files[@]}"; do
+        log_verbose "Downloading $file..."
+        if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
+            log_error "Failed to download $file"
+            exit 1
+        fi
+    done
+
+    # Download maintenance scripts
+    mkdir -p scripts/maintenance
+    for file in "${maintenance_files[@]}"; do
         log_verbose "Downloading $file..."
         if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
             log_error "Failed to download $file"
@@ -178,7 +211,9 @@ download_files() {
     done
 
     # Make scripts executable
-    chmod +x run_claude.sh run_vscode.sh update.sh backup.sh uninstall.sh
+    chmod +x claude vscode
+    chmod +x scripts/launchers/*.sh
+    chmod +x scripts/maintenance/*.sh
 
     log_success "All files downloaded successfully"
 }
