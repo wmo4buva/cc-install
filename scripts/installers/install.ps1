@@ -363,12 +363,39 @@ function Main {
 
     # Setup shortcuts for easy access
     Write-Info "Step 5/5: Setting up launch shortcuts..."
+
+    # Ensure execution policy allows running scripts
+    $currentPolicy = Get-ExecutionPolicy -Scope CurrentUser -ErrorAction SilentlyContinue
+    if ($currentPolicy -in @('Restricted', 'Undefined')) {
+        Write-Info "Setting execution policy to RemoteSigned for current user..."
+        try {
+            Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction Stop
+            Write-Success "Execution policy updated"
+        }
+        catch {
+            Write-Warn "Could not update execution policy: $_"
+            Write-Host "You may need to run PowerShell as Administrator to set execution policy" -ForegroundColor Yellow
+        }
+    }
+
+    # Run setup-shortcuts with bypass to ensure it executes
     try {
-        & ".\scripts\installers\setup-shortcuts.ps1" -InstallDir $PWD.Path
+        $shortcutScript = Join-Path $PWD.Path "scripts\installers\setup-shortcuts.ps1"
+        & powershell.exe -ExecutionPolicy Bypass -File $shortcutScript -InstallDir $PWD.Path
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "setup-shortcuts.ps1 exited with code $LASTEXITCODE"
+        }
     }
     catch {
-        Write-Warn "Failed to setup shortcuts, but installation is complete"
-        Write-Host "You can still launch using: .\claude or .\vscode" -ForegroundColor Yellow
+        Write-ErrorMsg "Failed to setup shortcuts: $_"
+        Write-Warn "Installation is complete, but shortcuts were not configured"
+        Write-Host "You can still launch using:" -ForegroundColor Yellow
+        Write-Host "  .\claude.cmd   (from this directory)" -ForegroundColor Yellow
+        Write-Host "  .\vscode.cmd   (from this directory)" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "To manually setup shortcuts later, run:" -ForegroundColor Yellow
+        Write-Host "  .\scripts\installers\setup-shortcuts.ps1" -ForegroundColor Yellow
     }
 
     Show-SuccessMessage
