@@ -28,7 +28,7 @@ Make sure Docker Desktop is **running** before proceeding with installation.
 Open Terminal and run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BattenIT/cc-install/main/scripts/installers/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh | bash
 ```
 
 ### Windows
@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/BattenIT/cc-install/main/scripts/in
 Open PowerShell and run:
 
 ```powershell
-irm https://raw.githubusercontent.com/BattenIT/cc-install/main/scripts/installers/install.ps1 | iex
+irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
 ```
 
 ### What Happens During Installation?
