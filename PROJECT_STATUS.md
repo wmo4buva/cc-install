@@ -20,7 +20,7 @@ The Claude Code Faculty Installer (cc-install) **v1.1.0** is now live with major
 - ✅ VS Code Server (browser-based IDE)
 - ✅ Persistent workspace
 - ✅ Simple launchers (`./claude`, `./vscode`)
-- ✅ **NEW**: System-wide commands (`claude-start`, `claude-vscode`)
+- ✅ **NEW**: System-wide commands (`ccdocker`, `ccvscode`)
 - ✅ **NEW**: macOS app shortcut
 - ✅ **NEW**: Pre-installed skills (Anthropic, Karpathy, Superpowers)
 - ✅ **NEW**: Auto-update notifications

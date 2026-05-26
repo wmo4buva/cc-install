@@ -6,6 +6,30 @@ A simple, Docker-based installer for Claude Code designed to help faculty member
 
 ---
 
+## ✨ What This Does
+
+This project provides a one-line installation command that:
+- ✅ Creates an isolated Docker environment with Claude Code CLI
+- ✅ Includes VS Code Server for browser-based code editing
+- ✅ Handles all dependencies automatically
+- ✅ Sets up easy launcher commands (`ccdocker`, `ccvscode`)
+- ✅ Persists your work in a local `workspace/` directory
+- ✅ Pre-installs powerful Claude Code skills for productivity
+
+---
+
+## 📋 What Happens During Installation?
+
+The installer will:
+1. ✅ Check that Docker is installed and running
+2. ⬇️ Download required files
+3. 🐳 Build a Docker image with Claude Code and VS Code Server (~5-10 minutes)
+4. 🚀 Start the container
+5. 📁 Create a `workspace/` directory for your files
+6. ⚡ Set up easy launch shortcuts
+
+---
+
 ## 🚀 Quick Start (5 Minutes)
 
 ### Step 1: Install Docker Desktop
@@ -53,41 +77,44 @@ irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installer
 
 After installation completes, you can launch from anywhere:
 
+<table>
+<tr>
+<td width="50%">
+
+#### 🍎 **macOS / Linux**
+
 ```bash
-claude-start    # Launch Claude Code CLI
+ccdocker    # Launch Claude Code CLI
 ```
 
-Or use the VS Code Server in your browser:
+Or use VS Code Server:
 
 ```bash
-claude-vscode   # Opens http://localhost:8080
+ccvscode    # Opens http://localhost:8080
 ```
+
+</td>
+<td width="50%">
+
+#### 🪟 **Windows**
+
+```powershell
+ccdocker    # Launch Claude Code CLI
+```
+
+Or use VS Code Server:
+
+```powershell
+ccvscode    # Opens http://localhost:8080
+```
+
+</td>
+</tr>
+</table>
 
 ---
 
-## ✨ What This Does
-
-This project provides a one-line installation command that:
-- ✅ Creates an isolated Docker environment with Claude Code CLI
-- ✅ Includes VS Code Server for browser-based code editing
-- ✅ Handles all dependencies automatically
-- ✅ Sets up easy launcher commands (`claude-start`, `claude-vscode`)
-- ✅ Persists your work in a local `workspace/` directory
-- ✅ Pre-installs powerful Claude Code skills for productivity
-
----
-
-## 📋 What Happens During Installation?
-
-The installer will:
-1. ✅ Check that Docker is installed and running
-2. ⬇️ Download required files
-3. 🐳 Build a Docker image with Claude Code and VS Code Server (~5-10 minutes)
-4. 🚀 Start the container
-5. 📁 Create a `workspace/` directory for your files
-6. ⚡ Set up easy launch shortcuts
-
-## Usage
+## More Usage Options
 
 After installation, navigate to the `cc-install` directory:
 

@@ -12,10 +12,10 @@ This release focuses on making Claude Code accessible to novice users with impro
 
 #### Easy Launch System
 - **Shell Aliases**: Automatic setup of system-wide commands
-  - `claude-start` - Launch Claude Code from anywhere
-  - `claude-vscode` - Launch VS Code Server from anywhere
-  - `claude-stop` - Stop the container
-  - `claude-logs` - View container logs
+  - `ccdocker` - Launch Claude Code from anywhere
+  - `ccvscode` - Launch VS Code Server from anywhere
+  - `ccstop` - Stop the container
+  - `cclogs` - View container logs
 - **macOS App**: Creates `~/Applications/Claude Code.app` for GUI launch
 - **Post-Install Setup**: Automated via `setup-shortcuts.sh`
 

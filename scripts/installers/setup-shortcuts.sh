@@ -39,17 +39,17 @@ setup_shell_aliases() {
     cat >> "$shell_rc" << EOF
 
 # Claude Code shortcuts
-alias claude-start='cd "$INSTALL_DIR" && ./claude'
-alias claude-vscode='cd "$INSTALL_DIR" && ./vscode'
-alias claude-stop='cd "$INSTALL_DIR" && ./scripts/launchers/run_claude.sh stop'
-alias claude-logs='cd "$INSTALL_DIR" && ./scripts/launchers/run_claude.sh logs'
+alias ccdocker='cd "$INSTALL_DIR" && ./claude'
+alias ccvscode='cd "$INSTALL_DIR" && ./vscode'
+alias ccstop='cd "$INSTALL_DIR" && ./scripts/launchers/run_claude.sh stop'
+alias cclogs='cd "$INSTALL_DIR" && ./scripts/launchers/run_claude.sh logs'
 EOF
 
     echo -e "${GREEN}✓${NC} Added shell aliases to $shell_rc"
-    echo -e "  ${BLUE}claude-start${NC}  - Launch Claude Code CLI"
-    echo -e "  ${BLUE}claude-vscode${NC} - Launch VS Code Server"
-    echo -e "  ${BLUE}claude-stop${NC}   - Stop the container"
-    echo -e "  ${BLUE}claude-logs${NC}   - View container logs"
+    echo -e "  ${BLUE}ccdocker${NC}  - Launch Claude Code CLI"
+    echo -e "  ${BLUE}ccvscode${NC} - Launch VS Code Server"
+    echo -e "  ${BLUE}ccstop${NC}   - Stop the container"
+    echo -e "  ${BLUE}cclogs${NC}   - View container logs"
 }
 
 # 2. Create desktop shortcut (macOS)
@@ -109,10 +109,10 @@ print_instructions() {
     echo -e "  1️⃣  ${YELLOW}Restart your terminal${NC} (or run: source ~/.zshrc)"
     echo ""
     echo -e "  2️⃣  Launch Claude Code from ${YELLOW}anywhere${NC}:"
-    echo -e "      ${GREEN}claude-start${NC}"
+    echo -e "      ${GREEN}ccdocker${NC}"
     echo ""
     echo -e "  3️⃣  Or launch VS Code Server:"
-    echo -e "      ${GREEN}claude-vscode${NC}"
+    echo -e "      ${GREEN}ccvscode${NC}"
     echo ""
 
     if [ "$(uname)" = "Darwin" ]; then
@@ -123,8 +123,8 @@ print_instructions() {
     fi
 
     echo -e "${BLUE}Other Commands:${NC}"
-    echo -e "  ${GREEN}claude-stop${NC}   - Stop the container"
-    echo -e "  ${GREEN}claude-logs${NC}   - View container logs"
+    echo -e "  ${GREEN}ccstop${NC}   - Stop the container"
+    echo -e "  ${GREEN}cclogs${NC}   - View container logs"
     echo ""
     echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
 }
