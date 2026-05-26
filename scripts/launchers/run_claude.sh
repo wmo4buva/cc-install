@@ -29,17 +29,39 @@ if [ ! -f "docker-compose.yml" ]; then
     exit 1
 fi
 
+# Check for updates (silent, non-blocking)
+if [ -f "scripts/maintenance/check-update.sh" ]; then
+    bash scripts/maintenance/check-update.sh --silent || true
+fi
+
 # Check Docker is installed
 if ! command -v docker &> /dev/null; then
     log_error "Docker is not installed"
-    echo "Please install Docker Desktop from: https://www.docker.com/products/docker-desktop/"
+    echo ""
+    echo "📥 Please install Docker Desktop:"
+    echo "   https://www.docker.com/products/docker-desktop/"
+    echo ""
+    echo "After installing, make sure Docker Desktop is running before trying again."
     exit 1
 fi
 
 # Check Docker daemon is running
 if ! docker info &> /dev/null; then
     log_error "Docker daemon is not running"
-    echo "Please start Docker Desktop and try again"
+    echo ""
+    echo "🚀 Please start Docker Desktop:"
+    echo ""
+    if [ "$(uname)" = "Darwin" ]; then
+        echo "   1. Open Applications folder"
+        echo "   2. Double-click 'Docker' to start"
+        echo "   3. Wait for the Docker icon in menu bar to show 'running'"
+    else
+        echo "   1. Find Docker Desktop in your applications"
+        echo "   2. Start it and wait ~30 seconds"
+        echo "   3. Look for the Docker icon in your system tray"
+    fi
+    echo ""
+    echo "💡 Run diagnostics: ./scripts/maintenance/diagnose.sh"
     exit 1
 fi
 

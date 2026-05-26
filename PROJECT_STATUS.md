@@ -1,33 +1,41 @@
 # Project Status Report
 
-**Date:** May 24, 2026  
-**Version:** 1.0.0 (Pre-Release)  
-**Status:** ✅ COMPLETE & READY FOR DISTRIBUTION
+**Date:** May 26, 2026  
+**Version:** 1.1.0  
+**Status:** ✅ PRODUCTION RELEASE - v1.1.0 "Skills & UX Edition"
 
 ---
 
-## 🎉 Project Complete!
+## 🎉 v1.1.0 Released!
 
-The Claude Code Faculty Installer (cc-install) is **production-ready** with comprehensive documentation, clean organization, and a clear roadmap for future development.
+The Claude Code Faculty Installer (cc-install) **v1.1.0** is now live with major UX improvements, auto-update mechanism, pre-installed skills, and Amazon Bedrock integration for UVA users.
 
 ---
 
 ## 📊 What Was Delivered
 
-### Core Product
+### Core Product (v1.1.0)
 - ✅ Docker-based Claude Code installation
 - ✅ One-line installers (macOS/Linux + Windows)
 - ✅ VS Code Server (browser-based IDE)
 - ✅ Persistent workspace
-- ✅ Simple launchers (`./claude`, `./vscode`, `ccdocker`)
+- ✅ Simple launchers (`./claude`, `./vscode`)
+- ✅ **NEW**: System-wide commands (`claude-start`, `claude-vscode`)
+- ✅ **NEW**: macOS app shortcut
+- ✅ **NEW**: Pre-installed skills (Anthropic, Karpathy, Superpowers)
+- ✅ **NEW**: Auto-update notifications
+- ✅ **NEW**: Diagnostic tool
+- ✅ **NEW**: Enhanced error messages
 - ✅ Maintenance scripts (update, backup, restore, uninstall)
 
-### Documentation (10 Files, ~60 KB)
-- ✅ **README.md** - User guide for faculty
+### Documentation (11 Files, ~70 KB)
+- ✅ **README.md** - User guide for faculty (REDESIGNED)
+- ✅ **CHANGELOG.md** - Version history & changes (NEW)
 - ✅ **INDEX.md** - Project navigation hub
 - ✅ **CLAUDE.md** - Developer technical guide
 - ✅ **ATTRIBUTION.md** - Credits to DAAF
-- ✅ **ROADMAP.md** - Future features & releases
+- ✅ **ROADMAP.md** - Future features & releases (UPDATED)
+- ✅ **VERSION** - Semantic version tracking (NEW)
 - ✅ **docs/README.md** - Documentation index
 - ✅ **docs/QUICK_REFERENCE.md** - Command cheat sheet
 - ✅ **docs/DEVELOPMENT.md** - Development history
@@ -35,10 +43,10 @@ The Claude Code Faculty Installer (cc-install) is **production-ready** with comp
 - ✅ **docs/TEST_RESULTS.md** - QA report
 - ✅ **docs/SKILLS_INSTALLATION.md** - Skills setup guide
 
-### Scripts (16 Files)
-- ✅ Installation (3): install.sh, install.ps1, install-shortcut.sh
-- ✅ Launchers (4): run_claude, run_vscode (.sh/.ps1)
-- ✅ Maintenance (8): update, backup, restore, uninstall (.sh/.ps1)
+### Scripts (19 Files)
+- ✅ Installation (4): install.sh, install.ps1, install-shortcut.sh, **setup-shortcuts.sh (NEW)**
+- ✅ Launchers (4): run_claude, run_vscode (.sh/.ps1) - ENHANCED
+- ✅ Maintenance (10): update, backup, restore, uninstall (.sh/.ps1), **check-update.sh (NEW)**, **diagnose.sh (NEW)**
 - ✅ Root launchers (2): claude, vscode
 
 ### Configuration (3 Files)

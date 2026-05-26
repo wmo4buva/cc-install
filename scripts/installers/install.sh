@@ -89,7 +89,20 @@ preflight_checks() {
     # Check Docker installation
     if ! command -v docker &> /dev/null; then
         log_error "Docker is not installed or not in PATH"
-        echo "Please install Docker Desktop from: https://www.docker.com/products/docker-desktop/"
+        echo ""
+        echo "╔═══════════════════════════════════════════════════════════╗"
+        echo "║  Installation cannot continue without Docker              ║"
+        echo "╚═══════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "📥 Step 1: Install Docker Desktop"
+        echo "   Visit: https://www.docker.com/products/docker-desktop/"
+        echo ""
+        echo "🚀 Step 2: Start Docker Desktop"
+        echo "   After installing, launch the application and wait for it"
+        echo "   to fully start (~30 seconds)"
+        echo ""
+        echo "🔄 Step 3: Run this installer again"
+        echo ""
         exit 1
     fi
     log_verbose "Docker found: $(docker --version)"
@@ -97,7 +110,29 @@ preflight_checks() {
     # Check Docker daemon
     if ! docker info &> /dev/null; then
         log_error "Docker daemon is not running"
-        echo "Please start Docker Desktop and try again"
+        echo ""
+        echo "╔═══════════════════════════════════════════════════════════╗"
+        echo "║  Docker is installed but not running                     ║"
+        echo "╚═══════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "🚀 Please start Docker Desktop:"
+        echo ""
+        if [ "$(uname)" = "Darwin" ]; then
+            echo "   • Open your Applications folder"
+            echo "   • Find and double-click 'Docker'"
+            echo "   • Wait for the whale icon in your menu bar"
+            echo "   • Icon should show 'Docker Desktop is running'"
+        else
+            echo "   • Find Docker Desktop in your applications menu"
+            echo "   • Start it and wait ~30 seconds"
+            echo "   • Look for the Docker icon in your system tray"
+            echo "   • Icon should indicate 'running' status"
+        fi
+        echo ""
+        echo "⏱️  Docker typically takes 20-30 seconds to start"
+        echo ""
+        echo "🔄 Then run this installer again"
+        echo ""
         exit 1
     fi
     log_verbose "Docker daemon is running"

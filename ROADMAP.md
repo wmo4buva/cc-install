@@ -1,8 +1,8 @@
 # Project Roadmap
 
-## Current Status: v1.0.0 (Pre-Release)
+## Current Status: v1.1.0 (Released)
 
-**Last Updated:** May 24, 2026
+**Last Updated:** May 26, 2026
 
 ---
 
@@ -12,11 +12,13 @@ Make Claude Code accessible to faculty members with zero technical friction, pre
 
 ---
 
-## 🚀 High Priority (Next Release - v1.1.0)
+## ✅ Completed in v1.1.0 (Released May 26, 2026)
 
-### 1. Pre-Install Claude Code Skills ⭐ TOP PRIORITY
+### 1. Pre-Install Claude Code Skills ✅ COMPLETE
 
-**Goal:** Include essential skills in the Docker image so faculty have them immediately.
+**Status:** ✅ Implemented in Dockerfile
+
+Skills now automatically installed during image build:
 
 **Skills to Include:**
 
@@ -63,32 +65,45 @@ RUN mkdir -p ~/.claude/skills && \
 - Consistent experience across all users
 - Skills work out-of-the-box
 
-**Testing Requirements:**
-- Verify skills load correctly
-- Test that skills don't conflict
-- Ensure no permission issues
-- Document included skills in README
+### 2. Auto-Update Mechanism ✅ COMPLETE
+
+**Status:** ✅ Implemented with version checking
+
+Features delivered:
+
+- ✅ Silent version checking on every launch (24-hour cache)
+- ✅ User notifications when updates available
+- ✅ `check-update.sh` script for manual checks
+- ✅ VERSION file with semantic versioning
+- ✅ Preserves workspace and settings
+
+### 3. Improved Error Messages ✅ COMPLETE
+
+**Status:** ✅ Enhanced diagnostics and user feedback
+
+Features delivered:
+- ✅ `diagnose.sh` - Comprehensive system diagnostics
+- ✅ Context-aware error messages with solutions
+- ✅ OS-specific troubleshooting instructions
+- ✅ Visual formatting for better readability
+- ✅ Common issues detected automatically
+
+### 4. Easy Launch Shortcuts ✅ COMPLETE (Bonus)
+
+**Status:** ✅ System-wide commands for novice users
+
+Features delivered:
+- ✅ `setup-shortcuts.sh` - Automatic alias creation
+- ✅ `claude-start`, `claude-vscode`, `claude-stop`, `claude-logs`
+- ✅ macOS app in ~/Applications
+- ✅ Works from any directory
+- ✅ Integrated into installation process
 
 ---
 
-### 2. Auto-Update Mechanism
+## 🚀 High Priority (Next Release - v1.2.0)
 
-**Goal:** Keep Claude Code and skills up-to-date automatically.
-
-**Features:**
-- Check for updates on container start (optional)
-- Notify user of available updates
-- One-command update: `./claude update`
-- Preserve workspace and settings
-
-**Implementation:**
-- Add update check to launcher script
-- Create update notification system
-- Version tracking in container
-
----
-
-### 3. Windows PowerShell Testing
+### 5. Windows PowerShell Testing
 
 **Goal:** Verify all PowerShell scripts work on Windows.
 
@@ -102,9 +117,9 @@ RUN mkdir -p ~/.claude/skills && \
 
 ---
 
-## 📋 Medium Priority (v1.2.0)
+## 📋 Medium Priority (v1.2.0 - Planned)
 
-### 4. FBS-Specific Skills
+### 6. FBS-Specific Skills
 
 **Goal:** Create custom skills for Frank Batten School workflows.
 
@@ -123,7 +138,7 @@ RUN mkdir -p ~/.claude/skills && \
 
 ---
 
-### 5. Enhanced Documentation
+### 7. Enhanced Documentation
 
 **Features:**
 - Video tutorials for faculty
@@ -139,7 +154,7 @@ RUN mkdir -p ~/.claude/skills && \
 
 ---
 
-### 6. Usage Analytics (Privacy-Respecting)
+### 8. Usage Analytics (Privacy-Respecting)
 
 **Goal:** Help IT understand usage patterns for support.
 
@@ -156,21 +171,6 @@ RUN mkdir -p ~/.claude/skills && \
 - Transparent data collection
 
 ---
-
-### 7. Improved Error Messages
-
-**Goal:** Better user feedback when things go wrong.
-
-**Improvements:**
-- Detect common issues automatically
-- Provide solution suggestions
-- Link to relevant documentation
-- Friendly, non-technical language
-
-**Examples:**
-- "Docker not running" → "Please start Docker Desktop"
-- "Port conflict" → "Here's how to change the port"
-- "Out of memory" → "Here's how to adjust resources"
 
 ---
 
@@ -304,19 +304,19 @@ RUN mkdir -p ~/.claude/skills && \
 
 ## 📅 Release Schedule
 
-### v1.1.0 - "Skills Edition" (Target: June 2026)
-**Focus:** Pre-installed skills, auto-updates
+### ✅ v1.1.0 - "Skills & UX Edition" (Released: May 26, 2026)
+**Focus:** Pre-installed skills, auto-updates, improved UX
 
-**Must Have:**
+**Delivered:**
 - ✅ Pre-installed Anthropic skills
 - ✅ Pre-installed Karpathy guidelines
 - ✅ Pre-installed Superpowers
-- ✅ Auto-update mechanism
-- ✅ Windows testing complete
-
-**Nice to Have:**
-- Skills documentation
-- Video tutorial
+- ✅ Auto-update mechanism with version checking
+- ✅ Enhanced error messages and diagnostics
+- ✅ Easy launch shortcuts (claude-start, etc.)
+- ✅ Amazon Bedrock integration docs
+- ✅ CHANGELOG.md
+- ⏳ Windows testing (in progress)
 
 ---
 
