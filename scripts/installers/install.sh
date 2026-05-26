@@ -165,12 +165,19 @@ download_files() {
         "README.md"
         "claude"
         "vscode"
+        "claude.cmd"
+        "vscode.cmd"
     )
 
     # Launcher scripts
     local launcher_files=(
         "scripts/launchers/run_claude.sh"
         "scripts/launchers/run_vscode.sh"
+    )
+
+    # Installer scripts
+    local installer_files=(
+        "scripts/installers/setup-shortcuts.ps1"
     )
 
     # Maintenance scripts
@@ -193,6 +200,16 @@ download_files() {
     # Download launcher scripts
     mkdir -p scripts/launchers
     for file in "${launcher_files[@]}"; do
+        log_verbose "Downloading $file..."
+        if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
+            log_error "Failed to download $file"
+            exit 1
+        fi
+    done
+
+    # Download installer scripts
+    mkdir -p scripts/installers
+    for file in "${installer_files[@]}"; do
         log_verbose "Downloading $file..."
         if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
             log_error "Failed to download $file"

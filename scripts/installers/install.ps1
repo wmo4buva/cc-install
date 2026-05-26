@@ -120,7 +120,7 @@ function Test-PreflightChecks {
 }
 
 function Get-Files {
-    Write-Info "Step 1/4: Downloading required files..."
+    Write-Info "Step 1/5: Downloading required files..."
 
     # Root files
     $rootFiles = @(
@@ -129,13 +129,20 @@ function Get-Files {
         ".dockerignore",
         "README.md",
         "claude",
-        "vscode"
+        "vscode",
+        "claude.cmd",
+        "vscode.cmd"
     )
 
     # Launcher scripts
     $launcherFiles = @(
         "scripts/launchers/run_claude.ps1",
         "scripts/launchers/run_vscode.ps1"
+    )
+
+    # Installer scripts
+    $installerFiles = @(
+        "scripts/installers/setup-shortcuts.ps1"
     )
 
     # Maintenance scripts
@@ -146,7 +153,7 @@ function Get-Files {
         "scripts/maintenance/restore.ps1"
     )
 
-    $allFiles = $rootFiles + $launcherFiles + $maintenanceFiles
+    $allFiles = $rootFiles + $launcherFiles + $installerFiles + $maintenanceFiles
 
     foreach ($file in $allFiles) {
         Write-VerboseMsg "Downloading $file..."
@@ -183,7 +190,7 @@ function Get-Files {
 }
 
 function Build-Image {
-    Write-Info "Step 2/4: Building Docker image (this may take a few minutes)..."
+    Write-Info "Step 2/5: Building Docker image (this may take a few minutes)..."
 
     if ($DryRun) {
         Write-Host "[DRY RUN] Would build Docker image" -ForegroundColor Gray
@@ -206,7 +213,7 @@ function Build-Image {
 }
 
 function Start-Container {
-    Write-Info "Step 3/4: Starting container..."
+    Write-Info "Step 3/5: Starting container..."
 
     if ($DryRun) {
         Write-Host "[DRY RUN] Would start container" -ForegroundColor Gray
@@ -252,7 +259,7 @@ function Start-Container {
 }
 
 function Initialize-Workspace {
-    Write-Info "Step 4/4: Initializing workspace..."
+    Write-Info "Step 4/5: Initializing workspace..."
 
     # Create workspace directory
     if (-not (Test-Path "workspace")) {
@@ -298,19 +305,24 @@ function Show-SuccessMessage {
     Write-Host ""
     Write-Host "Next Steps:" -ForegroundColor Blue
     Write-Host ""
-    Write-Host "  1. Launch Claude Code CLI:" -ForegroundColor Green
-    Write-Host "     .\claude" -ForegroundColor Yellow
-    Write-Host "     or: .\scripts\launchers\run_claude.ps1" -ForegroundColor Gray
+    Write-Host "  1️⃣  Restart PowerShell, then launch from " -NoNewline
+    Write-Host "anywhere" -ForegroundColor Yellow -NoNewline
+    Write-Host ":"
+    Write-Host "      ccdocker   " -ForegroundColor Green -NoNewline
+    Write-Host "# Launch Claude Code CLI" -ForegroundColor Gray
+    Write-Host "      ccvscode   " -ForegroundColor Green -NoNewline
+    Write-Host "# Launch VS Code Server" -ForegroundColor Gray
     Write-Host ""
-    Write-Host "  2. Or open VS Code Server in your browser:" -ForegroundColor Green
-    Write-Host "     .\vscode" -ForegroundColor Yellow
-    Write-Host "     or: .\scripts\launchers\run_vscode.ps1" -ForegroundColor Gray
+    Write-Host "  2️⃣  Or run from this directory:" -ForegroundColor Blue
+    Write-Host "      claude.cmd " -ForegroundColor Yellow -NoNewline
+    Write-Host "# Launch Claude Code CLI" -ForegroundColor Gray
+    Write-Host "      vscode.cmd " -ForegroundColor Yellow -NoNewline
+    Write-Host "# Launch VS Code Server" -ForegroundColor Gray
     Write-Host ""
-    Write-Host "  3. Your files will be stored in:" -ForegroundColor Green
-    Write-Host "     $InstallDir\workspace\" -ForegroundColor Yellow
+    Write-Host "  3️⃣  Your files will be stored in:" -ForegroundColor Blue
+    Write-Host "      $InstallDir\workspace\" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Useful Commands:" -ForegroundColor Blue
-    Write-Host ""
     Write-Host "  .\scripts\maintenance\update.ps1      - Update to latest versions" -ForegroundColor Yellow
     Write-Host "  .\scripts\maintenance\backup.ps1      - Backup your workspace" -ForegroundColor Yellow
     Write-Host "  .\scripts\maintenance\uninstall.ps1   - Remove everything" -ForegroundColor Yellow
@@ -348,6 +360,16 @@ function Main {
     Build-Image
     Start-Container
     Initialize-Workspace
+
+    # Setup shortcuts for easy access
+    Write-Info "Step 5/5: Setting up launch shortcuts..."
+    try {
+        & ".\scripts\installers\setup-shortcuts.ps1" -InstallDir $PWD.Path
+    }
+    catch {
+        Write-Warn "Failed to setup shortcuts, but installation is complete"
+        Write-Host "You can still launch using: .\claude or .\vscode" -ForegroundColor Yellow
+    }
 
     Show-SuccessMessage
 

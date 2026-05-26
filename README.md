@@ -38,6 +38,12 @@ The installer will:
 
 ✅ Make sure Docker Desktop is **running** before continuing.
 
+**⚠️ Windows Users:** If this is your first time using Docker on this machine, you may need to update WSL first. Open PowerShell as Administrator and run:
+```powershell
+wsl --update
+```
+Then restart your computer before installing Docker Desktop.
+
 ---
 
 ### Step 2: Run One Command
@@ -52,11 +58,17 @@ curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/in
 
 #### 🪟 **Windows**
 
-Open **PowerShell** and paste:
+**Open PowerShell** (NOT Command Prompt):
+- Press **Windows + X** → click **Terminal** or **Windows PowerShell**
+- Or: Press **Windows key**, type `powershell`, press Enter
+
+Then paste this command:
 
 ```powershell
 irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
 ```
+
+**Note:** This command won't work in Command Prompt (cmd.exe) - you must use PowerShell.
 
 ⏱️ **Installation takes 5-10 minutes** • ☕ Grab a coffee while it builds!
 
@@ -90,9 +102,14 @@ cd cc-install
 
 Launch Claude Code in your terminal:
 
-**Easiest:**
+**macOS / Linux:**
 ```bash
-./claude              # macOS/Linux
+./claude
+```
+
+**Windows:**
+```cmd
+claude.cmd
 ```
 
 **Or use full path:**
@@ -105,9 +122,14 @@ Launch Claude Code in your terminal:
 
 Open VS Code Server in your web browser:
 
-**Easiest:**
+**macOS / Linux:**
 ```bash
-./vscode              # macOS/Linux
+./vscode
+```
+
+**Windows:**
+```cmd
+vscode.cmd
 ```
 
 **Or use full path:**
@@ -126,45 +148,45 @@ This will:
 #### View Container Logs
 **macOS / Linux:**
 ```bash
-./run_claude.sh logs
+./scripts/launchers/run_claude.sh logs
 ```
 
 **Windows:**
 ```powershell
-.\run_claude.ps1 logs
+.\scripts\launchers\run_claude.ps1 logs
 ```
 
 #### Stop the Container
 **macOS / Linux:**
 ```bash
-./run_claude.sh stop
+./scripts/launchers/run_claude.sh stop
 ```
 
 **Windows:**
 ```powershell
-.\run_claude.ps1 stop
+.\scripts\launchers\run_claude.ps1 stop
 ```
 
 #### Restart the Container
 **macOS / Linux:**
 ```bash
-./run_claude.sh restart
+./scripts/launchers/run_claude.sh restart
 ```
 
 **Windows:**
 ```powershell
-.\run_claude.ps1 restart
+.\scripts\launchers\run_claude.ps1 restart
 ```
 
 #### Open a Bash Shell in the Container
 **macOS / Linux:**
 ```bash
-./run_claude.sh bash
+./scripts/launchers/run_claude.sh bash
 ```
 
 **Windows:**
 ```powershell
-.\run_claude.ps1 bash
+.\scripts\launchers\run_claude.ps1 bash
 ```
 
 ## Pre-Installed Skills
