@@ -305,7 +305,12 @@ function Show-SuccessMessage {
     Write-Host ""
     Write-Host "Next Steps:" -ForegroundColor Blue
     Write-Host ""
-    Write-Host "  1️⃣  Restart PowerShell, then launch from " -NoNewline
+    Write-Host "  ⚠️  IMPORTANT: " -NoNewline -ForegroundColor Yellow
+    Write-Host "Close this PowerShell window and open a " -NoNewline
+    Write-Host "NEW" -ForegroundColor Yellow -NoNewline
+    Write-Host " one!" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  1️⃣  After restarting PowerShell, launch from " -NoNewline
     Write-Host "anywhere" -ForegroundColor Yellow -NoNewline
     Write-Host ":"
     Write-Host "      ccdocker   " -ForegroundColor Green -NoNewline

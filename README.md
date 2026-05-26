@@ -76,7 +76,7 @@ irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installer
 
 ### Step 3: Launch Claude Code
 
-After installation completes, you can launch from anywhere:
+After installation completes, **close and reopen PowerShell** (Windows) or restart your terminal (macOS/Linux), then you can launch from anywhere:
 
 ```bash
 ccdocker    # Launch Claude Code CLI
@@ -87,6 +87,8 @@ Or use VS Code Server:
 ```bash
 ccvscode    # Opens http://localhost:8080
 ```
+
+**⚠️ Important:** The shortcuts (`ccdocker`, `ccvscode`) only work after you **restart your PowerShell/Terminal window**. If they don't work, make sure you opened a fresh window after installation.
 
 ---
 
