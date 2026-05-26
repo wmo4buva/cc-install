@@ -41,6 +41,23 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 # Ensure Claude Code is in PATH
 ENV PATH="/home/claudeuser/.local/bin:${PATH}"
 
+# Install Claude Code Skills
+# Pre-install powerful skills for enhanced productivity
+RUN mkdir -p /home/claudeuser/.claude/skills && \
+    # Anthropic Official Skills
+    git clone --depth 1 https://github.com/anthropics/skills /tmp/anthropic-skills && \
+    cp -r /tmp/anthropic-skills/skills/* /home/claudeuser/.claude/skills/ 2>/dev/null || true && \
+    # Andrej Karpathy Guidelines
+    git clone --depth 1 https://github.com/multica-ai/andrej-karpathy-skills /tmp/karpathy-skills && \
+    cp -r /tmp/karpathy-skills/skills/* /home/claudeuser/.claude/skills/ 2>/dev/null || true && \
+    # Superpowers by Jesse Vincent
+    git clone --depth 1 https://github.com/obra/superpowers /tmp/superpowers && \
+    cp -r /tmp/superpowers/skills/* /home/claudeuser/.claude/skills/ 2>/dev/null || true && \
+    # Cleanup
+    rm -rf /tmp/anthropic-skills /tmp/karpathy-skills /tmp/superpowers && \
+    # List installed skills for verification
+    ls -la /home/claudeuser/.claude/skills/ || true
+
 # Create workspace directory
 RUN mkdir -p /home/claudeuser/workspace
 

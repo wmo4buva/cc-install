@@ -4,51 +4,88 @@ A simple, Docker-based installer for Claude Code designed to help faculty member
 
 **Inspired by the [DAAF project](https://github.com/DAAF-Contribution-Community/daaf)** — credit to their excellent Docker-based installation approach.
 
-## What This Does
+---
 
-This project provides a one-line installation command that:
-- ✅ Creates an isolated Docker environment with Claude Code CLI
-- ✅ Includes VS Code Server for browser-based code editing
-- ✅ Handles all dependencies automatically
-- ✅ Provides simple launcher scripts for non-technical users
-- ✅ Persists your work in a local `workspace/` directory
+## 🚀 Quick Start (5 Minutes)
 
-## Prerequisites
+### Step 1: Install Docker Desktop
 
-**You only need one thing installed:**
+**Required:** Install Docker Desktop from https://www.docker.com/products/docker-desktop/
 
-- **Docker Desktop** — Download from: https://www.docker.com/products/docker-desktop/
+✅ Make sure Docker Desktop is **running** before continuing.
 
-Make sure Docker Desktop is **running** before proceeding with installation.
+---
 
-## Installation
+### Step 2: Run One Command
 
-### macOS / Linux
+<table>
+<tr>
+<td width="50%">
 
-Open Terminal and run:
+#### 🍎 **macOS / Linux**
+
+Open **Terminal** and paste:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh | bash
 ```
 
-### Windows
+</td>
+<td width="50%">
 
-Open PowerShell and run:
+#### 🪟 **Windows**
+
+Open **PowerShell** and paste:
 
 ```powershell
 irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
 ```
 
-### What Happens During Installation?
+</td>
+</tr>
+</table>
+
+⏱️ **Installation takes 5-10 minutes** • ☕ Grab a coffee while it builds!
+
+---
+
+### Step 3: Launch Claude Code
+
+After installation completes, you can launch from anywhere:
+
+```bash
+claude-start    # Launch Claude Code CLI
+```
+
+Or use the VS Code Server in your browser:
+
+```bash
+claude-vscode   # Opens http://localhost:8080
+```
+
+---
+
+## ✨ What This Does
+
+This project provides a one-line installation command that:
+- ✅ Creates an isolated Docker environment with Claude Code CLI
+- ✅ Includes VS Code Server for browser-based code editing
+- ✅ Handles all dependencies automatically
+- ✅ Sets up easy launcher commands (`claude-start`, `claude-vscode`)
+- ✅ Persists your work in a local `workspace/` directory
+- ✅ Pre-installs powerful Claude Code skills for productivity
+
+---
+
+## 📋 What Happens During Installation?
 
 The installer will:
-1. Check that Docker is installed and running
-2. Download required files
-3. Build a Docker image with Claude Code and VS Code Server (~5-10 minutes)
-4. Start the container
-5. Create a `workspace/` directory for your files
-
-Installation typically completes in **under 10 minutes** on a good internet connection.
+1. ✅ Check that Docker is installed and running
+2. ⬇️ Download required files
+3. 🐳 Build a Docker image with Claude Code and VS Code Server (~5-10 minutes)
+4. 🚀 Start the container
+5. 📁 Create a `workspace/` directory for your files
+6. ⚡ Set up easy launch shortcuts
 
 ## Usage
 
@@ -143,14 +180,36 @@ This will:
 
 When you first launch Claude Code, you'll be prompted to configure it:
 
-1. **API Key**: You'll need an Anthropic API key
+### 🎯 **Recommended: Amazon Bedrock (for UVA/FBS Users)**
+
+1. **AWS Credentials**: Use your university Amazon Bedrock account
+   - **Access Key ID** and **Secret Access Key** from your AWS account
+   - **Region**: Typically `us-east-1` or your organization's region
+   - **Benefits**: 
+     - ✅ Organization billing
+     - ✅ Better cost management
+     - ✅ Compliance with university policies
+
+Configure Bedrock by setting these environment variables or during Claude Code setup:
+```bash
+export AWS_ACCESS_KEY_ID="your-access-key"
+export AWS_SECRET_ACCESS_KEY="your-secret-key"
+export AWS_REGION="us-east-1"
+```
+
+### 💳 **Alternative: Anthropic API (Personal Use)**
+
+2. **Anthropic API Key**: For personal accounts
    - Get one at: https://console.anthropic.com/
+   - **Note**: This will bill to your personal account
    - The key will be securely stored in the Docker volume
 
-2. **Preferences**: Claude Code will guide you through setting:
-   - Your preferred model (Opus, Sonnet, or Haiku)
-   - Thinking level
-   - Other preferences
+### ⚙️ **Preferences**
+
+Claude Code will guide you through setting:
+- Your preferred model (Opus, Sonnet, or Haiku)
+- Thinking level
+- Other preferences
 
 These settings are stored in the persistent `claude-config` Docker volume and will be remembered across container restarts.
 

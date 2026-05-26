@@ -251,7 +251,8 @@ print_success_message() {
     echo -e "${BLUE}First-Time Setup:${NC}"
     echo ""
     echo -e "  When you first launch Claude Code, you'll need to:"
-    echo -e "  - Enter your Anthropic API key"
+    echo -e "  - ${YELLOW}Enter your Amazon Bedrock credentials${NC} (recommended)"
+    echo -e "    OR use your Anthropic API key"
     echo -e "  - Configure your preferences"
     echo ""
     echo -e "${GREEN}For more information, see README.md${NC}"
@@ -279,6 +280,11 @@ main() {
     build_image
     start_container
     initialize_workspace
+
+    # Setup easy launch shortcuts
+    if [ -f "scripts/installers/setup-shortcuts.sh" ]; then
+        bash scripts/installers/setup-shortcuts.sh
+    fi
 
     print_success_message
 }
