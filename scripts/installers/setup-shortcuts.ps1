@@ -26,26 +26,51 @@ Write-Info "`nSetting up easy launch shortcuts...`n"
 
 # Setup PowerShell profile functions
 function Setup-PowerShellProfile {
-    # Determine profile path
-    $profilePath = $PROFILE.CurrentUserCurrentHost
+    # Detect all PowerShell profile paths to handle both PowerShell 5.1 and 7+
+    # PowerShell 5.1 uses: Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+    # PowerShell 7+   uses: Documents\PowerShell\Microsoft.PowerShell_profile.ps1
 
-    # Create profile directory if it doesn't exist
-    $profileDir = Split-Path -Path $profilePath -Parent
-    if (-not (Test-Path $profileDir)) {
-        New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
+    $profilePaths = @()
+
+    # Always add the current session's profile
+    $profilePaths += $PROFILE.CurrentUserCurrentHost
+
+    # Detect which PowerShell version is running and add the OTHER version's profile too
+    $documentsPath = [Environment]::GetFolderPath('MyDocuments')
+    if ($PSVersionTable.PSVersion.Major -ge 7) {
+        # Running PowerShell 7+, also add 5.1 profile
+        $ps51Profile = Join-Path $documentsPath "WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
+        $profilePaths += $ps51Profile
+        Write-Info "Detected PowerShell 7+ - will configure both PowerShell 7 and 5.1 profiles"
+    } else {
+        # Running PowerShell 5.1, also add 7+ profile
+        $ps7Profile = Join-Path $documentsPath "PowerShell\Microsoft.PowerShell_profile.ps1"
+        $profilePaths += $ps7Profile
+        Write-Info "Detected PowerShell 5.1 - will configure both PowerShell 5.1 and 7+ profiles"
     }
 
-    # Create profile file if it doesn't exist
-    if (-not (Test-Path $profilePath)) {
-        New-Item -Path $profilePath -ItemType File -Force | Out-Null
-    }
+    # Remove duplicates
+    $profilePaths = $profilePaths | Select-Object -Unique
 
-    # Check if shortcuts already exist
-    $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
-    if ($profileContent -match "# Claude Code shortcuts") {
-        Write-Success "PowerShell profile already configured at $profilePath"
-        return
-    }
+    $configuredCount = 0
+    foreach ($profilePath in $profilePaths) {
+        # Create profile directory if it doesn't exist
+        $profileDir = Split-Path -Path $profilePath -Parent
+        if (-not (Test-Path $profileDir)) {
+            New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
+        }
+
+        # Create profile file if it doesn't exist
+        if (-not (Test-Path $profilePath)) {
+            New-Item -Path $profilePath -ItemType File -Force | Out-Null
+        }
+
+        # Check if shortcuts already exist
+        $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
+        if ($profileContent -match "# Claude Code shortcuts") {
+            Write-Success "Profile already configured: $profilePath"
+            continue
+        }
 
     # Add function definitions to profile
     $shortcutBlock = @"
@@ -82,14 +107,22 @@ function ccrestart {
 }
 "@
 
-    Add-Content -Path $profilePath -Value $shortcutBlock
+        Add-Content -Path $profilePath -Value $shortcutBlock
+        Write-Success "Configured profile: $profilePath"
+        $configuredCount++
+    }
 
-    Write-Success "Added PowerShell functions to profile: $profilePath"
-    Write-Host "  ccdocker   - Launch Claude Code CLI" -ForegroundColor Blue
-    Write-Host "  ccvscode   - Launch VS Code Server" -ForegroundColor Blue
-    Write-Host "  ccstop     - Stop the container" -ForegroundColor Blue
-    Write-Host "  cclogs     - View container logs" -ForegroundColor Blue
-    Write-Host "  ccrestart  - Restart the container" -ForegroundColor Blue
+    if ($configuredCount -gt 0) {
+        Write-Host ""
+        Write-Host "Shortcuts configured:" -ForegroundColor Blue
+        Write-Host "  ccdocker   - Launch Claude Code CLI" -ForegroundColor Green
+        Write-Host "  ccvscode   - Launch VS Code Server" -ForegroundColor Green
+        Write-Host "  ccstop     - Stop the container" -ForegroundColor Green
+        Write-Host "  cclogs     - View container logs" -ForegroundColor Green
+        Write-Host "  ccrestart  - Restart the container" -ForegroundColor Green
+    } else {
+        Write-Success "All profiles already configured"
+    }
 }
 
 # Print instructions

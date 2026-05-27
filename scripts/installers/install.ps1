@@ -384,9 +384,12 @@ function Main {
     }
 
     # Run setup-shortcuts with bypass to ensure it executes
+    # Use the same PowerShell executable that's running this script (handles both 5.1 and 7+)
     try {
         $shortcutScript = Join-Path $PWD.Path "scripts\installers\setup-shortcuts.ps1"
-        & powershell.exe -ExecutionPolicy Bypass -File $shortcutScript -InstallDir $PWD.Path
+
+        # Invoke using current PowerShell process to ensure profile compatibility
+        & $shortcutScript -InstallDir $PWD.Path
 
         if ($LASTEXITCODE -ne 0) {
             throw "setup-shortcuts.ps1 exited with code $LASTEXITCODE"

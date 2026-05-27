@@ -30,19 +30,60 @@ The installer will:
 
 ---
 
-## 🚀 Quick Start (5 Minutes)
+## 🚀 Quick Start
 
 ### Step 1: Install Docker Desktop
 
-**Required:** Install Docker Desktop from https://www.docker.com/products/docker-desktop/
+**Time Estimate:** 10-15 minutes (first time), 2 minutes (if Docker already installed)
 
-✅ Make sure Docker Desktop is **running** before continuing.
+#### For All Users
 
-**⚠️ Windows Users:** If this is your first time using Docker on this machine, you may need to update WSL first. Open PowerShell as Administrator and run:
+1. **Download Docker Desktop** from https://www.docker.com/products/docker-desktop/
+
+   **Which version to download?**
+   - **Windows:** Check **Settings → System → About → System type**
+     - If it says "x64-based processor" → Download **Windows x86_64**
+     - If it says "ARM64-based processor" → Download **Windows ARM64**
+   - **Mac:** Check ** → About This Mac**
+     - **Apple Silicon (M1/M2/M3)** → Download **Mac with Apple chip**
+     - **Intel chip** → Download **Mac with Intel chip**
+
+2. **Install Docker Desktop**
+   - Run the installer
+   - Accept default options (enable WSL 2 on Windows)
+   - Restart if prompted
+
+3. **Start Docker Desktop** and wait for it to fully initialize (~30-60 seconds)
+   - Look for the Docker icon in your system tray/menu bar
+   - Icon should show "Docker Desktop is running"
+
+#### Windows Users Only: WSL Setup
+
+**What is WSL?** Windows Subsystem for Linux (WSL) lets Docker run Linux containers on Windows. Docker Desktop requires it.
+
+**Check if WSL is already installed:**
 ```powershell
-wsl --update
+wsl --status
 ```
-Then restart your computer before installing Docker Desktop.
+
+If you see version information, WSL is installed and you can skip to Step 2.
+
+**If WSL is not installed or needs updating:**
+
+1. Open **PowerShell as Administrator**:
+   - Press **Windows + X** → Select **Terminal (Admin)** or **Windows PowerShell (Admin)**
+   - Click "Yes" when prompted
+
+2. Run this command:
+   ```powershell
+   wsl --update
+   ```
+
+3. **Restart your computer** after the update completes
+
+4. Then install Docker Desktop (see above)
+
+✅ Make sure Docker Desktop is **running** before continuing to Step 2.
 
 ---
 
@@ -70,7 +111,12 @@ irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installer
 
 **Note:** This command won't work in Command Prompt (cmd.exe) - you must use PowerShell.
 
-⏱️ **Installation takes 5-10 minutes** • ☕ Grab a coffee while it builds!
+⏱️ **Time Estimate:** 10-15 minutes for the build process • ☕ Grab a coffee while it builds!
+
+**Total time including Docker setup:**
+- Already have Docker running: **10-15 minutes**
+- Need to install Docker first: **20-30 minutes**
+- Need to install WSL + Docker + restart: **30-45 minutes**
 
 ---
 
