@@ -1,8 +1,8 @@
 # Project Roadmap
 
-## Current Status: v1.1.0 (Released)
+## Current Status: v1.2.0 (Released)
 
-**Last Updated:** May 26, 2026
+**Last Updated:** May 27, 2026
 
 ---
 
@@ -101,25 +101,57 @@ Features delivered:
 
 ---
 
-## 🚀 High Priority (Next Release - v1.2.0)
+## ✅ Completed in v1.2.0 (Released May 27, 2026)
 
-### 5. Windows PowerShell Testing
+### 5. Windows PowerShell Testing & Bug Fixes ✅ COMPLETE
 
-**Goal:** Verify all PowerShell scripts work on Windows.
+**Status:** ✅ Fully tested and all issues resolved
 
-**Tasks:**
-- [ ] Test install.ps1 on Windows 10/11
-- [ ] Test run_claude.ps1
-- [ ] Test run_vscode.ps1
-- [ ] Test all maintenance scripts
-- [ ] Fix any Windows-specific issues
-- [ ] Document Windows-specific notes
+**Critical Issues Fixed:**
+- ✅ PowerShell 7 vs 5.1 profile compatibility
+- ✅ Execution policy blocking script execution
+- ✅ Corrupted emoji syntax errors in scripts
+- ✅ Repository URL mismatches (404 errors)
+- ✅ Missing Windows wrapper scripts (.cmd files)
+- ✅ setup-shortcuts.ps1 now writes to both PS versions
+
+**Testing Completed:**
+- ✅ Windows 11 with PowerShell 7.5.5
+- ✅ Windows 10 with PowerShell 5.1
+- ✅ Execution policy scenarios (Restricted, Undefined)
+- ✅ Profile writing to both version locations
+- ✅ Shortcut functionality after PowerShell restart
+
+### 6. macOS Installation Reliability ✅ COMPLETE
+
+**Status:** ✅ Fixed TTY hang and improved UX
+
+**Issues Fixed:**
+- ✅ TTY hang using download-then-run pattern
+- ✅ Missing setup-shortcuts.sh download
+- ✅ Incorrect success message paths
+- ✅ Permission dialog documentation
+- ✅ Shell alias setup for zsh/bash
+
+### 7. Documentation Overhaul ✅ COMPLETE
+
+**Status:** ✅ Comprehensive rewrite for non-technical faculty
+
+**Improvements Made:**
+- ✅ Realistic time estimates (removed misleading "5 minutes")
+- ✅ WSL explanation (what it is, why needed)
+- ✅ Docker download guidance (chip types, system detection)
+- ✅ Step-by-step WSL installation with admin PowerShell
+- ✅ Platform-specific instructions throughout
+- ✅ Restart reminders for shortcuts
+- ✅ macOS permission dialog notes
+- ✅ PowerShell vs Command Prompt clarification
 
 ---
 
-## 📋 Medium Priority (v1.2.0 - Planned)
+## 📋 Medium Priority (v1.3.0 - Planned)
 
-### 6. FBS-Specific Skills
+### 8. FBS-Specific Skills
 
 **Goal:** Create custom skills for Frank Batten School workflows.
 
@@ -138,7 +170,7 @@ Features delivered:
 
 ---
 
-### 7. Enhanced Documentation
+### 9. Enhanced Documentation
 
 **Features:**
 - Video tutorials for faculty
@@ -154,7 +186,7 @@ Features delivered:
 
 ---
 
-### 8. Usage Analytics (Privacy-Respecting)
+### 10. Usage Analytics (Privacy-Respecting)
 
 **Goal:** Help IT understand usage patterns for support.
 
@@ -176,7 +208,7 @@ Features delivered:
 
 ## 🔮 Future Ideas (v2.0.0+)
 
-### 8. UVA Single Sign-On Integration
+### 11. UVA Single Sign-On Integration
 
 **Goal:** Seamless authentication for faculty.
 
@@ -192,7 +224,7 @@ Features delivered:
 
 ---
 
-### 9. Fleet Management Dashboard
+### 12. Fleet Management Dashboard
 
 **Goal:** Central management for IT staff.
 
@@ -209,7 +241,7 @@ Features delivered:
 
 ---
 
-### 10. Canvas/Collab Integration
+### 13. Canvas/Collab Integration
 
 **Goal:** Connect Claude Code with UVA's learning management systems.
 
@@ -221,7 +253,7 @@ Features delivered:
 
 ---
 
-### 11. Pre-Configured Templates
+### 14. Pre-Configured Templates
 
 **Goal:** Domain-specific starting points.
 
@@ -233,7 +265,7 @@ Features delivered:
 
 ---
 
-### 12. Jupyter Notebook Support
+### 15. Jupyter Notebook Support
 
 **Goal:** Add Jupyter for faculty who need notebooks.
 
@@ -244,7 +276,7 @@ Features delivered:
 
 ---
 
-### 13. Multi-User Support
+### 16. Multi-User Support
 
 **Goal:** Share installations across teams.
 
@@ -256,7 +288,7 @@ Features delivered:
 
 ---
 
-### 14. Cloud Backup Integration
+### 17. Cloud Backup Integration
 
 **Goal:** Automatic workspace backup to cloud storage.
 
@@ -268,7 +300,7 @@ Features delivered:
 
 ---
 
-### 15. Custom Branding
+### 18. Custom Branding
 
 **Goal:** FBS-branded experience.
 
@@ -313,24 +345,41 @@ Features delivered:
 - ✅ Pre-installed Superpowers
 - ✅ Auto-update mechanism with version checking
 - ✅ Enhanced error messages and diagnostics
-- ✅ Easy launch shortcuts (claude-start, etc.)
+- ✅ Easy launch shortcuts (ccdocker, ccvscode, etc.)
 - ✅ Amazon Bedrock integration docs
 - ✅ CHANGELOG.md
-- ⏳ Windows testing (in progress)
 
 ---
 
-### v1.2.0 - "Faculty Edition" (Target: August 2026)
+### ✅ v1.2.0 - "Cross-Platform Reliability" (Released: May 27, 2026)
+**Focus:** Windows/macOS bug fixes, documentation overhaul
+
+**Delivered:**
+- ✅ Fixed PowerShell 7 vs 5.1 compatibility
+- ✅ Fixed execution policy blocking
+- ✅ Fixed corrupted emoji syntax errors
+- ✅ Fixed repository URL mismatches
+- ✅ macOS TTY hang resolved
+- ✅ Comprehensive documentation rewrite
+- ✅ Realistic time estimates
+- ✅ WSL setup guidance
+- ✅ Docker download instructions
+- ✅ Windows .cmd wrappers
+- ✅ setup-shortcuts for both platforms
+
+---
+
+### v1.3.0 - "Faculty Edition" (Target: September 2026)
 **Focus:** FBS-specific features, enhanced UX
 
 **Must Have:**
 - FBS custom skills (2-3 minimum)
-- Enhanced error messages
+- Video tutorials
 - Usage analytics (opt-in)
 
 **Nice to Have:**
 - Custom branding
-- Additional documentation
+- Additional faculty-focused documentation
 
 ---
 
@@ -398,8 +447,8 @@ This roadmap is reviewed:
 - **Quarterly** after v1.0.0 release
 - **After feedback** from faculty pilots
 
-Last Review: May 24, 2026  
-Next Review: June 24, 2026
+Last Review: May 27, 2026  
+Next Review: June 27, 2026
 
 ---
 

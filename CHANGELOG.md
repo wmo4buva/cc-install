@@ -2,6 +2,183 @@
 
 All notable changes to the Claude Code Faculty Installer (cc-install) project.
 
+## [1.2.0] - 2026-05-27
+
+### 🎉 Major Release: Windows & macOS Reliability + Documentation Overhaul
+
+This release fixes critical installation blockers on Windows and macOS, dramatically improves documentation for non-technical faculty, and ensures cross-platform compatibility.
+
+### 🐛 Critical Bug Fixes
+
+#### Windows Issues Fixed
+- **PowerShell 7 vs 5.1 Profile Mismatch** 
+  - Root cause: Installer forced `powershell.exe` (5.1) but users ran PowerShell 7+ (default in Windows Terminal)
+  - Fix: Now writes shortcuts to BOTH profile locations
+  - Result: `ccdocker`/`ccvscode` work regardless of PowerShell version
+  
+- **Corrupted Emoji Characters**
+  - Syntax errors in `setup-shortcuts.ps1` prevented script execution
+  - Replaced emoji with `[SUCCESS]` and `[WARNING]` text
+  - Script now parses correctly on all systems
+
+- **PowerShell Execution Policy Blocking**
+  - Scripts blocked by default Restricted/Undefined policy
+  - Now detects and sets RemoteSigned policy before running
+  - Uses `-ExecutionPolicy Bypass` flag for reliability
+
+- **Repository URL Mismatch**
+  - Installer pointed to old `BattenIT/cc-install` repo (404 errors)
+  - Updated to correct `wmo4buva/cc-install` throughout
+  - Fixed file paths to match new directory structure
+
+- **Missing Windows Wrapper Scripts**
+  - Created `claude.cmd` and `vscode.cmd` for root-level launching
+  - Work from installation directory without full paths
+  - Cross-platform compatibility with bash wrappers
+
+#### macOS Issues Fixed
+- **TTY Hang on Installation**
+  - Old: `curl ... | bash` could hang on TTY input
+  - New: `curl ... -o install.sh && bash install.sh` (reliable)
+
+- **setup-shortcuts.sh Not Downloaded**
+  - macOS users never got shell aliases
+  - Now downloads and configures automatically
+  - `ccdocker`/`ccvscode` work after `source ~/.zshrc`
+
+- **Incorrect Success Messages**
+  - Showed `./run_claude.sh` (wrong path)
+  - Now shows `cd cc-install && ./claude` (correct)
+  - Clear instructions about working directory
+
+### ✨ Added
+
+#### Windows-Specific Features
+- **setup-shortcuts.ps1**: PowerShell profile configuration
+  - Adds functions: `ccdocker`, `ccvscode`, `ccstop`, `cclogs`, `ccrestart`
+  - Works from anywhere after PowerShell restart
+  - Configures both 5.1 and 7+ profiles simultaneously
+
+- **Windows .cmd Wrappers**
+  - `claude.cmd` and `vscode.cmd` in repository root
+  - Wrap PowerShell launchers for easy execution
+  - Work without full paths from install directory
+
+- **Execution Policy Management**
+  - Automatic detection of restricted policies
+  - Sets RemoteSigned for CurrentUser if needed
+  - Clear error messages if admin rights required
+
+#### Documentation Improvements
+
+**Step 1: Docker Installation**
+- Added realistic time estimates (10-15 min first time, 2 min if installed)
+- Explained what WSL is (Windows Subsystem for Linux)
+- Added `wsl --status` check command before updating
+- Step-by-step WSL installation with admin PowerShell instructions
+- Docker download guidance:
+  - How to check Windows system type (x64 vs ARM64)
+  - How to check Mac chip (Apple Silicon vs Intel)
+  - Which installer to download for each platform
+  - What options to select during installation
+
+**Step 2: Run Installation Command**
+- macOS: Added note about Terminal permission dialog
+- Windows: Detailed PowerShell launch instructions
+  - Keyboard shortcuts: Windows + X → Terminal
+  - Clarified PowerShell vs Command Prompt requirement
+  - Note that `irm | iex` only works in PowerShell
+
+**Step 3: Launch Instructions**
+- Prominent warning to restart PowerShell/Terminal
+- Explanation that shortcuts only work after restart
+- Fallback commands if shortcuts don't work
+
+**Time Estimates Throughout**
+- Removed misleading "Quick Start (5 Minutes)" heading
+- Added realistic breakdown:
+  - Docker running: 10-15 minutes
+  - Install Docker first: 20-30 minutes
+  - WSL + Docker + restart: 30-45 minutes
+- Helps faculty plan time appropriately
+
+### 🔄 Changed
+
+#### Installation Process
+- Both installers now 5-step process (added Step 5: Setup shortcuts)
+- Consistent step numbering across platforms
+- Better error handling with actual error messages (not silent failures)
+- Fallback instructions when setup fails
+
+#### Success Messages
+- Windows: Prominent "Close and open NEW PowerShell" warning
+- macOS: Clear `cd cc-install` instruction before commands
+- Both: Correct file paths matching actual directory structure
+- Useful commands show full paths
+
+#### File Structure
+- Added installer scripts to download lists
+- Both platforms download setup-shortcuts scripts
+- Cross-platform compatibility maintained
+
+### 📚 Documentation Updates
+
+**README.md**
+- Complete rewrite of Quick Start section
+- Realistic time expectations
+- WSL explanation and setup
+- Docker download guidance
+- Platform-specific instructions throughout
+- Restart reminders for shortcuts
+
+**CLAUDE.md**
+- Updated with new Windows features
+- Documented PowerShell profile setup
+- Cross-platform wrapper scripts
+
+### 🚀 Testing & Validation
+
+- Tested on Windows 11 with PowerShell 7.5.5
+- Tested execution policy scenarios
+- Validated profile writing to both 5.1 and 7+ locations
+- Confirmed shortcuts work after PowerShell restart
+- macOS installation validated with download-then-run
+- Both platforms: verified directory structure and file paths
+
+### 📦 Deployment
+
+All changes pushed to: `https://github.com/wmo4buva/cc-install`
+
+**Installation commands UPDATED:**
+
+**macOS/Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh -o install.sh && bash install.sh
+```
+
+**Windows:**
+```powershell
+irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
+```
+
+### 🙏 Credits
+
+- Windows testing and feedback from UVA faculty members
+- Issue reports that uncovered PowerShell version mismatch
+- Built with Claude Sonnet 4.5
+
+### 🔗 Related Commits
+
+- `ba24aa4` - Critical fix: Update repo URLs and file paths in installers
+- `52de080` - Document pre-installed Claude Code skills in README
+- `faa5cb4` - Major Windows support improvements and cross-platform fixes
+- `1e5f0aa` - Fix PowerShell execution policy blocking shortcut setup
+- `ccfc4ad` - Fix corrupted emoji causing setup-shortcuts.ps1 syntax error
+- `65de649` - Fix PowerShell 7 vs 5.1 profile compatibility + improve docs
+- `46784f0` - Fix macOS installation issues and improve UX
+
+---
+
 ## [1.1.0] - 2026-05-26
 
 ### 🎉 Major Release: UX Improvements & Auto-Update
