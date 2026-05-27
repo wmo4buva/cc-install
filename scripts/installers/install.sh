@@ -187,6 +187,10 @@ download_files() {
         "scripts/maintenance/backup.sh"
         "scripts/maintenance/uninstall.sh"
         "scripts/maintenance/restore.sh"
+        "scripts/maintenance/check-update.sh"
+        "scripts/maintenance/diagnose.sh"
+        "scripts/maintenance/check-update.ps1"
+        "scripts/maintenance/diagnose.ps1"
     )
 
     # Download root files

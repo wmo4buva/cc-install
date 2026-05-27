@@ -239,6 +239,52 @@ This will:
 .\scripts\launchers\run_claude.ps1 bash
 ```
 
+## Diagnostic & Maintenance Tools
+
+### Check for Updates
+
+Check if a newer version is available:
+
+**macOS / Linux:**
+```bash
+./scripts/maintenance/check-update.sh
+```
+
+**Windows:**
+```powershell
+.\scripts\maintenance\check-update.ps1
+```
+
+The update check happens automatically (silently) when you launch Claude Code. It caches results for 24 hours to avoid excessive network calls.
+
+### Run Diagnostics
+
+If you encounter issues, run the diagnostic tool to check your system:
+
+**macOS / Linux:**
+```bash
+./scripts/maintenance/diagnose.sh
+```
+
+**Windows:**
+```powershell
+.\scripts\maintenance\diagnose.ps1
+```
+
+The diagnostic tool checks:
+- ✅ Docker installation and daemon status
+- ✅ Docker Compose availability
+- ✅ Container status and health
+- ✅ Port availability (8080)
+- ✅ Disk space
+- ✅ Workspace and volumes
+- ✅ Docker image status
+- ✅ Installation version
+
+It also provides solutions for common issues.
+
+---
+
 ## Pre-Installed Skills
 
 This installation comes with powerful Claude Code skills pre-installed for enhanced productivity:
@@ -302,6 +348,22 @@ This directory:
 - Is automatically synced between your host and the container
 
 ## Troubleshooting
+
+**🔍 Need help?** Run the diagnostic tool first:
+
+**macOS / Linux:**
+```bash
+./scripts/maintenance/diagnose.sh
+```
+
+**Windows:**
+```powershell
+.\scripts\maintenance\diagnose.ps1
+```
+
+This will check your system and provide specific solutions for common issues.
+
+---
 
 ### Docker Not Running
 ```

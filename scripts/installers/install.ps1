@@ -150,7 +150,11 @@ function Get-Files {
         "scripts/maintenance/update.ps1",
         "scripts/maintenance/backup.ps1",
         "scripts/maintenance/uninstall.ps1",
-        "scripts/maintenance/restore.ps1"
+        "scripts/maintenance/restore.ps1",
+        "scripts/maintenance/check-update.ps1",
+        "scripts/maintenance/diagnose.ps1",
+        "scripts/maintenance/check-update.sh",
+        "scripts/maintenance/diagnose.sh"
     )
 
     $allFiles = $rootFiles + $launcherFiles + $installerFiles + $maintenanceFiles
