@@ -94,8 +94,10 @@ If you see version information, WSL is installed and you can skip to Step 2.
 Open **Terminal** and paste:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh -o install.sh && bash install.sh
 ```
+
+**macOS Note:** You may see a prompt asking "Terminal would like to make changes to your computer." Click **OK** to allow the installation to proceed.
 
 #### 🪟 **Windows**
 

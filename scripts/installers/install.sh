@@ -155,7 +155,7 @@ preflight_checks() {
 
 # Download required files
 download_files() {
-    log_info "Step 1/4: Downloading required files..."
+    log_info "Step 1/5: Downloading required files..."
 
     # Root files
     local root_files=(
@@ -177,6 +177,7 @@ download_files() {
 
     # Installer scripts
     local installer_files=(
+        "scripts/installers/setup-shortcuts.sh"
         "scripts/installers/setup-shortcuts.ps1"
     )
 
@@ -237,7 +238,7 @@ download_files() {
 
 # Build Docker image
 build_image() {
-    log_info "Step 2/4: Building Docker image (this may take a few minutes)..."
+    log_info "Step 2/5: Building Docker image (this may take a few minutes)..."
 
     if ! docker compose build --progress plain; then
         log_error "Failed to build Docker image"
@@ -250,7 +251,7 @@ build_image() {
 
 # Start container
 start_container() {
-    log_info "Step 3/4: Starting container..."
+    log_info "Step 3/5: Starting container..."
 
     if ! docker compose up -d; then
         log_error "Failed to start container"
@@ -279,7 +280,7 @@ start_container() {
 
 # Initialize workspace
 initialize_workspace() {
-    log_info "Step 4/4: Initializing workspace..."
+    log_info "Step 4/5: Initializing workspace..."
 
     # Create workspace directory if it doesn't exist
     mkdir -p workspace
@@ -320,20 +321,23 @@ print_success_message() {
     echo ""
     echo -e "${BLUE}Next Steps:${NC}"
     echo ""
-    echo -e "  ${GREEN}1.${NC} Launch Claude Code CLI:"
-    echo -e "     ${YELLOW}./run_claude.sh${NC}"
+    echo -e "  ${GREEN}1.${NC} Navigate to the installation directory:"
+    echo -e "     ${YELLOW}cd $INSTALL_DIR${NC}"
     echo ""
-    echo -e "  ${GREEN}2.${NC} Or open VS Code Server in your browser:"
-    echo -e "     ${YELLOW}./run_vscode.sh${NC}"
+    echo -e "  ${GREEN}2.${NC} Launch Claude Code CLI:"
+    echo -e "     ${YELLOW}./claude${NC}"
     echo ""
-    echo -e "  ${GREEN}3.${NC} Your files will be stored in:"
+    echo -e "  ${GREEN}3.${NC} Or open VS Code Server in your browser:"
+    echo -e "     ${YELLOW}./vscode${NC}"
+    echo ""
+    echo -e "  ${GREEN}4.${NC} Your files will be stored in:"
     echo -e "     ${YELLOW}$INSTALL_DIR/workspace/${NC}"
     echo ""
-    echo -e "${BLUE}Useful Commands:${NC}"
+    echo -e "${BLUE}Useful Commands (from $INSTALL_DIR directory):${NC}"
     echo ""
-    echo -e "  ${YELLOW}./update.sh${NC}      - Update to latest versions"
-    echo -e "  ${YELLOW}./backup.sh${NC}      - Backup your workspace"
-    echo -e "  ${YELLOW}./uninstall.sh${NC}   - Remove everything"
+    echo -e "  ${YELLOW}./scripts/maintenance/update.sh${NC}      - Update to latest versions"
+    echo -e "  ${YELLOW}./scripts/maintenance/backup.sh${NC}      - Backup your workspace"
+    echo -e "  ${YELLOW}./scripts/maintenance/uninstall.sh${NC}   - Remove everything"
     echo ""
     echo -e "${BLUE}First-Time Setup:${NC}"
     echo ""
@@ -369,8 +373,15 @@ main() {
     initialize_workspace
 
     # Setup easy launch shortcuts
+    log_info "Step 5/5: Setting up launch shortcuts..."
     if [ -f "scripts/installers/setup-shortcuts.sh" ]; then
-        bash scripts/installers/setup-shortcuts.sh
+        bash scripts/installers/setup-shortcuts.sh || {
+            log_warn "Failed to setup shortcuts, but installation is complete"
+            echo -e "${YELLOW}You can still launch using: cd $INSTALL_DIR && ./claude${NC}"
+        }
+    else
+        log_warn "setup-shortcuts.sh not found, skipping shortcut setup"
+        echo -e "${YELLOW}You can launch using: cd $INSTALL_DIR && ./claude${NC}"
     fi
 
     print_success_message
