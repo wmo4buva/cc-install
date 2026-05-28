@@ -13,43 +13,92 @@ INSTALL_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 echo -e "${BLUE}Setting up easy launch shortcuts...${NC}\n"
 
-# 1. Add to PATH via shell profile
-setup_shell_aliases() {
-    local shell_rc=""
+# 1. Create standalone scripts in ~/.local/bin
+setup_bin_scripts() {
+    local bin_dir="$HOME/.local/bin"
 
-    if [ -n "${BASH_VERSION:-}" ]; then
-        shell_rc="$HOME/.bashrc"
-        [ -f "$HOME/.bash_profile" ] && shell_rc="$HOME/.bash_profile"
-    elif [ -n "${ZSH_VERSION:-}" ]; then
-        shell_rc="$HOME/.zshrc"
-    fi
+    # Create bin directory if it doesn't exist
+    mkdir -p "$bin_dir"
 
-    if [ -z "$shell_rc" ]; then
-        echo -e "${YELLOW}⚠ Could not detect shell. Skipping profile setup.${NC}"
+    # Check if scripts already exist
+    if [ -f "$bin_dir/ccvscode" ]; then
+        echo -e "${GREEN}✓${NC} Shortcuts already installed in $bin_dir"
         return
     fi
 
-    # Check if aliases already exist
-    if grep -q "# Claude Code shortcuts" "$shell_rc" 2>/dev/null; then
-        echo -e "${GREEN}✓${NC} Shell aliases already configured in $shell_rc"
-        return
-    fi
+    # Create ccdocker
+    cat > "$bin_dir/ccdocker" << 'SCRIPT'
+#!/usr/bin/env bash
+# Claude Code Docker Shortcut
+cd "INSTALL_DIR_PLACEHOLDER" && ./scripts/launchers/run_claude.sh "$@"
+SCRIPT
+    sed -i.bak "s|INSTALL_DIR_PLACEHOLDER|$INSTALL_DIR|g" "$bin_dir/ccdocker" && rm -f "$bin_dir/ccdocker.bak"
+    chmod +x "$bin_dir/ccdocker"
 
-    # Add aliases to shell profile
-    cat >> "$shell_rc" << EOF
+    # Create ccvscode
+    cat > "$bin_dir/ccvscode" << 'SCRIPT'
+#!/usr/bin/env bash
+# VS Code Server Launcher Shortcut
+cd "INSTALL_DIR_PLACEHOLDER" && ./scripts/launchers/run_vscode.sh "$@"
+SCRIPT
+    sed -i.bak "s|INSTALL_DIR_PLACEHOLDER|$INSTALL_DIR|g" "$bin_dir/ccvscode" && rm -f "$bin_dir/ccvscode.bak"
+    chmod +x "$bin_dir/ccvscode"
 
-# Claude Code shortcuts
-alias ccdocker='cd "$INSTALL_DIR" && ./claude'
-alias ccvscode='cd "$INSTALL_DIR" && ./vscode'
-alias ccstop='cd "$INSTALL_DIR" && ./scripts/launchers/run_claude.sh stop'
-alias cclogs='cd "$INSTALL_DIR" && ./scripts/launchers/run_claude.sh logs'
-EOF
+    # Create ccstop
+    cat > "$bin_dir/ccstop" << 'SCRIPT'
+#!/usr/bin/env bash
+# Stop Claude Code Container
+cd "INSTALL_DIR_PLACEHOLDER" && ./scripts/launchers/run_claude.sh stop
+SCRIPT
+    sed -i.bak "s|INSTALL_DIR_PLACEHOLDER|$INSTALL_DIR|g" "$bin_dir/ccstop" && rm -f "$bin_dir/ccstop.bak"
+    chmod +x "$bin_dir/ccstop"
 
-    echo -e "${GREEN}✓${NC} Added shell aliases to $shell_rc"
+    # Create cclogs
+    cat > "$bin_dir/cclogs" << 'SCRIPT'
+#!/usr/bin/env bash
+# View Claude Code Container Logs
+cd "INSTALL_DIR_PLACEHOLDER" && ./scripts/launchers/run_claude.sh logs
+SCRIPT
+    sed -i.bak "s|INSTALL_DIR_PLACEHOLDER|$INSTALL_DIR|g" "$bin_dir/cclogs" && rm -f "$bin_dir/cclogs.bak"
+    chmod +x "$bin_dir/cclogs"
+
+    # Create ccrestart
+    cat > "$bin_dir/ccrestart" << 'SCRIPT'
+#!/usr/bin/env bash
+# Restart Claude Code Container
+cd "INSTALL_DIR_PLACEHOLDER" && ./scripts/launchers/run_claude.sh restart
+SCRIPT
+    sed -i.bak "s|INSTALL_DIR_PLACEHOLDER|$INSTALL_DIR|g" "$bin_dir/ccrestart" && rm -f "$bin_dir/ccrestart.bak"
+    chmod +x "$bin_dir/ccrestart"
+
+    echo -e "${GREEN}✓${NC} Created shortcuts in $bin_dir"
     echo -e "  ${BLUE}ccdocker${NC}  - Launch Claude Code CLI"
     echo -e "  ${BLUE}ccvscode${NC} - Launch VS Code Server"
     echo -e "  ${BLUE}ccstop${NC}   - Stop the container"
     echo -e "  ${BLUE}cclogs${NC}   - View container logs"
+    echo -e "  ${BLUE}ccrestart${NC} - Restart container"
+
+    # Ensure ~/.local/bin is in PATH
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+        echo ""
+        echo -e "${YELLOW}⚠ Note:${NC} Add ${BLUE}~/.local/bin${NC} to your PATH:"
+        echo ""
+
+        local shell_rc=""
+        if [ -n "${ZSH_VERSION:-}" ]; then
+            shell_rc="$HOME/.zshrc"
+        elif [ -n "${BASH_VERSION:-}" ]; then
+            shell_rc="$HOME/.bashrc"
+            [ -f "$HOME/.bash_profile" ] && shell_rc="$HOME/.bash_profile"
+        fi
+
+        if [ -n "$shell_rc" ]; then
+            echo "  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> $shell_rc"
+            echo "  source $shell_rc"
+        else
+            echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+        fi
+    fi
 }
 
 # 2. Create desktop shortcut (macOS)
@@ -106,30 +155,26 @@ print_instructions() {
     echo ""
     echo -e "${BLUE}Quick Start:${NC}"
     echo ""
-    echo -e "  1️⃣  ${YELLOW}Restart your terminal${NC} (or run: source ~/.zshrc)"
-    echo ""
-    echo -e "  2️⃣  Launch Claude Code from ${YELLOW}anywhere${NC}:"
-    echo -e "      ${GREEN}ccdocker${NC}"
-    echo ""
-    echo -e "  3️⃣  Or launch VS Code Server:"
-    echo -e "      ${GREEN}ccvscode${NC}"
+    echo -e "  ${GREEN}ccdocker${NC}  - Launch Claude Code CLI"
+    echo -e "  ${GREEN}ccvscode${NC} - Launch VS Code Server"
     echo ""
 
     if [ "$(uname)" = "Darwin" ]; then
         echo -e "${BLUE}macOS Users:${NC}"
-        echo -e "  • Find ${YELLOW}Claude Code${NC} app in your Applications folder"
+        echo -e "  • Find ${YELLOW}Claude Code${NC} app in ~/Applications"
         echo -e "  • Double-click to launch in Terminal"
         echo ""
     fi
 
     echo -e "${BLUE}Other Commands:${NC}"
-    echo -e "  ${GREEN}ccstop${NC}   - Stop the container"
-    echo -e "  ${GREEN}cclogs${NC}   - View container logs"
+    echo -e "  ${GREEN}ccstop${NC}    - Stop the container"
+    echo -e "  ${GREEN}cclogs${NC}    - View container logs"
+    echo -e "  ${GREEN}ccrestart${NC} - Restart container"
     echo ""
     echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
 }
 
 # Run setup
-setup_shell_aliases
+setup_bin_scripts
 create_macos_app
 print_instructions
