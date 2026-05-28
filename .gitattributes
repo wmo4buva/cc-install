@@ -1,0 +1,15 @@
+# Ensure PowerShell scripts use Windows (CRLF) line endings
+*.ps1 text eol=crlf
+
+# Shell scripts use Unix (LF) line endings
+*.sh text eol=lf
+
+# Markdown and text files use native endings
+*.md text
+*.txt text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.zip binary
+*.tar.gz binary
