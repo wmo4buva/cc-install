@@ -2,6 +2,43 @@
 
 All notable changes to the Claude Code Faculty Installer (cc-install) project.
 
+## [1.2.1] - 2026-05-28
+
+### 🐛 Critical Bug Fix
+
+#### Windows PowerShell Parsing Error
+- **Issue**: PowerShell scripts failed to parse with error: "The string is missing the terminator" 
+  - Error occurred at `run_vscode.ps1:103` when users ran `ccvscode` after installation
+  - Affected all `.ps1` files in the project
+  
+- **Root Cause**: PowerShell scripts were committed with Unix (LF) line endings, but PowerShell on Windows expects Windows (CRLF) line endings
+  - This caused quote parsing issues and syntax errors
+  - Files downloaded via installer had LF endings from GitHub
+  
+- **Fix**: Added `.gitattributes` to enforce CRLF line endings for all PowerShell files
+  - `*.ps1 text eol=crlf` ensures proper endings on all platforms
+  - Future checkouts and downloads will have correct endings
+  - Shell scripts (`.sh`) remain LF via `*.sh text eol=lf`
+
+### 📦 Deployment
+
+All changes pushed to: `https://github.com/wmo4buva/cc-install`
+
+Users who previously installed can update by running:
+```powershell
+cd cc-install
+.\scripts\maintenance\update.ps1
+```
+
+Or re-run the one-line installer to get the fixed version.
+
+### 🙏 Credits
+
+- Issue reported by UVA faculty user testing on Windows
+- Built with Claude Sonnet 4.5
+
+---
+
 ## [1.2.0] - 2026-05-27
 
 ### 🎉 Major Release: Windows & macOS Reliability + Documentation Overhaul
