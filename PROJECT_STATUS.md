@@ -1,14 +1,20 @@
 # Project Status Report
 
-**Date:** May 26, 2026  
-**Version:** 1.1.0  
-**Status:** ✅ PRODUCTION RELEASE - v1.1.0 "Skills & UX Edition"
+**Date:** July 8, 2026  
+**Version:** 1.2.1  
+**Status:** ✅ PRODUCTION RELEASE - v1.2.1 "Windows & Cross-Platform Fixes"
 
 ---
 
-## 🎉 v1.1.0 Released!
+## 🎉 v1.2.1 Released!
 
-The Claude Code Faculty Installer (cc-install) **v1.1.0** is now live with major UX improvements, auto-update mechanism, pre-installed skills, and Amazon Bedrock integration for UVA users.
+The Claude Code Faculty Installer (cc-install) **v1.2.1** is live. Building on the
+v1.1.0 "Skills & UX Edition," the 1.2.x line focused on Windows/macOS reliability:
+PowerShell line-ending fixes (CRLF via `.gitattributes`), standalone shortcut scripts
+(`ccdocker`/`ccvscode`), a diagnostic tool, and consistent `scripts/`-based layout.
+Faculty authenticate with their **UVA Amazon Bedrock** credentials.
+
+**Repository:** `wmo4buva/cc-install` (remote: `git@github.com-uva:wmo4buva/cc-install.git`)
 
 ---
 
@@ -62,13 +68,13 @@ The Claude Code Faculty Installer (cc-install) **v1.1.0** is now live with major
 
 ```
 cc-install/
-├── 📖 Documentation (4 root + 6 docs/)
-├── 🐳 Docker Config (2 files)
-├── 🚀 Quick Launchers (2 files)
+├── 📖 Documentation (root: README, CHANGELOG, CLAUDE, ATTRIBUTION, ROADMAP, … + docs/)
+├── 🐳 Docker Config (Dockerfile, docker-compose.yml, .dockerignore)
+├── 🚀 Quick Launchers (claude, vscode + claude.cmd, vscode.cmd)
 ├── 📁 scripts/
-│   ├── installers/ (3 scripts)
-│   ├── launchers/ (4 scripts)
-│   └── maintenance/ (8 scripts)
+│   ├── installers/   (install.sh, install.ps1, setup-shortcuts.{sh,ps1}, install-shortcut.sh)
+│   ├── launchers/    (run_claude.{sh,ps1}, run_vscode.{sh,ps1})
+│   └── maintenance/  (update, backup, restore, uninstall, check-update, diagnose — .sh/.ps1)
 └── 💾 workspace/ (user data)
 ```
 
@@ -173,16 +179,16 @@ cc-install/
 - ✅ Documentation review
 - ✅ GitHub repository creation
 
-### Short Term (This Week)
-- ⏳ GitHub repository setup (BattenIT/cc-install)
-- ⏳ Update installation URLs
-- ⏳ Windows PowerShell testing
+### Short Term
+- ✅ GitHub repository setup (wmo4buva/cc-install)
+- ✅ Installation URLs updated
+- ✅ Windows PowerShell testing (v1.2.x line-ending fixes)
 - ⏳ Faculty pilot feedback
 
 ### Medium Term (Next Month)
-- ⏳ Skills implementation (v1.1.0)
 - ⏳ Wider faculty rollout
 - ⏳ Support process refinement
+- ⏳ Unified installer (native OpenCode + MLX) — see docs/UNIFIED_INSTALLER_PLAN.md
 
 ---
 
@@ -229,10 +235,10 @@ See [ATTRIBUTION.md](ATTRIBUTION.md) for complete credits.
 
 ### For You (Mark)
 1. **Test locally** - Use `./claude` and `./vscode`
-2. **Create GitHub repo** - BattenIT/cc-install
-3. **Update URLs** - In install scripts
-4. **Find pilot faculty** - 2-3 willing testers
-5. **Plan v1.1.0** - Skills implementation
+2. **Find pilot faculty** - 2-3 willing testers
+3. **Distribute** - Share the faculty instruction guide (docs/FACULTY_GUIDE.md)
+4. **Gather feedback** - Refine based on pilot experience
+5. **Plan unified installer** - Native OpenCode + MLX (see UNIFIED_INSTALLER_PLAN.md)
 
 ### For Development
 1. Research skill licenses

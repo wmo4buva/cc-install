@@ -223,7 +223,7 @@ Before releasing to faculty:
 
 3. **Container won't start**
    - Solution: Check `docker compose logs`
-   - Rebuild if needed: `./update.sh`
+   - Rebuild if needed: `./scripts/maintenance/update.sh`
 
 4. **Workspace permissions**
    - Container uses UID 1000
@@ -267,7 +267,7 @@ Ideas for future versions:
 ## Contact
 
 For questions or contributions:
-- **Repository:** https://github.com/BattenIT/cc-install (pending)
+- **Repository:** https://github.com/wmo4buva/cc-install
 - **Support:** FBS IT Team
 - **Issues:** GitHub Issues (after repo creation)
 

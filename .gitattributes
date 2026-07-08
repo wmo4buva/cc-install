@@ -13,3 +13,7 @@
 *.jpg binary
 *.zip binary
 *.tar.gz binary
+*.pdf binary
+
+# Self-contained HTML guides: keep bytes intact, don't treat as diffable text
+docs/installGuides/*.html -text

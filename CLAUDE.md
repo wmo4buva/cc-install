@@ -52,20 +52,21 @@ This project is heavily inspired by [DAAF (Data Analysis Agent Framework)](https
 cc-install/
 ├── Dockerfile                  # Image definition
 ├── docker-compose.yml          # Container orchestration
-├── .dockerignore              # Build context exclusions
-├── install.sh                 # macOS/Linux installer
-├── install.ps1                # Windows installer
-├── run_claude.sh              # Claude launcher (macOS/Linux)
-├── run_claude.ps1             # Claude launcher (Windows)
-├── run_vscode.sh              # VS Code launcher (macOS/Linux)
-├── run_vscode.ps1             # VS Code launcher (Windows)
-├── update.sh / update.ps1     # Update scripts
-├── backup.sh / backup.ps1     # Backup scripts
-├── uninstall.sh / uninstall.ps1  # Uninstall scripts
-├── README.md                  # User documentation
-├── ATTRIBUTION.md             # Credits to DAAF and third-party software
-└── CLAUDE.md                  # This file
+├── .dockerignore               # Build context exclusions
+├── claude / claude.cmd         # Root launcher: Claude Code (macOS/Linux + Windows)
+├── vscode / vscode.cmd         # Root launcher: VS Code Server (macOS/Linux + Windows)
+├── scripts/
+│   ├── installers/             # install.sh, install.ps1, setup-shortcuts.{sh,ps1}
+│   ├── launchers/              # run_claude.{sh,ps1}, run_vscode.{sh,ps1}
+│   └── maintenance/            # update, backup, restore, uninstall, check-update, diagnose (.sh/.ps1)
+├── README.md                   # User documentation
+├── ATTRIBUTION.md              # Credits to DAAF and third-party software
+└── CLAUDE.md                   # This file
 ```
+
+> **Note:** The one-line install command downloads `scripts/installers/install.sh`
+> (or `install.ps1`). All launcher and maintenance scripts live under `scripts/`;
+> the root `claude`/`vscode` wrappers just forward into `scripts/launchers/`.
 
 ## Common Development Tasks
 
@@ -229,9 +230,11 @@ Before pushing changes:
 
 ### Claude Code Installation Fails
 
-The Anthropic install script URL might have changed. Check:
+The Claude Code install script URL might have changed. The Dockerfile uses
+`https://claude.ai/install.sh` (which redirects to the current bootstrap script).
+Check it still resolves:
 ```bash
-curl -I https://console.anthropic.com/install.sh
+curl -IL https://claude.ai/install.sh
 ```
 
 Update Dockerfile if needed.
@@ -271,7 +274,7 @@ The container uses UID 1000. If host user has different UID, permissions may con
 The Dockerfile uses Anthropic's installer which installs the latest version by default. To pin a specific version, modify the Dockerfile:
 
 ```dockerfile
-RUN curl -fsSL https://console.anthropic.com/install.sh | bash -s -- <VERSION>
+RUN curl -fsSL https://claude.ai/install.sh | bash -s -- <VERSION>
 ```
 
 ### Updating code-server Version
@@ -295,8 +298,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_<VERSION>.x | bash -
 For one-line installation to work, scripts must be publicly accessible. Options:
 
 1. **GitHub (Recommended)**:
-   - Create public repository
-   - Use `https://raw.githubusercontent.com/BattenIT/cc-install/main/install.sh`
+   - Public repository: `wmo4buva/cc-install`
+   - Use `https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh`
    - Benefit: Version control, easy updates
 
 2. **FBS Web Server**:

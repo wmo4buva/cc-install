@@ -339,8 +339,10 @@ function Show-SuccessMessage {
     Write-Host "First-Time Setup:" -ForegroundColor Blue
     Write-Host ""
     Write-Host "  When you first launch Claude Code, you'll need to:" -ForegroundColor White
-    Write-Host "  - Enter your Anthropic API key" -ForegroundColor White
+    Write-Host "  - Enter your UVA Amazon Bedrock credentials" -ForegroundColor White
+    Write-Host "    (AWS access key, secret key, and region - billed to UVA)" -ForegroundColor White
     Write-Host "  - Configure your preferences" -ForegroundColor White
+    Write-Host "  See README.md - 'First-Time Setup' for details." -ForegroundColor Blue
     Write-Host ""
     Write-Host "For more information, see README.md" -ForegroundColor Green
     Write-Host ""

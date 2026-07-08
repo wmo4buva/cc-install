@@ -1,0 +1,260 @@
+# Getting Started with Claude Code — Faculty Guide
+
+Welcome! This guide walks you through installing and using **Claude Code**, an
+AI coding assistant, on your own computer. You do **not** need to be a programmer
+or know anything about Docker to follow along.
+
+**What you'll end up with:**
+- Claude Code running in your terminal (a chat-style AI assistant for writing,
+  editing, and understanding files and code).
+- An optional browser-based code editor (VS Code) at `http://localhost:8080`.
+- A `workspace` folder on your computer where all your files live.
+
+**Time needed:** about 10–15 minutes if Docker is already installed, or 20–30
+minutes the first time (Docker install adds time).
+
+> **Need help at any point?** Contact **FBS IT** — see [Getting Help](#getting-help)
+> at the bottom. There's also a built-in diagnostic tool that checks your setup
+> and suggests fixes.
+
+---
+
+## Before you start: What you'll need
+
+1. **A computer** running macOS (Apple Silicon or Intel) or Windows 10/11.
+2. **Docker Desktop** — free software that runs Claude Code in a safe, isolated
+   "container" so it never interferes with the rest of your computer. We'll
+   install this in Step 1.
+3. **Your UVA Amazon Bedrock credentials** — this is how Claude Code connects to
+   the AI, billed to the university (not to you personally). If you don't have
+   these yet, request them from **FBS IT before you start** so they're ready when
+   you first launch Claude Code.
+
+---
+
+## Step 1 — Install Docker Desktop
+
+Docker Desktop is what makes this "one-line install" possible. You only do this once.
+
+1. Go to **https://www.docker.com/products/docker-desktop/** and download the
+   version for your computer:
+
+   | Your computer | Download |
+   |---|---|
+   | **Mac — Apple Silicon** (M1/M2/M3/M4) | "Mac with Apple chip" |
+   | **Mac — Intel** | "Mac with Intel chip" |
+   | **Windows** | "Windows" (choose ARM64 only if your PC is ARM-based; otherwise x86_64) |
+
+   *Not sure which Mac you have?* Click the  menu → **About This Mac**.
+   *Not sure about Windows?* **Settings → System → About → System type**.
+
+2. **Run the installer** and accept the default options.
+   - On Windows, allow it to enable **WSL 2** if asked, and **restart** if prompted.
+
+3. **Open Docker Desktop** and wait ~30–60 seconds until it says
+   **"Docker Desktop is running"** (whale icon in your menu bar / system tray).
+
+> **Windows users:** If Docker asks for WSL and it isn't installed, open
+> **PowerShell as Administrator** (Windows + X → *Terminal (Admin)*), run
+> `wsl --update`, then restart your computer. Then start Docker Desktop.
+
+✅ **Make sure Docker Desktop is running before moving to Step 2.**
+
+---
+
+## Step 2 — Install Claude Code (one command)
+
+Open your terminal and paste the single command for your system. It downloads
+everything, builds your environment, and sets up easy launch shortcuts.
+
+### 🍎 macOS / Linux
+
+Open the **Terminal** app and paste:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh -o install.sh && bash install.sh
+```
+
+> You may see a macOS prompt like *"Terminal would like to make changes."* Click
+> **OK** to allow it.
+
+### 🪟 Windows
+
+Open **PowerShell** (not Command Prompt): press **Windows + X → Terminal** or
+**Windows PowerShell**, then paste:
+
+```powershell
+irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
+```
+
+> This command **only works in PowerShell**, not the black Command Prompt window.
+
+**☕ Now wait.** The build takes about **10–15 minutes** the first time. You'll see
+lots of text scroll by — that's normal. When it's done, you'll see a green
+**"Installation Complete!"** message.
+
+---
+
+## Step 3 — Launch Claude Code
+
+**First, close your terminal window and open a fresh one.** This is required so
+the new shortcut commands become available.
+
+Then, from anywhere, type:
+
+```bash
+ccdocker
+```
+
+That starts **Claude Code** in your terminal. To use the **browser-based editor**
+instead:
+
+```bash
+ccvscode
+```
+
+This opens **http://localhost:8080** in your browser — a full code editor you can
+use with your mouse.
+
+| Command | What it does |
+|---|---|
+| `ccdocker` | Launch Claude Code (the AI assistant) |
+| `ccvscode` | Launch the browser-based VS Code editor |
+| `ccstop` | Stop Claude Code when you're done for the day |
+| `ccrestart` | Restart it if something seems stuck |
+| `cclogs` | Show technical logs (mainly for troubleshooting) |
+
+> **Shortcuts not found?** Make sure you opened a **brand-new terminal window**
+> after the install finished. On Mac you can always fall back to:
+> `cd cc-install` then `./claude` (or `./vscode`).
+
+---
+
+## Step 4 — First-time sign-in (Amazon Bedrock)
+
+The **first time** you run `ccdocker`, Claude Code asks how to connect to the AI.
+Choose **Amazon Bedrock** and enter the credentials FBS IT gave you:
+
+- **AWS Access Key ID**
+- **AWS Secret Access Key**
+- **Region** (usually `us-east-1` — FBS IT will confirm)
+
+This connects Claude Code to UVA's account, so **usage is billed to the
+university, not to you**. You only enter these once — they're remembered securely
+for next time.
+
+> Don't have Bedrock credentials yet? **Contact FBS IT** — they'll issue them.
+
+---
+
+## Using Claude Code day to day
+
+- **Just talk to it.** Type what you want in plain English:
+  *"Summarize the CSV file in my workspace,"* or *"Help me draft a Python script
+  to rename these files."* Claude Code can read, write, and edit files for you.
+
+- **Your files live in one place.** Everything you and Claude Code create is saved
+  in the `workspace` folder inside `cc-install`:
+  - **Mac:** `cc-install/workspace/`
+  - It behaves like any normal folder — you can open it in Finder/Explorer, drag
+    files in, and back it up.
+
+- **Your work is safe.** Files and settings live *outside* the container, so they
+  survive restarts, updates, and even rebuilding the environment.
+
+- **Pre-installed skills.** Your install already includes helpful skill packs
+  (from Anthropic and others). Type `/skills` inside Claude Code to see them.
+
+- **When you're done**, you can close the terminal. To fully stop the background
+  environment, type `ccstop`.
+
+---
+
+## Keeping it up to date
+
+Because Claude Code runs inside a managed container, the normal "self-update"
+won't stick. To update properly, run the update script from the `cc-install`
+folder:
+
+**macOS / Linux:**
+```bash
+cd cc-install
+./scripts/maintenance/update.sh
+```
+
+**Windows:**
+```powershell
+cd cc-install
+.\scripts\maintenance\update.ps1
+```
+
+This rebuilds with the latest Claude Code **without touching your `workspace`
+files or your saved settings**. It's the recommended thing to do if you ever see
+an "update available" message.
+
+---
+
+## Backing up your work
+
+Your `workspace` folder is just files on your computer, so you can copy it like
+any folder. There's also a one-command backup:
+
+**macOS / Linux:**
+```bash
+cd cc-install
+./scripts/maintenance/backup.sh
+```
+
+**Windows:**
+```powershell
+cd cc-install
+.\scripts\maintenance\backup.ps1
+```
+
+This creates a dated backup you can restore later with the matching
+`restore.sh` / `restore.ps1` script.
+
+---
+
+## Troubleshooting
+
+**Try the diagnostic tool first** — it checks Docker, ports, disk space, and your
+container, then tells you exactly what's wrong and how to fix it:
+
+**macOS / Linux:**
+```bash
+cd cc-install
+./scripts/maintenance/diagnose.sh
+```
+
+**Windows:**
+```powershell
+cd cc-install
+.\scripts\maintenance\diagnose.ps1
+```
+
+### Common issues
+
+| Problem | Fix |
+|---|---|
+| *"command not found: ccdocker"* | Open a **fresh terminal window** after installing. On Mac you can also `cd cc-install` and run `./claude`. |
+| *"Docker daemon is not running"* | Open **Docker Desktop** and wait until it says "running," then try again. |
+| The install command *"doesn't work"* on Windows | Make sure you're in **PowerShell**, not Command Prompt (cmd). |
+| Browser editor won't open | Wait ~10 seconds after `ccvscode`, then visit **http://localhost:8080** manually. |
+| *"port 8080 already allocated"* | Something else is using that port. Run the diagnostic tool, or contact FBS IT. |
+| Everything seems stuck | Run `ccrestart`, or run the diagnostic tool above. |
+
+---
+
+## Getting Help
+
+- **First stop:** run the diagnostic tool (above) and note what it reports.
+- **Support:** contact **FBS IT** — include your operating system (Mac/Windows)
+  and, if possible, a copy of the diagnostic output or a screenshot of the error.
+- **Reference:** the full technical [README](../README.md) has additional detail
+  and a command cheat-sheet ([Quick Reference](QUICK_REFERENCE.md)).
+
+---
+
+*Claude Code Faculty Installer • Frank Batten School • Built on the
+[DAAF project](https://github.com/DAAF-Contribution-Community/daaf) approach.*

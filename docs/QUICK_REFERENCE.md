@@ -5,14 +5,11 @@ One-page reference for common tasks.
 ## 🚀 Quick Start
 
 ```bash
-# Install shortcut command (first time only)
-./install-shortcut.sh
-
 # Launch Claude Code
 ccdocker
 
 # Or launch VS Code in browser
-./run_vscode.sh
+ccvscode
 ```
 
 ## 📝 Common Commands
@@ -28,12 +25,12 @@ ccdocker restart   # Restart container
 
 ### Using Scripts Directly
 ```bash
-./run_claude.sh         # Launch Claude Code
-./run_vscode.sh         # Launch VS Code Server (browser)
-./update.sh             # Update to latest versions
-./backup.sh             # Backup workspace
-./restore.sh backup.tar.gz  # Restore from backup
-./uninstall.sh          # Remove everything
+./claude                                    # Launch Claude Code
+./vscode                                    # Launch VS Code Server (browser)
+./scripts/maintenance/update.sh             # Update to latest versions
+./scripts/maintenance/backup.sh             # Backup workspace
+./scripts/maintenance/restore.sh backup.tar.gz  # Restore from backup
+./scripts/maintenance/uninstall.sh          # Remove everything
 ```
 
 ## 🐳 Docker Commands
@@ -90,8 +87,8 @@ Start Docker Desktop, wait for it to fully load.
 
 ### Reset everything
 ```bash
-./uninstall.sh  # Follow prompts
-./install.sh    # Reinstall
+./scripts/maintenance/uninstall.sh  # Follow prompts
+# Then re-run the one-line installer from the README to reinstall
 ```
 
 ## 📊 Quick Stats
@@ -126,7 +123,7 @@ mkdir -p workspace/{projects,research,teaching}
 
 ### Quick backup before major changes
 ```bash
-./backup.sh && echo "Backup created: $(ls -t backups/ | head -1)"
+./scripts/maintenance/backup.sh && echo "Backup created: $(ls -t backups/ | head -1)"
 ```
 
 ### Check Claude Code version
@@ -162,16 +159,16 @@ docker stats cc-install
 
 ```bash
 # 1. Backup current workspace
-./backup.sh
+./scripts/maintenance/backup.sh
 
 # 2. Update to latest versions
-./update.sh
+./scripts/maintenance/update.sh
 
 # 3. Test that everything works
 ccdocker --version
 
 # 4. If issues, restore and report
-./restore.sh backups/latest_backup.tar.gz
+./scripts/maintenance/restore.sh backups/latest_backup.tar.gz
 ```
 
 ## 🎯 One-Liners

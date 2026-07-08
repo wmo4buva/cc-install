@@ -103,5 +103,5 @@ echo -e "${GREEN}║                                                           �
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${BLUE}You can now use Claude Code with:${NC}"
-echo -e "  ${YELLOW}./run_claude.sh${NC} or ${YELLOW}./run_vscode.sh${NC}"
+echo -e "  ${YELLOW}./claude${NC} or ${YELLOW}./vscode${NC}  (or ${YELLOW}ccdocker${NC} / ${YELLOW}ccvscode${NC})"
 echo ""

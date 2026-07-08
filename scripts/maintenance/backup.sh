@@ -66,7 +66,7 @@ if tar -czf "$BACKUP_FILE" workspace/; then
     echo -e "  ${GREEN}Size:${NC} $BACKUP_SIZE"
     echo ""
     echo -e "${YELLOW}To restore this backup:${NC}"
-    echo -e "  ${BLUE}./restore.sh $BACKUP_FILE${NC}"
+    echo -e "  ${BLUE}./scripts/maintenance/restore.sh $BACKUP_FILE${NC}"
     echo ""
 else
     log_error "Backup failed"

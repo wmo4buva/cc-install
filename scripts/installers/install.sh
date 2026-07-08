@@ -298,8 +298,8 @@ This is your workspace directory. All files you create or edit in Claude Code wi
 ## Getting Started
 
 1. Your Claude Code installation is ready to use
-2. Run `./run_claude.sh` to start Claude Code CLI
-3. Run `./run_vscode.sh` to open VS Code Server in your browser
+2. Run `./claude` (or `ccdocker`) to start Claude Code CLI
+3. Run `./vscode` (or `ccvscode`) to open VS Code Server in your browser
 4. Your files in this directory will persist across container restarts
 
 ## Need Help?
@@ -346,9 +346,10 @@ print_success_message() {
     echo -e "${BLUE}First-Time Setup:${NC}"
     echo ""
     echo -e "  When you first launch Claude Code, you'll need to:"
-    echo -e "  - ${YELLOW}Enter your Amazon Bedrock credentials${NC} (recommended)"
-    echo -e "    OR use your Anthropic API key"
+    echo -e "  - ${YELLOW}Enter your UVA Amazon Bedrock credentials${NC}"
+    echo -e "    (AWS access key, secret key, and region — billed to UVA)"
     echo -e "  - Configure your preferences"
+    echo -e "  ${BLUE}See README.md → \"First-Time Setup\" for details.${NC}"
     echo ""
     echo -e "${GREEN}For more information, see README.md${NC}"
     echo ""

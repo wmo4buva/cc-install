@@ -74,16 +74,16 @@ A Docker-based installer for Claude Code inspired by the [DAAF project](https://
 
 ## Installation URLs (For Distribution)
 
-When hosted on GitHub at `BattenIT/cc-install`:
+Hosted on GitHub at `wmo4buva/cc-install`:
 
 **macOS / Linux:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BattenIT/cc-install/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh -o install.sh && bash install.sh
 ```
 
 **Windows:**
 ```powershell
-irm https://raw.githubusercontent.com/BattenIT/cc-install/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
 ```
 
 ## Next Steps
@@ -96,9 +96,9 @@ irm https://raw.githubusercontent.com/BattenIT/cc-install/main/install.ps1 | iex
    docker compose exec claude-code claude --version
    ```
 
-2. **Create GitHub repository** — Push to `BattenIT/cc-install`
+2. **GitHub repository** — `wmo4buva/cc-install`
    ```bash
-   git remote add origin https://github.com/BattenIT/cc-install.git
+   git remote add origin git@github.com-uva:wmo4buva/cc-install.git
    git push -u origin main
    ```
 

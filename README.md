@@ -6,6 +6,24 @@ A simple, Docker-based installer for Claude Code designed to help faculty member
 
 ---
 
+## 📚 Start Here — Faculty Guides & Tip Sheets
+
+New to Claude Code? These approachable, step-by-step guides are the easiest place
+to begin — no technical background required.
+
+| Guide | Format | Best for |
+|-------|--------|----------|
+| **[📘 Install Guide (PDF)](docs/installGuides/ClaudeCodeInstallGuide.pdf)** | PDF | Printable, illustrated walkthrough of installation and first launch |
+| **[🖥️ Install Guide (HTML)](docs/installGuides/ClaudeCodeInstallGuide.html)** | HTML | The same guide to view or present on-screen |
+| **[💡 Claude Code Tip Sheet (PDF)](docs/installGuides/ClaudeCodeTipSheet.pdf)** | PDF | Quick tips and everyday usage once you're up and running |
+| **[📝 Faculty Guide (Markdown)](docs/FACULTY_GUIDE.md)** | Markdown | Plain-language reference you can read right here on GitHub |
+| **[⚡ Quick Reference](docs/QUICK_REFERENCE.md)** | Markdown | One-page command cheat-sheet |
+
+> 💡 **Faculty:** open the **Install Guide (PDF)** first, then keep the **Tip Sheet**
+> handy. Everything below is the full technical reference.
+
+---
+
 ## ✨ What This Does
 
 This project provides a one-line installation command that:
@@ -389,14 +407,14 @@ Error: port 8080 is already allocated
 **Solution**:
 1. Check Docker Desktop is running
 2. View logs: `docker compose logs`
-3. Try rebuilding: `./update.sh` (macOS/Linux) or `.\update.ps1` (Windows)
+3. Try rebuilding: `./scripts/maintenance/update.sh` (macOS/Linux) or `.\scripts\maintenance\update.ps1` (Windows)
 
 ### Claude Code Command Not Found
 ```
 claude: command not found
 ```
 
-**Solution**: The container may need a moment to fully start. Wait 10 seconds and try again. If it persists, rebuild with `./update.sh`
+**Solution**: The container may need a moment to fully start. Wait 10 seconds and try again. If it persists, rebuild with `./scripts/maintenance/update.sh`
 
 ### Installation Fails During Build
 
@@ -408,19 +426,40 @@ claude: command not found
 
 ## Updating
 
-To update to the latest versions of Claude Code and VS Code Server:
+To update to the latest versions of Claude Code and VS Code Server, run the update script from the `cc-install` directory:
 
 **macOS / Linux:**
 ```bash
-./update.sh
+cd cc-install
+./scripts/maintenance/update.sh
 ```
 
 **Windows:**
 ```powershell
-.\update.ps1
+cd cc-install
+.\scripts\maintenance\update.ps1
 ```
 
 This will rebuild the Docker image with the latest versions while preserving your workspace and settings.
+
+### How updating works (important)
+
+Because Claude Code runs inside a Docker container here, you **cannot** update it the normal way (Claude Code's built-in self-updater). Any update made inside the running container is lost the next time the image is rebuilt, because the Claude Code CLI is baked into the image — not stored in a persistent volume.
+
+**The update script is the only durable way to update.** When you run it, the script:
+
+1. Stops the container
+2. Rebuilds the Docker image from scratch (`--no-cache`), which re-runs the official Claude Code installer and pulls the **latest** version
+3. Restarts the container
+4. Prints the new Claude Code and code-server versions so you can confirm
+
+Your `workspace/` files and your Claude Code settings (the `claude-config` volume) are **not** touched — they live outside the image.
+
+> **Note on versions:** This always installs the *latest* available Claude Code. There is no way to pin a specific version without editing the `Dockerfile`.
+
+### About the "update available" notification
+
+When you launch Claude Code, you may occasionally see a notification that an update is available. This refers to a new version of **this installer (cc-install)** — not Claude Code itself. Running the update script above gets you both: the latest installer features *and* a rebuild with the latest Claude Code.
 
 ## Backup and Restore
 
@@ -428,12 +467,12 @@ This will rebuild the Docker image with the latest versions while preserving you
 
 **macOS / Linux:**
 ```bash
-./backup.sh
+./scripts/maintenance/backup.sh
 ```
 
 **Windows:**
 ```powershell
-.\backup.ps1
+.\scripts\maintenance\backup.ps1
 ```
 
 This creates a timestamped backup of your workspace directory.
@@ -442,12 +481,12 @@ This creates a timestamped backup of your workspace directory.
 
 **macOS / Linux:**
 ```bash
-./restore.sh <backup-file.tar.gz>
+./scripts/maintenance/restore.sh <backup-file.tar.gz>
 ```
 
 **Windows:**
 ```powershell
-.\restore.ps1 <backup-file.zip>
+.\scripts\maintenance\restore.ps1 <backup-file.zip>
 ```
 
 ## Uninstalling
@@ -456,12 +495,12 @@ To completely remove the installation:
 
 **macOS / Linux:**
 ```bash
-./uninstall.sh
+./scripts/maintenance/uninstall.sh
 ```
 
 **Windows:**
 ```powershell
-.\uninstall.ps1
+.\scripts\maintenance\uninstall.ps1
 ```
 
 This will:
@@ -517,11 +556,11 @@ This is a separate, containerized installation that won't conflict with any exis
 
 ### What happens if I delete the container?
 
-Your workspace files and Claude Code settings are safe — they're stored in persistent locations outside the container. You can rebuild the container with `./update.sh` and everything will still be there.
+Your workspace files and Claude Code settings are safe — they're stored in persistent locations outside the container. You can rebuild the container with `./scripts/maintenance/update.sh` and everything will still be there.
 
 ### Can I customize the environment?
 
-Yes! You can edit the `Dockerfile` to add additional packages or tools, then run `./update.sh` to rebuild with your changes.
+Yes! You can edit the `Dockerfile` to add additional packages or tools, then run `./scripts/maintenance/update.sh` to rebuild with your changes.
 
 ### How much disk space does this use?
 
