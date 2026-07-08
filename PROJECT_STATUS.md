@@ -8,11 +8,11 @@
 
 ## 🎉 v1.2.1 Released!
 
-The Claude Code Faculty Installer (cc-install) **v1.2.1** is live. Building on the
+The Claude Code Installer (cc-install) **v1.2.1** is live. Building on the
 v1.1.0 "Skills & UX Edition," the 1.2.x line focused on Windows/macOS reliability:
 PowerShell line-ending fixes (CRLF via `.gitattributes`), standalone shortcut scripts
 (`ccdocker`/`ccvscode`), a diagnostic tool, and consistent `scripts/`-based layout.
-Faculty authenticate with their **UVA Amazon Bedrock** credentials.
+Users authenticate with their **UVA Amazon Bedrock** credentials.
 
 **Repository:** `wmo4buva/cc-install` (remote: `git@github.com-uva:wmo4buva/cc-install.git`)
 
@@ -35,7 +35,7 @@ Faculty authenticate with their **UVA Amazon Bedrock** credentials.
 - ✅ Maintenance scripts (update, backup, restore, uninstall)
 
 ### Documentation (11 Files, ~70 KB)
-- ✅ **README.md** - User guide for faculty (REDESIGNED)
+- ✅ **README.md** - User guide for anyone (REDESIGNED)
 - ✅ **CHANGELOG.md** - Version history & changes (NEW)
 - ✅ **INDEX.md** - Project navigation hub
 - ✅ **CLAUDE.md** - Developer technical guide
@@ -95,11 +95,11 @@ cc-install/
 
 ## 📝 Documentation Quality
 
-- **Audience Coverage:** Faculty, IT Support, Developers, Stakeholders
+- **Audience Coverage:** Users, IT Support, Developers, Stakeholders
 - **Navigation:** Multiple entry points by role
 - **Completeness:** 100% (all aspects covered)
 - **Maintainability:** Easy to update
-- **Accessibility:** Non-technical language for faculty
+- **Accessibility:** Non-technical language for anyone
 
 **Documentation Score: 10/10** ✅
 
@@ -115,9 +115,9 @@ cc-install/
 - Auto-update mechanism
 - Windows testing complete
 
-### v1.2.0 - "Faculty Edition" (August 2026)
-**Priority:** FBS-specific features
-- Custom FBS skills
+### v1.2.0 - "Batten Edition" (August 2026)
+**Priority:** Batten-specific features
+- Custom Batten skills
 - Enhanced error messages
 - Usage analytics (opt-in)
 
@@ -175,7 +175,7 @@ cc-install/
 
 ### Immediate
 - ✅ Local use and testing
-- ✅ Faculty pilot program (2-3 users)
+- ✅ Users pilot program (2-3 users)
 - ✅ Documentation review
 - ✅ GitHub repository creation
 
@@ -183,10 +183,10 @@ cc-install/
 - ✅ GitHub repository setup (wmo4buva/cc-install)
 - ✅ Installation URLs updated
 - ✅ Windows PowerShell testing (v1.2.x line-ending fixes)
-- ⏳ Faculty pilot feedback
+- ⏳ Users pilot feedback
 
 ### Medium Term (Next Month)
-- ⏳ Wider faculty rollout
+- ⏳ Wider users rollout
 - ⏳ Support process refinement
 - ⏳ Unified installer (native OpenCode + MLX) — see docs/UNIFIED_INSTALLER_PLAN.md
 
@@ -198,7 +198,7 @@ cc-install/
 - First Docker-based Claude Code installer
 - Inspired by DAAF but simplified
 - Skills integration planned
-- Faculty-focused design
+- Users-focused design
 
 ### Quality
 - Production-ready documentation
@@ -225,7 +225,7 @@ cc-install/
 **Inspired by:** [DAAF Project](https://github.com/DAAF-Contribution-Community/daaf)  
 **Built with:** Docker + Claude Code + code-server  
 **Documentation by:** Claude Sonnet 4.5  
-**For:** Frank Batten School Faculty
+**For:** Frank Batten School Users
 
 See [ATTRIBUTION.md](ATTRIBUTION.md) for complete credits.
 
@@ -235,8 +235,8 @@ See [ATTRIBUTION.md](ATTRIBUTION.md) for complete credits.
 
 ### For You (Mark)
 1. **Test locally** - Use `./claude` and `./vscode`
-2. **Find pilot faculty** - 2-3 willing testers
-3. **Distribute** - Share the faculty instruction guide (docs/FACULTY_GUIDE.md)
+2. **Find pilot users** - 2-3 willing testers
+3. **Distribute** - Share the install guide (docs/INSTALL_GUIDE.md)
 4. **Gather feedback** - Refine based on pilot experience
 5. **Plan unified installer** - Native OpenCode + MLX (see UNIFIED_INSTALLER_PLAN.md)
 
@@ -244,13 +244,13 @@ See [ATTRIBUTION.md](ATTRIBUTION.md) for complete credits.
 1. Research skill licenses
 2. Test Dockerfile skills approach
 3. Build test image
-4. Faculty pilot test
+4. Users pilot test
 5. Release v1.1.0
 
 ### For Documentation
 1. Create video tutorial (optional)
 2. Screenshot for README
-3. Faculty quick-start guide
+3. Users quick-start guide
 4. Support FAQ
 
 ---
@@ -259,7 +259,7 @@ See [ATTRIBUTION.md](ATTRIBUTION.md) for complete credits.
 
 After release, track:
 - **Installation Success Rate** (Target: 95%)
-- **Faculty Satisfaction** (Target: 4/5 stars)
+- **Users Satisfaction** (Target: 4/5 stars)
 - **Support Tickets** (Target: <5/month)
 - **Active Usage** (Target: 60% monthly active)
 
@@ -278,7 +278,7 @@ After release, track:
 - Windows testing needed earlier
 - Skills could be included from start
 - Video tutorials would help adoption
-- More faculty input during design
+- More users input during design
 
 ### For Next Project
 - Start with roadmap
@@ -290,9 +290,9 @@ After release, track:
 
 ## 🏆 Final Thoughts
 
-This project demonstrates that complex technical tools (Claude Code, Docker, VS Code Server) can be packaged in a way that makes them accessible to non-technical users. By following DAAF's proven patterns and focusing on simplicity, we've created something that faculty can actually use.
+This project demonstrates that complex technical tools (Claude Code, Docker, VS Code Server) can be packaged in a way that makes them accessible to non-technical users. By following DAAF's proven patterns and focusing on simplicity, we've created something that users can actually use.
 
-The comprehensive documentation ensures the project is maintainable and can grow with faculty needs. The clear roadmap provides direction for future development. The organized structure makes contributing easy.
+The comprehensive documentation ensures the project is maintainable and can grow with users needs. The clear roadmap provides direction for future development. The organized structure makes contributing easy.
 
 **This is production-ready software that solves a real problem.**
 
@@ -300,8 +300,8 @@ The comprehensive documentation ensures the project is maintainable and can grow
 
 **Status:** ✅ COMPLETE  
 **Next Milestone:** v1.1.0 "Skills Edition"  
-**Maintained by:** FBS IT Team  
+**Maintained by:** Batten IT Team  
 
 ---
 
-*Created with ❤️ by Claude Sonnet 4.5 for faculty who want to explore AI-assisted coding.*
+*Created with ❤️ by Claude Sonnet 4.5 for anyone who want to explore AI-assisted coding.*

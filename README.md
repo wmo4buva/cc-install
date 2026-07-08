@@ -1,12 +1,12 @@
-# Claude Code Faculty Installer (cc-install)
+# Claude Code Installer (cc-install)
 
-A simple, Docker-based installer for Claude Code designed to help faculty members get started with Claude Code quickly and easily, without dealing with complex technical setup.
+A simple, Docker-based installer for Claude Code designed to help anyone get started with Claude Code quickly and easily, without dealing with complex technical setup.
 
 **Inspired by the [DAAF project](https://github.com/DAAF-Contribution-Community/daaf)** — credit to their excellent Docker-based installation approach.
 
 ---
 
-## 📚 Start Here — Faculty Guides & Tip Sheets
+## 📚 Start Here — Install Guides & Tip Sheets
 
 New to Claude Code? These approachable, step-by-step guides are the easiest place
 to begin — no technical background required.
@@ -16,10 +16,10 @@ to begin — no technical background required.
 | **[📘 Install Guide (PDF)](docs/installGuides/ClaudeCodeInstallGuide.pdf)** | PDF | Printable, illustrated walkthrough of installation and first launch |
 | **[🖥️ Install Guide (HTML)](docs/installGuides/ClaudeCodeInstallGuide.html)** | HTML | The same guide to view or present on-screen |
 | **[💡 Claude Code Tip Sheet (PDF)](docs/installGuides/ClaudeCodeTipSheet.pdf)** | PDF | Quick tips and everyday usage once you're up and running |
-| **[📝 Faculty Guide (Markdown)](docs/FACULTY_GUIDE.md)** | Markdown | Plain-language reference you can read right here on GitHub |
+| **[📝 Install Guide (Markdown)](docs/INSTALL_GUIDE.md)** | Markdown | Plain-language reference you can read right here on GitHub |
 | **[⚡ Quick Reference](docs/QUICK_REFERENCE.md)** | Markdown | One-page command cheat-sheet |
 
-> 💡 **Faculty:** open the **Install Guide (PDF)** first, then keep the **Tip Sheet**
+> 💡 **Tip:** open the **Install Guide (PDF)** first, then keep the **Tip Sheet**
 > handy. Everything below is the full technical reference.
 
 ---
@@ -319,7 +319,7 @@ These skills are automatically available when you launch Claude Code. You can li
 
 When you first launch Claude Code, you'll be prompted to configure it:
 
-### 🎯 **Recommended: Amazon Bedrock (for UVA/FBS Users)**
+### 🎯 **Recommended: Amazon Bedrock (for UVA/Batten Users)**
 
 1. **AWS Credentials**: Use your university Amazon Bedrock account
    - **Access Key ID** and **Secret Access Key** from your AWS account
@@ -595,4 +595,4 @@ This project is provided as-is for educational and research purposes. Claude Cod
 
 ---
 
-**Made with ❤️ for faculty members who want to explore AI-assisted coding without the technical setup hassle.**
+**Made with ❤️ for anyone who wants to explore AI-assisted coding without the technical setup hassle.**

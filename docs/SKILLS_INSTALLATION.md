@@ -4,7 +4,7 @@ How to add pre-installed skills to the Claude Code Docker image.
 
 ## Overview
 
-Skills are powerful extensions that give Claude Code additional capabilities. By pre-installing skills in the Docker image, faculty get enhanced functionality immediately without manual setup.
+Skills are powerful extensions that give Claude Code additional capabilities. By pre-installing skills in the Docker image, users get enhanced functionality immediately without manual setup.
 
 ---
 
@@ -188,7 +188,7 @@ services:
 ## Recommended Approach
 
 **Use Dockerfile approach (Approach 1)** because:
-1. Faculty don't need to wait on first launch
+1. Users don't need to wait on first launch
 2. Works offline after initial install
 3. Guaranteed consistent experience
 4. Skills are part of the "product"
@@ -263,7 +263,7 @@ Before including any skills:
 
 ---
 
-## Skills Documentation for Faculty
+## Skills Documentation for Users
 
 Create `docs/SKILLS_GUIDE.md` with:
 
@@ -303,7 +303,7 @@ Skills extend Claude Code's capabilities. Think of them as "apps" for Claude Cod
 2. **Test Integration** - Build and test locally
 3. **Update Dockerfile** - Add skills installation
 4. **Update Documentation** - README and new guides
-5. **Test with Faculty** - Pilot with 2-3 users
+5. **Test with Users** - Pilot with 2-3 users
 6. **Release v1.1.0** - Deploy with skills
 
 ---

@@ -1,4 +1,4 @@
-# Getting Started with Claude Code — Faculty Guide
+# Getting Started with Claude Code — Install Guide
 
 Welcome! This guide walks you through installing and using **Claude Code**, an
 AI coding assistant, on your own computer. You do **not** need to be a programmer
@@ -13,7 +13,7 @@ or know anything about Docker to follow along.
 **Time needed:** about 10–15 minutes if Docker is already installed, or 20–30
 minutes the first time (Docker install adds time).
 
-> **Need help at any point?** Contact **FBS IT** — see [Getting Help](#getting-help)
+> **Need help at any point?** Contact **Batten IT** — see [Getting Help](#getting-help)
 > at the bottom. There's also a built-in diagnostic tool that checks your setup
 > and suggests fixes.
 
@@ -27,7 +27,7 @@ minutes the first time (Docker install adds time).
    install this in Step 1.
 3. **Your UVA Amazon Bedrock credentials** — this is how Claude Code connects to
    the AI, billed to the university (not to you personally). If you don't have
-   these yet, request them from **FBS IT before you start** so they're ready when
+   these yet, request them from **Batten IT before you start** so they're ready when
    you first launch Claude Code.
 
 ---
@@ -133,17 +133,17 @@ use with your mouse.
 ## Step 4 — First-time sign-in (Amazon Bedrock)
 
 The **first time** you run `ccdocker`, Claude Code asks how to connect to the AI.
-Choose **Amazon Bedrock** and enter the credentials FBS IT gave you:
+Choose **Amazon Bedrock** and enter the credentials Batten IT gave you:
 
 - **AWS Access Key ID**
 - **AWS Secret Access Key**
-- **Region** (usually `us-east-1` — FBS IT will confirm)
+- **Region** (usually `us-east-1` — Batten IT will confirm)
 
 This connects Claude Code to UVA's account, so **usage is billed to the
 university, not to you**. You only enter these once — they're remembered securely
 for next time.
 
-> Don't have Bedrock credentials yet? **Contact FBS IT** — they'll issue them.
+> Don't have Bedrock credentials yet? **Contact Batten IT** — they'll issue them.
 
 ---
 
@@ -241,7 +241,7 @@ cd cc-install
 | *"Docker daemon is not running"* | Open **Docker Desktop** and wait until it says "running," then try again. |
 | The install command *"doesn't work"* on Windows | Make sure you're in **PowerShell**, not Command Prompt (cmd). |
 | Browser editor won't open | Wait ~10 seconds after `ccvscode`, then visit **http://localhost:8080** manually. |
-| *"port 8080 already allocated"* | Something else is using that port. Run the diagnostic tool, or contact FBS IT. |
+| *"port 8080 already allocated"* | Something else is using that port. Run the diagnostic tool, or contact Batten IT. |
 | Everything seems stuck | Run `ccrestart`, or run the diagnostic tool above. |
 
 ---
@@ -249,12 +249,12 @@ cd cc-install
 ## Getting Help
 
 - **First stop:** run the diagnostic tool (above) and note what it reports.
-- **Support:** contact **FBS IT** — include your operating system (Mac/Windows)
+- **Support:** contact **Batten IT** — include your operating system (Mac/Windows)
   and, if possible, a copy of the diagnostic output or a screenshot of the error.
 - **Reference:** the full technical [README](../README.md) has additional detail
   and a command cheat-sheet ([Quick Reference](QUICK_REFERENCE.md)).
 
 ---
 
-*Claude Code Faculty Installer • Frank Batten School • Built on the
+*Claude Code Installer • Batten • Built on the
 [DAAF project](https://github.com/DAAF-Contribution-Community/daaf) approach.*

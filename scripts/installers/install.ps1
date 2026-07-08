@@ -1,4 +1,4 @@
-# Claude Code Faculty Installer - Installation Script for Windows
+# Claude Code Installer - Installation Script for Windows
 # Inspired by DAAF (https://github.com/DAAF-Contribution-Community/daaf)
 
 param(
@@ -353,7 +353,7 @@ function Main {
     Write-Host ""
     Write-Host "╔═══════════════════════════════════════════════════════════╗" -ForegroundColor Blue
     Write-Host "║                                                           ║" -ForegroundColor Blue
-    Write-Host "║   Claude Code Faculty Installer                           ║" -ForegroundColor Blue
+    Write-Host "║   Claude Code Installer                                   ║" -ForegroundColor Blue
     Write-Host "║   Inspired by DAAF                                        ║" -ForegroundColor Blue
     Write-Host "║                                                           ║" -ForegroundColor Blue
     Write-Host "╚═══════════════════════════════════════════════════════════╝" -ForegroundColor Blue

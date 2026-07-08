@@ -1,4 +1,4 @@
-# Claude Code Faculty Installer - Docker Image
+# Claude Code Installer - Docker Image
 # Inspired by DAAF (https://github.com/DAAF-Contribution-Community/daaf)
 # Simplified for Claude Code and VS Code Server only
 

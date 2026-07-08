@@ -1,4 +1,4 @@
-# Project Summary: Claude Code Faculty Installer (cc-install)
+# Project Summary: Claude Code Installer (cc-install)
 
 ## Status: ✅ Phase 1-5 Complete
 
@@ -6,7 +6,7 @@ All core files have been created and committed to git.
 
 ## What Was Built
 
-A Docker-based installer for Claude Code inspired by the [DAAF project](https://github.com/DAAF-Contribution-Community/daaf), designed to make Claude Code accessible to faculty members without technical expertise.
+A Docker-based installer for Claude Code inspired by the [DAAF project](https://github.com/DAAF-Contribution-Community/daaf), designed to make Claude Code accessible to users without technical expertise.
 
 ### Core Components
 
@@ -57,7 +57,7 @@ A Docker-based installer for Claude Code inspired by the [DAAF project](https://
 
 ## Key Features
 
-### For Faculty (End Users)
+### For Users (End Users)
 - **One-line installation** — Just paste a command
 - **No technical knowledge required** — All Docker operations are automated
 - **Persistent workspace** — Files survive container restarts
@@ -108,14 +108,14 @@ irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installer
 
 4. **Test installation** — Run the one-line installer on a clean system
 
-5. **Faculty testing** — Have 1-2 faculty test the installation
+5. **User testing** — Have 1-2 users test the installation
 
 ### Optional Enhancements
 - GitHub Actions for CI/CD
 - Automated testing of installation scripts
 - Version tags and releases
-- FBS branding (logo, colors)
-- Pre-installed FBS-specific Claude Code skills
+- Batten branding (logo, colors)
+- Pre-installed Batten-specific Claude Code skills
 
 ## Technical Details
 
@@ -160,4 +160,4 @@ We borrowed their excellent Docker-based installation patterns while simplifying
 
 ## Project Complete! 🎉
 
-Ready for testing and distribution to faculty.
+Ready for testing and distribution to users.

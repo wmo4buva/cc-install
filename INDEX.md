@@ -1,4 +1,4 @@
-# Claude Code Faculty Installer (cc-install)
+# Claude Code Installer (cc-install)
 
 **Quick Start:** `./install-shortcut.sh` then use `ccdocker` command
 
@@ -50,7 +50,7 @@ cc-install/
 
 ## 🎯 Quick Links by Role
 
-### 👨‍🏫 I'm a Faculty Member
+### 👨‍🏫 I'm a New User
 **I want to install and use Claude Code**
 
 1. **Install:** [README.md](README.md) → Prerequisites & Installation
@@ -58,7 +58,7 @@ cc-install/
 3. **Reference:** [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)
 
 ### 🔧 I'm IT Support
-**I need to help faculty with issues**
+**I need to help users with issues**
 
 1. **Understand the tool:** [README.md](README.md) → Architecture
 2. **Troubleshooting:** [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) → Troubleshooting
@@ -125,7 +125,7 @@ Or use scripts directly:
 **Status:** ✅ Testing & Refinement Phase  
 **Version:** 1.0.0 (pre-release)  
 **Last Updated:** May 24, 2026  
-**Ready For:** Faculty testing, GitHub distribution
+**Ready For:** User testing, GitHub distribution
 
 **Tested Components:**
 - ✅ Docker build (1.43 GB image)
@@ -139,11 +139,11 @@ Or use scripts directly:
 - ⏳ Windows PowerShell script testing
 - ⏳ GitHub repository creation
 - ⏳ Full installation flow test
-- ⏳ Faculty user testing
+- ⏳ Users user testing
 
 ## 🚀 Distribution Checklist
 
-Before releasing to faculty:
+Before releasing to users:
 
 - [x] Core functionality tested
 - [x] Documentation complete
@@ -152,7 +152,7 @@ Before releasing to faculty:
 - [ ] GitHub repository created
 - [ ] Installation URLs updated
 - [ ] Windows testing completed
-- [ ] Faculty pilot testing
+- [ ] Users pilot testing
 
 ## 💡 Quick Tips
 
@@ -175,8 +175,8 @@ See [ATTRIBUTION.md](ATTRIBUTION.md) for full credits and licenses.
 
 ---
 
-**Made with ❤️ for faculty members who want to explore AI-assisted coding without the technical setup hassle.**
+**Made with ❤️ for users who want to explore AI-assisted coding without the technical setup hassle.**
 
-**Built by:** FBS IT Team  
+**Built by:** Batten IT Team  
 **Powered by:** Docker + Claude Code + code-server  
 **License:** See [ATTRIBUTION.md](ATTRIBUTION.md)

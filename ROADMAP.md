@@ -8,7 +8,7 @@
 
 ## 🎯 Vision
 
-Make Claude Code accessible to faculty members with zero technical friction, pre-configured with powerful skills for research, teaching, and administrative work.
+Make Claude Code accessible to users with zero technical friction, pre-configured with powerful skills for research, teaching, and administrative work.
 
 ---
 
@@ -60,7 +60,7 @@ RUN mkdir -p ~/.claude/skills && \
 ```
 
 **Benefits:**
-- Faculty get powerful skills immediately
+- Users get powerful skills immediately
 - No manual installation needed
 - Consistent experience across all users
 - Skills work out-of-the-box
@@ -135,7 +135,7 @@ Features delivered:
 
 ### 7. Documentation Overhaul ✅ COMPLETE
 
-**Status:** ✅ Comprehensive rewrite for non-technical faculty
+**Status:** ✅ Comprehensive rewrite for non-technical users
 
 **Improvements Made:**
 - ✅ Realistic time estimates (removed misleading "5 minutes")
@@ -151,7 +151,7 @@ Features delivered:
 
 ## 📋 Medium Priority (v1.3.0 - Planned)
 
-### 8. FBS-Specific Skills
+### 8. Batten-Specific Skills
 
 **Goal:** Create custom skills for Frank Batten School workflows.
 
@@ -163,9 +163,9 @@ Features delivered:
 - **Grant Writing Assistant** - Grant proposal templates and helpers
 
 **Process:**
-1. Survey faculty for most-wanted features
+1. Survey users for most-wanted features
 2. Develop custom skills
-3. Test with pilot faculty
+3. Test with pilot users
 4. Include in default installation
 
 ---
@@ -173,7 +173,7 @@ Features delivered:
 ### 9. Enhanced Documentation
 
 **Features:**
-- Video tutorials for faculty
+- Video tutorials for anyone
 - Common use-case examples
 - Troubleshooting flowcharts
 - Quick-start guide (1-page PDF)
@@ -182,7 +182,7 @@ Features delivered:
 - 5-minute installation video
 - "First Steps with Claude Code" tutorial
 - "Using Skills" guide
-- Faculty success stories
+- Users success stories
 
 ---
 
@@ -210,7 +210,7 @@ Features delivered:
 
 ### 11. UVA Single Sign-On Integration
 
-**Goal:** Seamless authentication for faculty.
+**Goal:** Seamless authentication for anyone.
 
 **Benefits:**
 - No separate API key management
@@ -231,7 +231,7 @@ Features delivered:
 **Features:**
 - View all installed instances
 - Push updates to all users
-- Monitor usage across faculty
+- Monitor usage across users
 - Troubleshoot remotely
 
 **Use Cases:**
@@ -267,7 +267,7 @@ Features delivered:
 
 ### 15. Jupyter Notebook Support
 
-**Goal:** Add Jupyter for faculty who need notebooks.
+**Goal:** Add Jupyter for anyone who need notebooks.
 
 **Implementation:**
 - Add Jupyter to Docker image
@@ -302,13 +302,13 @@ Features delivered:
 
 ### 18. Custom Branding
 
-**Goal:** FBS-branded experience.
+**Goal:** Batten-branded experience.
 
 **Elements:**
-- FBS logo in VS Code Server
+- Batten logo in VS Code Server
 - Custom welcome message
 - School colors in terminal
-- UVA/FBS documentation links
+- UVA/Batten documentation links
 
 ---
 
@@ -369,17 +369,17 @@ Features delivered:
 
 ---
 
-### v1.3.0 - "Faculty Edition" (Target: September 2026)
-**Focus:** FBS-specific features, enhanced UX
+### v1.3.0 - "Batten Edition" (Target: September 2026)
+**Focus:** Batten-specific features, enhanced UX
 
 **Must Have:**
-- FBS custom skills (2-3 minimum)
+- Batten custom skills (2-3 minimum)
 - Video tutorials
 - Usage analytics (opt-in)
 
 **Nice to Have:**
 - Custom branding
-- Additional faculty-focused documentation
+- Additional users-focused documentation
 
 ---
 
@@ -399,15 +399,15 @@ Features delivered:
 
 ## 🎓 Community & Adoption
 
-### Faculty Feedback Loop
-1. **Pilot Program** (5-10 faculty) - v1.0.0
-2. **Early Adopters** (20-30 faculty) - v1.1.0
+### Users Feedback Loop
+1. **Pilot Program** (5-10 users) - v1.0.0
+2. **Early Adopters** (20-30 users) - v1.1.0
 3. **Department Rollout** - v1.2.0
 4. **School-Wide** - v2.0.0
 
 ### Success Metrics
 - Installation success rate (target: 95%)
-- Faculty satisfaction (target: 4/5 stars)
+- Users satisfaction (target: 4/5 stars)
 - Support ticket volume (target: <5/month)
 - Active usage (target: 60% monthly active)
 
@@ -435,7 +435,7 @@ Features delivered:
 
 **Feature Requests:** GitHub Issues  
 **Bug Reports:** GitHub Issues  
-**General Questions:** FBS IT Support  
+**General Questions:** Batten IT Support  
 **Contributions:** Pull Requests Welcome!
 
 ---
@@ -445,7 +445,7 @@ Features delivered:
 This roadmap is reviewed:
 - **Monthly** during active development
 - **Quarterly** after v1.0.0 release
-- **After feedback** from faculty pilots
+- **After feedback** from users pilots
 
 Last Review: May 27, 2026  
 Next Review: June 27, 2026
@@ -455,7 +455,7 @@ Next Review: June 27, 2026
 ## 📝 Notes
 
 ### Design Principles
-1. **Simplicity First** - Faculty should never see Docker
+1. **Simplicity First** - Users should never see Docker
 2. **Works Out-of-Box** - Minimal configuration required
 3. **Safe by Default** - Can't break their system
 4. **Privacy-Respecting** - No data collection without consent
@@ -464,9 +464,9 @@ Next Review: June 27, 2026
 ### Non-Goals
 - ❌ Replace existing UVA tools
 - ❌ Become a system administration tool
-- ❌ Support enterprise features faculty don't need
+- ❌ Support enterprise features users don't need
 - ❌ Complicate the installation process
 
 ---
 
-**Remember:** The goal is to make Claude Code accessible to faculty, not to build a complex enterprise system. Keep it simple, keep it useful.
+**Remember:** The goal is to make Claude Code accessible to users, not to build a complex enterprise system. Keep it simple, keep it useful.

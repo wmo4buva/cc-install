@@ -39,7 +39,7 @@ While inspired by DAAF, `cc-install` is simplified and focused specifically on C
 |--------|------|------------|
 | **Purpose** | Data analysis with Python/Claude | Claude Code only |
 | **Included Tools** | Claude Code, Python data science stack, marimo, code-server | Claude Code, code-server |
-| **Target Audience** | Data scientists and analysts | Faculty members (all disciplines) |
+| **Target Audience** | Data scientists and analysts | Users (all disciplines) |
 | **Python Libraries** | 50+ data science packages | Minimal (for basic scripting) |
 | **Repository Cloning** | Clones DAAF repo during installation | Creates empty workspace |
 | **Configuration** | environment_settings.txt | Uses Claude Code's built-in config |
@@ -61,7 +61,7 @@ We are deeply grateful to the DAAF project contributors for:
 - Demonstrating how to make powerful AI tools accessible to non-technical users
 - Open-sourcing their work for the community
 
-The DAAF project solved the "last mile" problem of getting AI tools into the hands of researchers and faculty. Their approach made it possible for us to create this simplified version for Claude Code users.
+The DAAF project solved the "last mile" problem of getting AI tools into the hands of researchers and users. Their approach made it possible for us to create this simplified version for Claude Code users.
 
 ## Third-Party Software
 
@@ -121,7 +121,7 @@ Special thanks to:
 - **Anthropic** for Claude Code
 - **Coder** for code-server
 - **Docker, Inc.** for Docker containerization technology
-- **Faculty members** who provided feedback on installation usability
+- **Users** who provided feedback on installation usability
 
 ---
 

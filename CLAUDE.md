@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**cc-install** (Claude Code Install) is a Docker-based installer that simplifies Claude Code distribution to faculty members. It provides one-line installation commands for macOS and Windows that create an isolated, reproducible environment with Claude Code CLI and VS Code Server.
+**cc-install** (Claude Code Install) is a Docker-based installer that simplifies Claude Code distribution to users. It provides one-line installation commands for macOS and Windows that create an isolated, reproducible environment with Claude Code CLI and VS Code Server.
 
 ### Purpose
 
-- Make Claude Code accessible to non-technical faculty
+- Make Claude Code accessible to non-technical users
 - Eliminate complex dependency management and system configuration
 - Provide a consistent environment across different machines and operating systems
 - Include browser-based IDE (code-server) for users who prefer GUI over CLI
@@ -302,8 +302,8 @@ For one-line installation to work, scripts must be publicly accessible. Options:
    - Use `https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh`
    - Benefit: Version control, easy updates
 
-2. **FBS Web Server**:
-   - Host files on UVA/FBS server
+2. **Batten Web Server**:
+   - Host files on UVA/Batten server
    - Use direct URLs
    - Benefit: Control and privacy
 
@@ -315,12 +315,12 @@ For one-line installation to work, scripts must be publicly accessible. Options:
 4. Update README.md with tested one-line commands
 5. Create GitHub release with notes
 
-### Faculty Distribution
+### Distribution
 
-Provide faculty with:
+Provide users with:
 - One-line installation command
 - Link to README.md
-- Support contact (FBS IT)
+- Support contact (Batten IT)
 - Estimated installation time (~10 minutes)
 
 ## Future Enhancements
@@ -328,11 +328,11 @@ Provide faculty with:
 Ideas for future versions:
 
 - Auto-update mechanism
-- Pre-installed FBS-specific Claude Code skills
+- Pre-installed Batten-specific Claude Code skills
 - Integration with UVA SSO
 - Fleet management for IT (central dashboard)
 - Usage analytics
-- Custom FBS branding and templates
+- Custom Batten branding and templates
 - Integration with Canvas/Collab
 
 ## Support and Documentation
@@ -350,4 +350,4 @@ When contributing:
 2. Test on both macOS and Windows
 3. Update documentation (README.md, CLAUDE.md)
 4. Credit sources and inspirations
-5. Keep it simple — this is for faculty, not DevOps engineers
+5. Keep it simple — this is for anyone, not DevOps engineers

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code Faculty Installer - Installation Script for macOS/Linux
+# Claude Code Installer - Installation Script for macOS/Linux
 # Inspired by DAAF (https://github.com/DAAF-Contribution-Community/daaf)
 
 set -euo pipefail
@@ -360,7 +360,7 @@ main() {
     echo ""
     echo -e "${BLUE}╔═══════════════════════════════════════════════════════════╗${NC}"
     echo -e "${BLUE}║                                                           ║${NC}"
-    echo -e "${BLUE}║   Claude Code Faculty Installer                           ║${NC}"
+    echo -e "${BLUE}║   Claude Code Installer                                   ║${NC}"
     echo -e "${BLUE}║   Inspired by DAAF                                        ║${NC}"
     echo -e "${BLUE}║                                                           ║${NC}"
     echo -e "${BLUE}╚═══════════════════════════════════════════════════════════╝${NC}"

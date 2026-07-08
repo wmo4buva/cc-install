@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Claude Code Faculty Installer (cc-install) project.
+All notable changes to the Claude Code Installer (cc-install) project.
 
 ## [1.2.1] - 2026-05-28
 

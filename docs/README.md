@@ -1,10 +1,10 @@
 # Documentation Index
 
-Welcome to the Claude Code Faculty Installer documentation!
+Welcome to the Claude Code Installer documentation!
 
 ## 📚 Documentation Structure
 
-### For End Users (Faculty)
+### For End Users
 Start here if you're installing and using Claude Code:
 
 - **[Main README](../README.md)** - Installation and usage guide
@@ -66,7 +66,7 @@ Start here if you're maintaining or contributing to this project:
 
 - **[ROADMAP.md](../ROADMAP.md)** - Future features and releases
   - v1.1.0: Skills edition (pre-installed skills)
-  - v1.2.0: Faculty edition (FBS-specific features)
+  - v1.2.0: usability edition (Batten-specific features)
   - v2.0.0: Enterprise edition (fleet management, SSO)
   - Community feedback and contribution guidelines
 
@@ -99,7 +99,7 @@ Start here if you're maintaining or contributing to this project:
 
 ## 📖 Reading Order by Role
 
-### Faculty Member (First Time User)
+### First-Time User
 1. [README.md](../README.md) - Installation → Usage → First-Time Setup
 2. [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Bookmark for later
 
@@ -125,7 +125,7 @@ Start here if you're maintaining or contributing to this project:
 
 | Document | Size | Audience | Purpose |
 |----------|------|----------|---------|
-| README.md | 9.5 KB | Faculty | User guide |
+| README.md | 9.5 KB | Users | User guide |
 | CLAUDE.md | 9.4 KB | Developers | Technical reference |
 | ATTRIBUTION.md | 5.1 KB | Legal/Open Source | Credits |
 | PROJECT_SUMMARY.md | 5.3 KB | Stakeholders | Implementation summary |
@@ -153,7 +153,7 @@ This project follows these documentation principles:
 - **Just Enough:** Comprehensive but not overwhelming
 - **Discoverable:** Clear navigation and cross-references
 - **Maintainable:** Easy to update as project evolves
-- **Accessible:** Non-technical language for faculty docs
+- **Accessible:** Non-technical language for anyone docs
 
 ## 🆘 Need Help?
 

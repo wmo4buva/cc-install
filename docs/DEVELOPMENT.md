@@ -11,7 +11,7 @@ This document tracks the development process, decisions made, and how to work wi
 This project is inspired by [DAAF (Data Analysis Agent Framework)](https://github.com/DAAF-Contribution-Community/daaf), which pioneered the Docker-based installation approach for AI tools.
 
 ### Goal
-Make Claude Code accessible to non-technical faculty members through a simple, Docker-based installation that requires only Docker Desktop as a prerequisite.
+Make Claude Code accessible to non-technical users members through a simple, Docker-based installation that requires only Docker Desktop as a prerequisite.
 
 ## Development Timeline
 
@@ -94,7 +94,7 @@ cc-install/
 - Eliminates "works on my machine" problems
 - Isolates dependencies from host system
 - Makes distribution trivial (one Docker image)
-- Faculty don't need to understand Docker internals
+- Users don't need to understand Docker internals
 
 ### 2. Two Access Methods
 **Decision:** Provide both CLI and browser-based IDE  
@@ -106,7 +106,7 @@ cc-install/
 ### 3. Persistent Workspace
 **Decision:** Mount `./workspace` as host directory, not Docker volume  
 **Rationale:**
-- Faculty can access files directly without Docker knowledge
+- Users can access files directly without Docker knowledge
 - Easy to backup (just copy a folder)
 - Compatible with existing file backup workflows
 - Transparent file location
@@ -114,7 +114,7 @@ cc-install/
 ### 4. Launcher Scripts Over Direct Docker Commands
 **Decision:** Wrap all Docker commands in simple scripts  
 **Rationale:**
-- Faculty never need to learn Docker commands
+- Users never need to learn Docker commands
 - Scripts handle container lifecycle automatically
 - Can add logic (preflight checks, error handling)
 - Easier to support ("just run run_claude.sh")
@@ -122,7 +122,7 @@ cc-install/
 ### 5. Cross-Platform Scripts
 **Decision:** Maintain both .sh and .ps1 versions  
 **Rationale:**
-- Faculty use diverse operating systems
+- Users use diverse operating systems
 - Bash for macOS/Linux, PowerShell for Windows
 - Keep feature parity between platforms
 
@@ -199,7 +199,7 @@ Use semantic versioning:
 
 ## Distribution Checklist
 
-Before releasing to faculty:
+Before releasing to users:
 
 - [ ] All tests pass (see TEST_RESULTS.md)
 - [ ] Documentation is complete and accurate
@@ -242,13 +242,13 @@ Ideas for future versions:
 
 ### High Priority
 - [ ] Auto-update mechanism
-- [ ] Pre-installed FBS-specific Claude Code skills
+- [ ] Pre-installed Batten-specific Claude Code skills
 - [ ] Better error messages in scripts
 - [ ] GitHub Actions for CI/CD
 
 ### Medium Priority
 - [ ] Integration with UVA SSO
-- [ ] Custom FBS branding
+- [ ] Custom Batten branding
 - [ ] Usage analytics for IT
 - [ ] Fleet management dashboard
 
@@ -268,7 +268,7 @@ Ideas for future versions:
 
 For questions or contributions:
 - **Repository:** https://github.com/wmo4buva/cc-install
-- **Support:** FBS IT Team
+- **Support:** Batten IT Team
 - **Issues:** GitHub Issues (after repo creation)
 
 ---
