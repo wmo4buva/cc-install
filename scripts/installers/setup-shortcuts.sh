@@ -78,27 +78,53 @@ SCRIPT
     echo -e "  ${BLUE}cclogs${NC}   - View container logs"
     echo -e "  ${BLUE}ccrestart${NC} - Restart container"
 
-    # Ensure ~/.local/bin is in PATH
-    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-        echo ""
-        echo -e "${YELLOW}⚠ Note:${NC} Add ${BLUE}~/.local/bin${NC} to your PATH:"
-        echo ""
+}
 
-        local shell_rc=""
-        if [ -n "${ZSH_VERSION:-}" ]; then
-            shell_rc="$HOME/.zshrc"
-        elif [ -n "${BASH_VERSION:-}" ]; then
-            shell_rc="$HOME/.bashrc"
-            [ -f "$HOME/.bash_profile" ] && shell_rc="$HOME/.bash_profile"
-        fi
+# Ensure ~/.local/bin is on PATH for future shells (idempotent + self-healing)
+ensure_local_bin_on_path() {
+    local path_marker="# Added by cc-install (Claude Code) — enables ccdocker/ccvscode"
+    local path_line='export PATH="$HOME/.local/bin:$PATH"'
 
-        if [ -n "$shell_rc" ]; then
-            echo "  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> $shell_rc"
-            echo "  source $shell_rc"
-        else
-            echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
-        fi
+    # Pick the startup file for the user's LOGIN shell (from $SHELL), NOT the
+    # shell running this script. The installer runs this under bash, so
+    # $BASH_VERSION / $ZSH_VERSION here describe the installer — not the user's
+    # real interactive shell — and must not be used to choose the rc file.
+    local login_shell="${SHELL##*/}"
+    local rc_file=""
+    case "$login_shell" in
+        zsh)  rc_file="$HOME/.zshrc" ;;
+        bash)
+            if [ "$(uname)" = "Darwin" ]; then
+                rc_file="$HOME/.bash_profile"   # macOS login shells read this
+            else
+                rc_file="$HOME/.bashrc"
+            fi
+            ;;
+        *)
+            if [ "$(uname)" = "Darwin" ]; then
+                rc_file="$HOME/.zshrc"          # macOS default shell is zsh
+            else
+                rc_file="$HOME/.profile"
+            fi
+            ;;
+    esac
+
+    # Already configured in this rc file? Don't add it a second time.
+    if [ -f "$rc_file" ] && grep -qF '.local/bin' "$rc_file"; then
+        echo -e "${GREEN}✓${NC} PATH already set up in $rc_file"
+        return
     fi
+
+    # Append the export line (creates the file if it doesn't exist yet).
+    {
+        echo ""
+        echo "$path_marker"
+        echo "$path_line"
+    } >> "$rc_file"
+
+    echo -e "${GREEN}✓${NC} Added ~/.local/bin to your PATH in $rc_file"
+    echo -e "  ${YELLOW}Open a NEW Terminal window${NC} to use ${BLUE}ccdocker${NC} / ${BLUE}ccvscode${NC}"
+    echo -e "  (or, in this window, run: ${BLUE}source $rc_file${NC})"
 }
 
 # 2. Create desktop shortcut (macOS)
@@ -176,5 +202,6 @@ print_instructions() {
 
 # Run setup
 setup_bin_scripts
+ensure_local_bin_on_path
 create_macos_app
 print_instructions

@@ -2,6 +2,33 @@
 
 All notable changes to the Claude Code Installer (cc-install) project.
 
+## [1.2.2] - 2026-07-22
+
+### 🐛 Critical Bug Fix
+
+#### `ccdocker` / `ccvscode` "command not found" after install (macOS/Linux)
+- **Issue**: After a successful install, users who typed `ccdocker` got
+  `zsh: command not found: ccdocker`. The shortcuts were created in
+  `~/.local/bin`, but that directory was not on the user's `PATH`.
+- **Root Cause**: `setup-shortcuts.sh` only *printed* the manual step to add
+  `~/.local/bin` to `PATH` — non-technical users never ran it. It also detected
+  the rc file from `$ZSH_VERSION`/`$BASH_VERSION`, which describe the **bash
+  process running the installer**, not the user's real login shell.
+- **Fix**: `setup-shortcuts.sh` now **automatically** appends
+  `export PATH="$HOME/.local/bin:$PATH"` to the correct startup file for the
+  user's login shell (chosen from `$SHELL`: `.zshrc`, or `.bash_profile` on
+  macOS / `.bashrc` on Linux). It's idempotent — reruns won't duplicate the
+  line — and tells the user to open a new terminal (or `source` the file).
+- **Note**: Windows was unaffected — its shortcuts are PowerShell profile
+  functions, which don't depend on `PATH`.
+
+**To recover an existing macOS install without reinstalling:**
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+(Or just launch from the folder: `cd ~/cc-install && ./claude`.)
+
 ## [1.2.1] - 2026-05-28
 
 ### 🐛 Critical Bug Fix
