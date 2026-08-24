@@ -23,11 +23,17 @@ services:
       - code-server-data:/home/claudeuser/.local/share/code-server
 
     ports:
+      # Published on 8088, not 8080. 8080 is heavily contended — local dev
+      # servers and local LLM servers both default to it, and a collision is
+      # worse than an inconvenience: tooling that probes "is anything on this
+      # port?" will misreport, and some of it kills whatever holds the port.
+      # The container still listens on 8080 internally; only the host side moved.
+      #
       # Bound to 127.0.0.1 on purpose. code-server runs with --auth none by
       # default, so publishing on 0.0.0.0 would hand anyone on your network a
       # shell in this container. Loopback-only means only this machine can
       # reach it. See docs/CREDENTIALS.md if you need network access.
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8088:8080"
 
     # Credentials live in .env (written by scripts/installers/setup-credentials.sh,
     # a.k.a. `ccauth`). required: false so the container still starts before

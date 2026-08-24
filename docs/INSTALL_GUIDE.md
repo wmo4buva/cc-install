@@ -7,7 +7,7 @@ or know anything about Docker to follow along.
 **What you'll end up with:**
 - Claude Code running in your terminal (a chat-style AI assistant for writing,
   editing, and understanding files and code).
-- An optional browser-based code editor (VS Code) at `http://localhost:8080`.
+- An optional browser-based code editor (VS Code) at `http://localhost:8088`.
 - A `workspace` folder on your computer where all your files live.
 
 **Time needed:** about 10–15 minutes if Docker is already installed, or 20–30
@@ -113,7 +113,7 @@ instead:
 ccvscode
 ```
 
-This opens **http://localhost:8080** in your browser — a full code editor you can
+This opens **http://localhost:8088** in your browser — a full code editor you can
 use with your mouse.
 
 | Command | What it does |
@@ -322,7 +322,7 @@ ccdiagnose
 | *"command not found: ccdocker"* | Open a **fresh terminal window** after installing. On Mac you can also `cd cc-install` and run `./claude`. |
 | *"Docker daemon is not running"* | Open **Docker Desktop** and wait until it says "running," then try again. |
 | The install command *"doesn't work"* on Windows | Make sure you're in **PowerShell**, not Command Prompt (cmd). |
-| Browser editor won't open | Wait ~10 seconds after `ccvscode`, then visit **http://localhost:8080** manually. |
+| Browser editor won't open | Wait ~10 seconds after `ccvscode`, then visit **http://localhost:8088** manually. |
 | *"port 8080 already allocated"* | Something else is using that port. Run `ccdiagnose`, or contact Batten IT. |
 | **Can't find Claude Code in the browser editor** | There's no button. Use **Terminal → New Terminal** and type `claude`. |
 | It keeps asking you to sign in | Run `ccdiagnose`, then `ccauth`. See [CREDENTIALS.md](CREDENTIALS.md). |

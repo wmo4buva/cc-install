@@ -66,7 +66,7 @@ fi
 # than assuming 8080, so a docker-compose.override.yml still gets the right URL.
 # ---------------------------------------------------------------------------
 HOST_PORT="$(docker compose port claude-code 8080 2>/dev/null | sed 's/.*://')"
-[ -n "$HOST_PORT" ] || HOST_PORT=8080
+[ -n "$HOST_PORT" ] || HOST_PORT=8088
 URL="http://localhost:${HOST_PORT}"
 
 # ---------------------------------------------------------------------------

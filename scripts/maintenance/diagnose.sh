@@ -88,14 +88,18 @@ echo ""
 
 # Port Check
 echo -e "${BLUE}═══ Port Availability ═══${NC}"
+# Check the port this install actually publishes, not a hardcoded 8080.
+CC_HOST_PORT="$(docker compose port claude-code 8080 2>/dev/null | sed 's/.*://')"
+[ -n "$CC_HOST_PORT" ] || CC_HOST_PORT="$(grep -oE '127\.0\.0\.1:[0-9]+:8080' docker-compose.yml 2>/dev/null | head -1 | cut -d: -f2)"
+[ -n "$CC_HOST_PORT" ] || CC_HOST_PORT=8088
 if command -v lsof &> /dev/null; then
-    if lsof -i :8080 &> /dev/null; then
-        echo -e "${YELLOW}⚠${NC} Port 8080 is in use"
-        echo -e "${BLUE}Process using port 8080:${NC}"
-        lsof -i :8080 | head -n 2
+    if lsof -i :"$CC_HOST_PORT" &> /dev/null; then
+        echo -e "${YELLOW}⚠${NC} Port $CC_HOST_PORT is in use"
+        echo -e "${BLUE}Process using port $CC_HOST_PORT:${NC}"
+        lsof -i :"$CC_HOST_PORT" | head -n 2
         echo -e "\n${YELLOW}⚠ Solution:${NC} Stop the process or change port in docker-compose.yml"
     else
-        echo -e "${GREEN}✓${NC} Port 8080 is available"
+        echo -e "${GREEN}✓${NC} Port $CC_HOST_PORT is available"
     fi
 else
     echo -e "${YELLOW}⚠${NC} Cannot check port status (lsof not available)"

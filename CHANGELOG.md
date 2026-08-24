@@ -43,6 +43,40 @@ Recorded here because it constrains future work:
 - `docs/.DS_Store` removed; `archive/` added to `.dockerignore`.
 - README and `docs/DEVELOPMENT.md` link the roadmap; `CLAUDE.md` file map updated.
 
+## [1.3.3] - 2026-08-24
+
+### Changed — the browser IDE now publishes on 8088, not 8080
+
+8080 on the host is heavily contended: local dev servers and local LLM servers
+both default to it. A collision there is worse than an inconvenience, because
+tooling that decides "is my server running?" by probing the port will misreport,
+and some of it then `kill`s whatever holds that port — which would take out this
+container's port forward.
+
+The container still listens on 8080 internally; only the host-side publish moved.
+`ccvscode` reads the published port back from Compose, so it opens the right URL
+with no further change.
+
+**Existing installs:** after `ccupdate`, your IDE moves from
+`http://localhost:8080` to `http://localhost:8088`. `ccvscode` opens it for you;
+update any bookmark. If you'd rather stay on 8080, see
+`docker-compose.override.yml.example` — and note the `!override` tag is required.
+
+`ccdiagnose` no longer hardcodes 8080; it checks whichever port the install
+actually publishes.
+
+### Fixed
+
+- `docker-compose.override.yml.example` now documents 8088 as the default, and its
+  "change the port" example uses 8090 so it isn't a no-op.
+
+### Documentation
+
+- The Visual Guide (HTML + PDF) is regenerated at 1 page with the new port.
+- `docs/DEVELOPMENT.md` records that the PDF render is **non-deterministic** —
+  the same HTML produced a 2-page PDF on one run and 1 page on the next. Anyone
+  regenerating it must assert the page count, not assume it.
+
 ## [1.3.2] - 2026-08-24
 
 ### 🐛 Fixed — VS Code extensions could not be installed (regression in 1.3.0)

@@ -26,7 +26,7 @@ This is the bit that isn't obvious, so it gets its own section.
 **There is no Claude Code button in the browser IDE.** VS Code Server is just an
 editor. Claude Code is a command you run in its terminal:
 
-1. Run `ccvscode`. Your browser opens `http://localhost:8080`.
+1. Run `ccvscode`. Your browser opens `http://localhost:8088`.
 2. In VS Code, open **Terminal → New Terminal** (or press <kbd>Ctrl</kbd>+<kbd>`</kbd>).
 3. Type `claude` and press Enter.
 

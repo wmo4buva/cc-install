@@ -105,7 +105,7 @@ Amazon Bedrock. Whatever you choose applies everywhere.
 
 ```bash
 ccdocker     # Claude Code in your terminal
-ccvscode     # VS Code in your browser (http://localhost:8080)
+ccvscode     # VS Code in your browser (http://localhost:8088)
 ```
 
 ---

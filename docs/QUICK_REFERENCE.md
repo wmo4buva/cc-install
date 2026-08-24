@@ -7,7 +7,7 @@ One page, everything you'll actually use.
 ```bash
 ccauth        # set up or change how you sign in    ← run this first
 ccdocker      # Claude Code in your terminal
-ccvscode      # VS Code in your browser (http://localhost:8080)
+ccvscode      # VS Code in your browser (http://localhost:8088)
 ccstop        # stop the container
 ccrestart     # restart it (applies .env changes)
 cclogs        # view container logs

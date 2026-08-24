@@ -42,7 +42,7 @@ if ($running -notmatch "claude-code") {
 
 # Which port did the user actually publish? Read it back from Compose rather
 # than assuming 8080, so a docker-compose.override.yml still gets the right URL.
-$hostPort = "8080"
+$hostPort = "8088"
 $portLine = docker compose port claude-code 8080 2>$null
 if ($portLine -match ':(\d+)\s*$') { $hostPort = $Matches[1] }
 $url = "http://localhost:$hostPort"

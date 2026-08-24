@@ -214,6 +214,33 @@ They're unpinned, so you inherit whatever is on those default branches at build
 time. See [../SECURITY.md](../SECURITY.md). To add a source, extend the loop in
 the `Dockerfile`; the entrypoint needs no change.
 
+## Regenerating the Visual Guide PDF
+
+Printed from `docs/installGuides/Claude Code Visual Guide.html` with headless
+Chrome. **The render is non-deterministic** — the identical HTML produced a 2-page
+PDF on one run and a 1-page PDF on the next, apparently depending on whether
+layout settled before printing. It is a one-page guide, so always assert the
+result rather than assuming:
+
+```bash
+python3 -c "
+import re,sys; d=open('out.pdf','rb').read()
+n=len(re.findall(rb'/Type\s*/Page[^s]',d)); print('pages:',n); sys.exit(0 if n==1 else 1)"
+```
+
+Re-run until it yields 1 page, then diff `pdftotext -layout` output against the
+previous version before committing. Also confirm the `REV. … vX.Y.Z` line matches
+`VERSION` — the guide stamps the version it documents.
+
+The HTML is a bundled artifact (content lives in an escaped payload), so edits are
+targeted string replacements against that payload. Verify afterwards that `<div`
+and `/div` counts still balance.
+
+Known cosmetic issue: the install command's URL wraps mid-string in the PDF text
+layer (`.../cc-install/mai` + `n/scripts/...`) because it sits in a narrow column,
+so copying it out of the PDF can introduce a line break. Widening that block, or
+adding "type this as one line", would fix it.
+
 ## Ideas not yet built
 
 The planned work now lives in [../ROADMAP.md](../ROADMAP.md) — in particular
