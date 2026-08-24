@@ -99,6 +99,16 @@ why bundled skills live in `/opt/cc-install/skills` and
 `scripts/container/entrypoint.sh` copies them into `~/.claude/skills` on every
 container start. Don't move them back.
 
+**A named volume mounted where the image has no such directory is created
+root-owned.** Docker copies ownership from the image path when it initializes an
+empty volume; if the path doesn't exist, the mountpoint is `root:root` and the
+container user is locked out. This shipped in 1.3.0 with the `code-server-data`
+volume: code-server died with `EACCES: permission denied, mkdir .../coder-logs`
+and every extension install failed. Two-part fix — `mkdir -p` the path in the
+`Dockerfile` as `claudeuser` (fixes new installs), and repair via `sudo chown` in
+`scripts/container/entrypoint.sh` (fixes existing ones, since a non-empty volume
+is never re-seeded). **Any new volume mount needs the same treatment.**
+
 **`update.sh` must refresh the host-side files, not just rebuild the image.**
 For a long time it only rebuilt, which meant a bug fixed in `run_vscode.sh` could
 never reach anyone who had already installed. It now re-downloads the repo

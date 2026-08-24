@@ -264,6 +264,41 @@ else {
 }
 Write-Host ""
 
+# Browser IDE / extensions health.
+#
+# The volume-ownership trap: a named volume mounted where the image has no such
+# directory is created root-owned, locking claudeuser out. code-server then dies
+# with EACCES on startup and every extension install fails. The entrypoint
+# repairs it now, but check so a silent recurrence is visible.
+Write-Host "═══ Browser IDE (code-server) ═══" -ForegroundColor Blue
+$running = docker compose ps --status running 2>$null
+if ($running -match "claude-code") {
+    docker compose exec -T claude-code test -w /home/claudeuser/.local/share/code-server 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[SUCCESS] Extensions directory is writable" -ForegroundColor Green
+        $exts = docker compose exec -T claude-code code-server --list-extensions 2>$null
+        $extCount = ($exts | Where-Object { $_ -match '\S' }).Count
+        Write-Host "          Extensions installed: $extCount"
+        if ($exts -match 'anthropic\.claude-code') {
+            Write-Host "[SUCCESS] Claude Code extension is installed" -ForegroundColor Green
+        }
+        else {
+            Write-Host "          Claude Code extension not installed (optional - claude works in the terminal without it)" -ForegroundColor Blue
+            Write-Host "          To add it: open the Extensions panel in the IDE and search 'Claude Code'"
+        }
+    }
+    else {
+        Write-Host "[ERROR] Extensions directory is NOT writable by claudeuser" -ForegroundColor Red
+        Write-Host "[WARNING] code-server will fail to start and extensions cannot be installed." -ForegroundColor Yellow
+        Write-Host "[WARNING] Solution: Run ccrestart - the container entrypoint repairs this." -ForegroundColor Yellow
+        Write-Host "          If it persists, run ccupdate." -ForegroundColor Yellow
+    }
+}
+else {
+    Write-Host "[WARNING] Container not running - cannot check" -ForegroundColor Yellow
+}
+Write-Host ""
+
 # Is the IDE port exposed beyond this machine?
 Write-Host "═══ Browser IDE Exposure ═══" -ForegroundColor Blue
 $published = docker compose port claude-code 8080 2>$null

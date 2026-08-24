@@ -81,6 +81,36 @@ RUN printf '\n# Added by cc-install\nexport PATH="$HOME/.local/bin:$PATH"\n' >> 
 
 RUN mkdir -p /home/claudeuser/workspace
 
+# Create code-server's data directory NOW, owned by claudeuser, because
+# docker-compose.yml mounts a named volume over it.
+#
+# Docker copies ownership and contents from the image path when it initializes an
+# empty named volume — but if the path does NOT exist in the image, it creates the
+# mountpoint as root:root instead. claudeuser (UID 1000) then can't write there,
+# which makes code-server throw `EACCES: permission denied, mkdir .../coder-logs`
+# on startup and makes every extension install fail. Verified both ways.
+RUN mkdir -p /home/claudeuser/.local/share/code-server/extensions
+
+# Optionally bake the Claude Code VS Code extension into the image.
+#
+# Off by default on purpose: it costs ~670 MB, because the extension ships its own
+# per-platform Claude binary in resources/native-binary/ — a ~326 MB duplicate of
+# the CLI this image already installs at the same version. Users can install it
+# from the Extensions panel in seconds instead (it's on Open VSX, which is the
+# registry code-server uses).
+#
+# Turn it on for a fleet build with either:
+#   docker compose build --build-arg INSTALL_VSCODE_EXTENSION=1
+#   CC_INSTALL_VSCODE_EXTENSION=1 in .env, then ccupdate
+ARG INSTALL_VSCODE_EXTENSION=0
+RUN if [ "$INSTALL_VSCODE_EXTENSION" = "1" ]; then \
+        echo "Installing the Claude Code VS Code extension into the image..." ; \
+        code-server --install-extension Anthropic.claude-code || \
+            echo "WARNING: could not pre-install the extension; users can add it from the Extensions panel" >&2 ; \
+    else \
+        echo "Skipping VS Code extension pre-install (INSTALL_VSCODE_EXTENSION=0)" ; \
+    fi
+
 WORKDIR /home/claudeuser/workspace
 
 EXPOSE 8080

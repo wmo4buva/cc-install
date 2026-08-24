@@ -194,6 +194,35 @@ if [ -f ".env" ]; then
 fi
 echo ""
 
+# Browser IDE / extensions health.
+#
+# The volume-ownership trap: a named volume mounted where the image has no such
+# directory is created root-owned, locking claudeuser out. code-server then dies
+# with EACCES on startup and every extension install fails. The entrypoint
+# repairs it now, but check so a silent recurrence is visible.
+echo -e "${BLUE}═══ Browser IDE (code-server) ═══${NC}"
+if docker compose ps --status running 2>/dev/null | grep -q claude-code; then
+    if docker compose exec -T claude-code test -w /home/claudeuser/.local/share/code-server 2>/dev/null; then
+        echo -e "${GREEN}✓${NC} Extensions directory is writable"
+        ext_count=$(docker compose exec -T claude-code code-server --list-extensions 2>/dev/null | grep -c . || echo 0)
+        echo -e "  Extensions installed: ${ext_count}"
+        if docker compose exec -T claude-code code-server --list-extensions 2>/dev/null | grep -qi 'anthropic.claude-code'; then
+            echo -e "${GREEN}✓${NC} Claude Code extension is installed"
+        else
+            echo -e "  ${BLUE}Claude Code extension not installed${NC} (optional — ${YELLOW}claude${NC} works in the terminal without it)"
+            echo -e "  To add it: open the Extensions panel in the IDE and search 'Claude Code'"
+        fi
+    else
+        echo -e "${RED}✗${NC} Extensions directory is NOT writable by claudeuser"
+        echo -e "${YELLOW}⚠${NC} code-server will fail to start and extensions cannot be installed."
+        echo -e "${YELLOW}⚠ Solution:${NC} Run ${GREEN}ccrestart${NC} — the container entrypoint repairs this."
+        echo -e "            If it persists, run ${GREEN}ccupdate${NC}."
+    fi
+else
+    echo -e "${YELLOW}⚠${NC} Container not running — cannot check"
+fi
+echo ""
+
 # Is the IDE port exposed beyond this machine?
 echo -e "${BLUE}═══ Browser IDE Exposure ═══${NC}"
 if [ -f "docker-compose.yml" ]; then

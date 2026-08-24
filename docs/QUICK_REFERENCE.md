@@ -25,6 +25,20 @@ type `claude`. Same sign-in and settings as `ccdocker`.
 
 → [CREDENTIALS.md](CREDENTIALS.md)
 
+### Extensions in the browser IDE
+
+Extensions panel (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>) → search →
+Install. They persist across `ccupdate`.
+
+```bash
+docker compose exec claude-code code-server --install-extension Anthropic.claude-code
+docker compose exec claude-code code-server --list-extensions
+```
+
+code-server uses **Open VSX**, not the Microsoft Marketplace — a few extensions
+aren't available. The Claude Code extension *is* (`Anthropic.claude-code`) and is
+optional; `claude` in the terminal works without it.
+
 ## Signing in
 
 | Option | When | Stored in |

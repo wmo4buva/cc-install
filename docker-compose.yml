@@ -1,6 +1,13 @@
 services:
   claude-code:
-    build: .
+    build:
+      context: .
+      args:
+        # Set CC_INSTALL_VSCODE_EXTENSION=1 in .env and run ccupdate to bake the
+        # Claude Code VS Code extension into the image. Off by default because it
+        # adds ~670 MB — the extension ships its own copy of the Claude binary,
+        # which this image already installs. See .env.example.
+        INSTALL_VSCODE_EXTENSION: ${CC_INSTALL_VSCODE_EXTENSION:-0}
     container_name: cc-install
     image: cc-install:latest
 

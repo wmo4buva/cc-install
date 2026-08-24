@@ -124,6 +124,67 @@ workspace with these instructions.
 
 → [docs/CREDENTIALS.md](docs/CREDENTIALS.md) covers signing in from the IDE.
 
+### Installing extensions (including the Claude Code extension)
+
+Open the **Extensions** panel in the browser IDE
+(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>), search, click **Install**. They
+persist in the `code-server-data` volume, so they survive restarts and `ccupdate`.
+
+Two things to know:
+
+**code-server uses [Open VSX](https://open-vsx.org), not the Microsoft
+Marketplace.** Microsoft's marketplace terms restrict it to Microsoft products, so
+code-server ships with Open VSX instead. Most extensions are on both, but not all
+— if something you want is missing, that's why.
+
+**The Claude Code extension is on Open VSX** as `Anthropic.claude-code`, so it
+installs normally. It is **optional** — running `claude` in the IDE terminal works
+without it. The extension adds the sidebar panel and inline diffs.
+
+From a terminal instead of the panel:
+
+```bash
+docker compose exec claude-code code-server --install-extension Anthropic.claude-code
+docker compose exec claude-code code-server --list-extensions
+```
+
+<details>
+<summary>Baking the Claude Code extension into the image (for IT / fleet builds)</summary>
+
+Off by default because it adds **~670 MB**: the extension ships its own
+per-platform Claude binary (~326 MB in `resources/native-binary/`), duplicating
+the CLI this image already installs at the same version.
+
+To include it anyway, add to `.env` and rebuild:
+
+```bash
+CC_INSTALL_VSCODE_EXTENSION=1
+```
+
+```bash
+ccupdate
+```
+
+Or for a one-off build: `docker compose build --build-arg INSTALL_VSCODE_EXTENSION=1`
+
+**Caveat:** this only reaches machines whose `code-server-data` volume is still
+empty — i.e. new installs. Docker seeds a named volume from the image only once,
+so an existing install won't pick up a baked-in extension. Those users install it
+from the Extensions panel (which takes seconds). Verified both ways.
+</details>
+
+<details>
+<summary>Extensions won't install, or the IDE won't start</summary>
+
+Run `ccdiagnose` — it checks whether the extensions directory is writable.
+
+Installs failing with a permission error, or code-server dying with
+`EACCES: permission denied, mkdir .../coder-logs`, was a **bug in v1.3.0-1.3.1**:
+the `code-server-data` volume was created root-owned, locking the container user
+out. Fixed in 1.3.2 — `ccrestart` repairs it, and `ccupdate` prevents it
+recurring.
+</details>
+
 ---
 
 ## Commands

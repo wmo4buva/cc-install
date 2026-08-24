@@ -184,6 +184,27 @@ Claude Code then runs in the panel at the bottom, with the same sign-in you set
 up in Step 4. There's also a **START-HERE.md** file waiting in your workspace
 with these instructions.
 
+### Adding extensions
+
+The browser editor can install extensions like normal VS Code. Click the
+**Extensions** icon in the left sidebar (or press
+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>), search for what you want, and click
+**Install**. They stay installed — updates won't remove them.
+
+**The Claude Code extension is optional.** Search for **"Claude Code"** and install
+it if you'd like the sidebar panel and inline diffs. You don't need it to use
+Claude Code — typing `claude` in the terminal works either way.
+
+> **Can't find an extension you expected?** The browser editor uses a different
+> extension store ([Open VSX](https://open-vsx.org)) than the desktop VS Code app,
+> because Microsoft's store is limited to Microsoft's own products. Most popular
+> extensions are in both, but a few aren't. Not something you can change, and not
+> a fault with your install.
+
+> **Getting a permission error when installing?** That was a bug in versions
+> 1.3.0-1.3.1. Run `ccrestart`, then `ccupdate`. If it persists, run `ccdiagnose`
+> and send the output to Batten IT.
+
 ---
 
 ## Working on a project you already have

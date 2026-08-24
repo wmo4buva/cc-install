@@ -2,13 +2,9 @@
 
 All notable changes to the Claude Code Installer (cc-install) project.
 
-## Unreleased — documentation
+### Housekeeping (previously unreleased)
 
-Housekeeping and planning. **No functional changes**, so `VERSION` deliberately
-stays at 1.3.1: bumping it would prompt every installed user to run a 10-15 minute
-`--no-cache` rebuild to receive a roadmap document. These files ship with the next
-functional release, and anyone running `ccupdate` for other reasons picks them up
-in the meantime.
+Planning and archive work that now ships alongside the fix above.
 
 ### Added
 - **[ROADMAP.md](ROADMAP.md)** covering the two things that actually need
@@ -46,6 +42,71 @@ Recorded here because it constrains future work:
 ### Changed
 - `docs/.DS_Store` removed; `archive/` added to `.dockerignore`.
 - README and `docs/DEVELOPMENT.md` link the roadmap; `CLAUDE.md` file map updated.
+
+## [1.3.2] - 2026-08-24
+
+### 🐛 Fixed — VS Code extensions could not be installed (regression in 1.3.0)
+
+The `code-server-data` volume added in 1.3.0 was mounted at
+`/home/claudeuser/.local/share/code-server`, a path that **did not exist in the
+image**. Docker creates such a mountpoint as `root:root`, so `claudeuser` (UID
+1000) was locked out of its own data directory. Consequences:
+
+- code-server threw `EACCES: permission denied, mkdir .../coder-logs` on startup
+  and failed to create its IPC socket
+- **every VS Code extension install failed**, including the Claude Code extension
+
+Fixed in two parts, because one alone is insufficient:
+
+1. **`Dockerfile`** creates the directory as `claudeuser` before any volume mounts
+   over it, so Docker seeds new volumes with the right ownership.
+2. **`scripts/container/entrypoint.sh`** probes the directory on every start and
+   repairs it with `sudo chown` if it isn't writable. Needed because Docker never
+   re-seeds a volume that already has content — a rebuild alone does **not** fix an
+   existing install. The same check now guards `~/.claude`.
+
+Verified: a fresh volume installs extensions correctly; a deliberately
+root-owned non-empty volume is repaired on start, after which code-server starts
+with zero `EACCES` and extensions install.
+
+**If you hit this:** `ccrestart` repairs it immediately; `ccupdate` prevents it
+recurring.
+
+### ✨ Added
+
+- **`ccdiagnose` checks the browser IDE.** Reports whether the extensions
+  directory is writable, how many extensions are installed, and whether the Claude
+  Code extension is present — so this class of failure is visible rather than
+  mysterious.
+- **Optional pre-installed Claude Code extension** for IT/fleet builds:
+  `CC_INSTALL_VSCODE_EXTENSION=1` in `.env` then `ccupdate`, or
+  `docker compose build --build-arg INSTALL_VSCODE_EXTENSION=1`.
+
+  **Off by default, deliberately:** it adds **~670 MB**. The extension ships its
+  own per-platform Claude binary (~326 MB in `resources/native-binary/`), which
+  duplicates the CLI this image already installs — both were 2.1.241 when measured.
+  It also only reaches installs whose volume is still empty, since Docker seeds a
+  volume once. Installing from the Extensions panel takes seconds and works on any
+  install, so that's the documented path.
+
+### 📚 Documentation
+
+New extension guidance in `README.md`, `docs/INSTALL_GUIDE.md` and
+`docs/QUICK_REFERENCE.md`, covering the thing that surprises people:
+**code-server uses [Open VSX](https://open-vsx.org), not the Microsoft
+Marketplace**, because Microsoft's terms restrict its marketplace to Microsoft
+products. The Claude Code extension *is* on Open VSX as `Anthropic.claude-code`
+and installs normally; it's optional, since `claude` in the IDE terminal works
+without it.
+
+`docs/DEVELOPMENT.md` gains the volume-ownership trap as a documented gotcha —
+any future volume mount needs the same treatment.
+
+### 🗂 Also
+
+- `ROADMAP.md` and `archive/` added (see the previous entry, now folded into this
+  release), plus `docs/plans/auth-first-instances.md` — the implementation plan for
+  the auth-first, instance-aware installer.
 
 ## [1.3.1] - 2026-08-24
 
