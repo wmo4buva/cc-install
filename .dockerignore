@@ -17,6 +17,7 @@ docker-compose.override.yml
 # Docs (not needed inside the image)
 *.md
 docs/
+archive/
 
 # Host-side scripts. scripts/container/ is re-included below because the
 # Dockerfile COPYs the entrypoint from there.

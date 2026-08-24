@@ -125,7 +125,8 @@ scripts/installers/   install, setup-shortcuts, setup-credentials
 scripts/launchers/    run_claude, run_vscode
 scripts/maintenance/  update, backup, restore, uninstall, check-update, diagnose
 docs/                 CREDENTIALS, INSTALL_GUIDE, QUICK_REFERENCE, DEVELOPMENT, installGuides/
-README.md  CHANGELOG.md  SECURITY.md  ATTRIBUTION.md  CLAUDE.md
+README.md  CHANGELOG.md  ROADMAP.md  SECURITY.md  ATTRIBUTION.md  CLAUDE.md
+archive/              superseded docs, excluded from the image and installers
 ```
 
 Adding a file needs no installer change — the installers download the whole repo

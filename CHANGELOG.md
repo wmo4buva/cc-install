@@ -2,6 +2,51 @@
 
 All notable changes to the Claude Code Installer (cc-install) project.
 
+## Unreleased — documentation
+
+Housekeeping and planning. **No functional changes**, so `VERSION` deliberately
+stays at 1.3.1: bumping it would prompt every installed user to run a 10-15 minute
+`--no-cache` rebuild to receive a roadmap document. These files ship with the next
+functional release, and anyone running `ccupdate` for other reasons picks them up
+in the meantime.
+
+### Added
+- **[ROADMAP.md](ROADMAP.md)** covering the two things that actually need
+  designing:
+  - **Supporting AWS Bedrock and Anthropic side by side.** Today one install
+    serves one billing pathway; `ccauth` overwrites `.env` when you switch, so the
+    previous configuration is lost. Notes why this isn't a simple toggle — model
+    IDs differ between Bedrock and the Anthropic API, Bedrock access is per
+    account/region/model, and credential lifetimes differ. Phased plan starting
+    with saved profiles.
+  - **Running several instances with different sign-ins.** Target design, the
+    verified blockers, and a working manual recipe for doing it today.
+- **`archive/`** holding the nine documents retired in v1.3.0 plus the dead
+  `install-shortcut.sh`, each with a banner marking it superseded, and an index
+  explaining why it went and what replaced it. Previously these existed only in
+  git history. Excluded from the Docker build context and not fetched by the
+  installers.
+
+### Verified while writing the roadmap
+Recorded here because it constrains future work:
+- `container_name: cc-install` is absolute and **not** namespaced by Compose
+  project, so a second instance fails with a name conflict. Confirmed by running
+  two projects from one compose file.
+- Named volumes **are** namespaced by project automatically (`cc-bedrock_cfg`,
+  `cc-anthropic_cfg`), so `claude-config` and `code-server-data` isolate per
+  instance for free — sign-ins won't bleed across.
+- Three instances coexist once `container_name` is dropped and the port is
+  parameterized, sharing one image.
+- Two latent hazards for multi-instance use, now documented: `uninstall.{sh,ps1}`
+  hardcodes `cc-install:latest` and `cc-install_claude-config`, so it would remove
+  the *shared* image and possibly the wrong volume; and `setup-shortcuts` uses
+  fixed shortcut names, so a second install silently repoints every `cc*` command
+  at itself.
+
+### Changed
+- `docs/.DS_Store` removed; `archive/` added to `.dockerignore`.
+- README and `docs/DEVELOPMENT.md` link the roadmap; `CLAUDE.md` file map updated.
+
 ## [1.3.1] - 2026-08-24
 
 Follow-ups from reviewing the new one-page Visual Guide against the shipped code.

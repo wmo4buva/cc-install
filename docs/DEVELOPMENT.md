@@ -206,6 +206,10 @@ the `Dockerfile`; the entrypoint needs no change.
 
 ## Ideas not yet built
 
+The planned work now lives in [../ROADMAP.md](../ROADMAP.md) — in particular
+supporting AWS Bedrock and Anthropic side by side, and running several instances
+with different sign-ins. The short list below is what isn't covered there.
+
 Kept short on purpose — a long speculative roadmap ages badly.
 
 - **Batten-specific skills** — course/policy templates bundled alongside the

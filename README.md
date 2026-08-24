@@ -425,6 +425,7 @@ under their own user account so they get their own workspace and settings.
 
 ## Support
 
+- **[ROADMAP.md](ROADMAP.md)** — what's planned, including multi-instance and dual auth backends
 - **Claude Code docs** — <https://docs.claude.com/en/docs/claude-code>
 - **code-server docs** — <https://coder.com/docs/code-server/>
 - **Docker docs** — <https://docs.docker.com/>
