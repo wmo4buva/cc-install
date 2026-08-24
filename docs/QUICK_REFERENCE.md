@@ -122,8 +122,9 @@ docker compose down && docker compose up -d
 ```
 
 **Port 8080 in use** — copy `docker-compose.override.yml.example` to
-`docker-compose.override.yml`, set the port to `127.0.0.1:8081:8080`, then use
-`http://localhost:8081`.
+`docker-compose.override.yml` and uncomment the port block. It uses
+`ports: !override`; without that tag Compose appends and publishes both ports.
+`ccvscode` picks up the new port automatically.
 
 **Docker not running** — start Docker Desktop, wait for it to finish loading.
 

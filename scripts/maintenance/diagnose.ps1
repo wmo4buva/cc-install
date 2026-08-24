@@ -329,7 +329,8 @@ Write-Host "   Start Docker Desktop and wait ~30 seconds"
 Write-Host ""
 Write-Host "2. Port 8080 in use:" -ForegroundColor Yellow
 Write-Host "   Copy docker-compose.override.yml.example to docker-compose.override.yml"
-Write-Host "   and change the port to 127.0.0.1:8081:8080"
+Write-Host "   and uncomment the 'ports: !override' block (the !override tag is"
+Write-Host "   required - without it Compose publishes BOTH ports)"
 Write-Host ""
 Write-Host "3. Container won't start:" -ForegroundColor Yellow
 Write-Host "   Run: docker compose down && docker compose up -d"

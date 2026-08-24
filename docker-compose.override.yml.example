@@ -19,18 +19,29 @@ services:
     #   - ${HOME}/.aws:/home/claudeuser/.aws:ro
 
     # --- Change the port the browser IDE uses -------------------------------
-    # Use this if something else on your machine already owns 8080.
-    # Remember to open the new port in your browser instead.
+    # Use this if something else on your machine already owns 8080. 8080 is a
+    # commonly contended port — local dev servers and local LLM servers both
+    # like it.
     #
-    # ports:
-    #   - "127.0.0.1:8081:8080"
+    # The `!override` tag is REQUIRED. Without it Compose MERGES list values by
+    # appending, so you would publish BOTH 8080 and your new port and the
+    # conflict would remain. `!override` replaces the base file's list.
+    # (Needs Docker Compose 2.24+; check with `docker compose version`.)
+    #
+    # ccvscode reads the published port back from Compose, so it opens the right
+    # URL automatically — nothing else to change.
+    #
+    # ports: !override
+    #   - "127.0.0.1:8088:8080"
 
     # --- Reach the IDE from another machine on your network -----------------
     # DANGER: this exposes code-server beyond this computer. code-server gives
     # whoever opens it a full shell in the container. If you do this you MUST
     # set CC_VSCODE_PASSWORD in .env first.
     #
-    # ports:
+    # Note the `!override` tag, for the same reason as above.
+    #
+    # ports: !override
     #   - "0.0.0.0:8080:8080"
 
     # --- Give the container more memory / CPU -------------------------------

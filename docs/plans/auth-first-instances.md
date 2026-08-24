@@ -148,6 +148,56 @@ CC_ENV_FILE=instances/bedrock/.env CC_PORT=8081 \
 If `env_file` path interpolation doesn't work, fall back to passing the container
 env explicitly from the resolver rather than via `env_file:`.
 
+### Port allocation — do NOT count up from 8080
+
+The obvious scheme (8080, 8081, 8082…) is wrong, and would actively break a real
+machine — including the one this project is developed on. 8080 is heavily
+contended, and consecutive ports above it are worse: a local MLX/LLM setup here
+reserves **8080, 8081 and 8082** for Gemma-fast, Qwen-deep and Qwen-vision. Three
+instances counting up from 8080 would collide with all three. Because that
+tooling's start/stop actions `kill` whatever holds the port, the collision is
+destructive in both directions — clicking "Stop Gemma" would kill an instance's
+port forward.
+
+Rules:
+
+1. **Allocate from an uncontended base.** Default `CC_PORT_BASE=8790`. Clear of
+   8080-8082, 3000/3001, 5000, 5432/5433, 7000, 8000, 9000.
+2. **Probe before assigning.** At `ccinstance add`, walk up from the base and skip
+   anything already listening. Never assume the base is free.
+3. **Record the result** as `CC_PORT=<n>` in the instance's `.env`, so it's stable
+   across restarts and never silently reshuffles.
+4. **Re-probe on start** and fail naming the process holding the port, rather than
+   letting Docker emit a bare `port is already allocated`.
+5. **Leave the default instance on 8080** for back-compat — but if 8080 is busy
+   during a *new* default install, say so and offer the next free port.
+
+### A hand-written `docker-compose.override.yml` breaks multi-instance
+
+`docker-compose.override.yml` is auto-loaded for **every** instance, because they
+share a directory. So a user override containing `ports:` pins *all* instances to
+one port and collides them with each other.
+
+Not hypothetical: this is exactly the fix applied to `~/cc-install` to get clear of
+the MLX collision, and it would silently defeat instances later.
+
+`ccinstance add` must:
+
+- detect a `ports:` key in `docker-compose.override.yml`,
+- refuse to create a second instance while it's present, and
+- explain the migration — delete the hand-written block and set `CC_PORT=8088` in
+  the instance's `.env`, which achieves the same result through the parameterized
+  path.
+
+Then make `CC_PORT` **the** documented way to move a port, and reduce the `ports:`
+block in `docker-compose.override.yml.example` to a comment pointing at `CC_PORT`
+so nobody hand-writes one again.
+
+**Compose merges lists by appending.** An override without the `!override` tag
+publishes both the old and the new port and leaves the conflict in place. Verified
+— and it caught me out while fixing the MLX collision, so the example file and
+`ccdiagnose` guidance both now say so explicitly.
+
 ### Auth-first in `install.sh`
 
 Current `main()` ([install.sh:305-333](../../scripts/installers/install.sh#L305-L333)):
@@ -357,6 +407,11 @@ Full pre-release checklist: `docs/DEVELOPMENT.md`.
 1. **Breaking existing installs' volume names.** Mitigated by not setting
    `COMPOSE_PROJECT_NAME` for the default instance. This is the one thing to get
    right; test with a non-default `CC_INSTALL_DIR`.
+1b. **Port collisions with other local services** — see the allocation rules
+   above. Counting up from 8080 collides with a common local-LLM port block
+   (8080/8081/8082) and the collision is destructive, because that tooling kills
+   whoever holds the port. Test on a machine that has such a setup, or simulate by
+   binding 8080-8082 before creating instances.
 2. **`env_file` path interpolation may not work.** Verify before building on it;
    fallback noted above.
 3. **78 call sites is a lot of mechanical edits**, and the `.ps1` half can't be

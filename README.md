@@ -383,7 +383,9 @@ Start Docker Desktop, wait for it to finish loading, try again.
 
 **`port 8080 is already allocated`**
 Copy `docker-compose.override.yml.example` to `docker-compose.override.yml` and
-change the port to `127.0.0.1:8081:8080`. Then use `http://localhost:8081`.
+uncomment the port block, which uses `ports: !override`. The `!override` tag
+matters — without it Compose appends and you end up publishing both ports.
+`ccvscode` reads the new port back from Compose automatically.
 
 **Container won't start**
 `docker compose logs` to see why, then `ccupdate` to rebuild.
