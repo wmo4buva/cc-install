@@ -2,6 +2,42 @@
 
 All notable changes to the Claude Code Installer (cc-install) project.
 
+## [1.3.1] - 2026-08-24
+
+Follow-ups from reviewing the new one-page Visual Guide against the shipped code.
+
+### Added
+- **`ccbackup`** — back up your workspace from anywhere. Every other maintenance
+  task had a `cc*` shortcut; backup was the one that still required `cd cc-install`
+  first, which quietly broke the "works from anywhere" promise in the docs.
+
+### Changed
+- **Build-time estimates are consistent at 10-15 minutes.** `install.sh`/`.ps1`
+  said 5-10 while the README said 10-15, and `update.sh` disagreed with both. A
+  `--no-cache` rebuild is the same work as a first build, so both now quote the
+  same figure.
+- `ccauth` Bedrock instructions in the docs and Visual Guide now mention that key
+  input is hidden as you type, and that two further prompts (session token,
+  Bedrock model ID) can be skipped with Enter. Following the old wording left
+  users staring at unexplained prompts.
+- Backup docs lead with `ccbackup`. Restore deliberately stays path-invoked — it
+  overwrites files, so it should be run deliberately from the install directory.
+- README's guide table pointed at `ClaudeCodeInstallGuide.pdf`/`.html`, which no
+  longer exist; it now points at the Visual Guide.
+
+### Documentation
+- **New "Working on your own projects" section** (README, INSTALL_GUIDE,
+  QUICK_REFERENCE, and the Visual Guide): how to open a folder from your computer
+  in Claude Code or the browser editor. Verified against Docker rather than
+  assumed — dropping a folder into `workspace/` appears instantly with no restart;
+  a second host folder can be mounted read-write via
+  `docker-compose.override.yml` and merges with `workspace/`; and **symlinks or
+  aliases pointing outside `workspace/` do not work** — the link is visible inside
+  the container but its files read as "No such file or directory", which is a
+  confusing trap worth naming explicitly.
+- Visual Guide (HTML + PDF) regenerated: `ccbackup` added, "Your files" moved into
+  "Using it day to day", revision line now tracks the version.
+
 ## [1.3.0] - 2026-08-24
 
 Sign-in actually works now, several scripts that were silently broken are fixed,

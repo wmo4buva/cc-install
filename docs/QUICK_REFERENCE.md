@@ -12,6 +12,7 @@ ccstop        # stop the container
 ccrestart     # restart it (applies .env changes)
 cclogs        # view container logs
 ccdiagnose    # check the install for problems
+ccbackup      # back up your workspace
 ccupdate      # update to the latest version
 ```
 
@@ -44,7 +45,7 @@ From inside the `cc-install` directory:
 ./scripts/installers/setup-credentials.sh         # same as ccauth
 ./scripts/maintenance/diagnose.sh                 # same as ccdiagnose
 ./scripts/maintenance/update.sh                   # same as ccupdate
-./scripts/maintenance/backup.sh                   # archive workspace/
+./scripts/maintenance/backup.sh                   # archive workspace/ (same as ccbackup)
 ./scripts/maintenance/restore.sh backup.tar.gz    # restore one
 ./scripts/maintenance/uninstall.sh                # remove everything
 ```
@@ -52,6 +53,22 @@ From inside the `cc-install` directory:
 `run_claude.sh` also takes: `bash`, `logs`, `stop`, `restart`, `auth`.
 
 Windows: same paths with `.ps1`.
+
+## Working on your own projects
+
+Claude Code only sees `workspace/`. Drag a project folder into
+`cc-install/workspace/` — it appears instantly, no restart.
+
+```
+File -> Open Folder -> /home/claudeuser/workspace/my-project    # browser editor
+ccdocker bash && cd my-project && claude                        # terminal
+```
+
+**Symlinks/aliases pointing outside `workspace/` do not work** — the link is
+visible in the container but the files read as missing. Copy the folder instead.
+
+To keep a project where it lives, mount it via `docker-compose.override.yml`
+(see the README) and `ccrestart`.
 
 ## File locations
 
@@ -113,7 +130,7 @@ leftover `ANTHROPIC_API_KEY` in `.env` overriding an account login.
 | code-server | 4.133.0 |
 | Node.js | 22 LTS |
 | Image size | ~1.5-2 GB |
-| Build time | 5-10 min |
+| Build time | 10-15 min |
 | Container user | `claudeuser` (UID 1000, non-root) |
 
 Check what you're actually running:
@@ -136,7 +153,7 @@ cat VERSION
 ## Safe update routine
 
 ```bash
-./scripts/maintenance/backup.sh    # 1. back up
+ccbackup                           # 1. back up
 ccupdate                           # 2. update scripts + image
 ccdocker --version                 # 3. confirm
 ```

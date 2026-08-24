@@ -132,7 +132,7 @@ function Get-Files {
 }
 
 function Build-Image {
-    Write-Info "Step 2/5: Building Docker image (this takes 5-10 minutes)..."
+    Write-Info "Step 2/5: Building Docker image (this takes 10-15 minutes)..."
     Write-Host "        Good time to grab a coffee."
 
     if ($DryRun) { Write-Host "[DRY RUN] Would build Docker image" -ForegroundColor Gray; return }

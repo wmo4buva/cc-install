@@ -23,6 +23,7 @@ SHORTCUTS=(
     "ccrestart|Restart the container|./scripts/launchers/run_claude.sh restart"
     "cclogs|View container logs|./scripts/launchers/run_claude.sh logs"
     "ccdiagnose|Check the install for problems|./scripts/maintenance/diagnose.sh"
+    "ccbackup|Back up your workspace|./scripts/maintenance/backup.sh \"\$@\""
     "ccupdate|Update to the latest version|./scripts/maintenance/update.sh"
 )
 

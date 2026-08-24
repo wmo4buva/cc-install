@@ -125,6 +125,7 @@ use with your mouse.
 | `ccrestart` | Restart it if something seems stuck |
 | `cclogs` | Show technical logs (mainly for troubleshooting) |
 | `ccdiagnose` | Check your install if something looks wrong |
+| `ccbackup` | Make a dated backup of your workspace |
 | `ccupdate` | Update to the newest version |
 
 > **Shortcuts not found?** Make sure you opened a **brand-new terminal window**
@@ -185,6 +186,40 @@ with these instructions.
 
 ---
 
+## Working on a project you already have
+
+Claude Code can only see files inside one folder: **`cc-install/workspace/`**.
+Anything outside it is invisible to Claude Code — that's the isolation that keeps
+it safe.
+
+So to work on an existing project, put it in there:
+
+1. Open `cc-install/workspace/` in **Finder** (Mac) or **File Explorer** (Windows)
+2. **Drag your project folder into it** (or copy it in)
+
+That's all. You don't need to restart anything — it shows up in Claude Code right
+away, and any change you make in either place appears in the other instantly.
+
+**Then open it:**
+
+- **Browser editor:** choose **File → Open Folder**, type
+  `/home/claudeuser/workspace/` followed by your folder name, and click OK.
+- **Terminal:** type `ccdocker bash`, then `cd` followed by your folder name, then
+  `claude`. (Plain `ccdocker` also works — Claude Code just sees all your projects
+  at once instead of one.)
+
+> ⚠️ **Don't use a shortcut or alias.** Making a Mac alias or Windows shortcut
+> inside `workspace/` that points to a folder elsewhere **won't work** — Claude
+> Code will see the shortcut but report the files as missing. Copy or move the
+> real folder instead.
+
+**Need to leave a project where it is?** If a folder can't be moved — it's synced
+by OneDrive, say — it can be attached as a second folder instead. That takes a
+one-time config change, so **ask Batten IT to set it up**; see "Keeping a project
+where it already lives" in the [README](../README.md).
+
+---
+
 ## Using Claude Code day to day
 
 - **Just talk to it.** Type what you want in plain English:
@@ -222,7 +257,7 @@ of the installer scripts — **without touching your `workspace` files or your
 sign-in**. It's the right thing to do whenever you see an "update available"
 message.
 
-It takes 5-10 minutes, because it rebuilds the environment from scratch.
+It takes 10-15 minutes, because it rebuilds the environment from scratch.
 
 ---
 
@@ -231,20 +266,22 @@ It takes 5-10 minutes, because it rebuilds the environment from scratch.
 Your `workspace` folder is just files on your computer, so you can copy it like
 any folder. There's also a one-command backup:
 
-**macOS / Linux:**
+```bash
+ccbackup
+```
+
+This creates a dated backup inside `cc-install/backups/`. It's good practice to
+run it before `ccupdate`.
+
+To restore one, run this from inside the `cc-install` folder — it overwrites
+files, so it deliberately isn't a from-anywhere shortcut:
+
 ```bash
 cd cc-install
-./scripts/maintenance/backup.sh
+./scripts/maintenance/restore.sh backups/<the-backup-file>
 ```
 
-**Windows:**
-```powershell
-cd cc-install
-.\scripts\maintenance\backup.ps1
-```
-
-This creates a dated backup you can restore later with the matching
-`restore.sh` / `restore.ps1` script.
+On Windows use `.\scripts\maintenance\restore.ps1 backups\<the-backup-file>`.
 
 ---
 

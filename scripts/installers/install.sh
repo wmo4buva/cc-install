@@ -187,7 +187,7 @@ download_files() {
 }
 
 build_image() {
-    log_info "Step 2/5: Building Docker image (this takes 5-10 minutes)..."
+    log_info "Step 2/5: Building Docker image (this takes 10-15 minutes)..."
     echo "        ☕ Good time to grab a coffee."
 
     if ! docker compose build --progress plain; then

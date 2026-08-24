@@ -95,7 +95,7 @@ rm -rf "$tmp_dir"
 log_info "Stopping container..."
 docker compose stop || true
 
-log_info "Rebuilding Docker image (this takes 5-10 minutes)..."
+log_info "Rebuilding Docker image (this takes 10-15 minutes)..."
 if ! docker compose build --no-cache --progress plain; then
     log_error "Failed to rebuild Docker image"
     exit 1

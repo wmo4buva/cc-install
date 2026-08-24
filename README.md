@@ -18,11 +18,11 @@ No technical background required.
 
 | Guide | Best for |
 |-------|----------|
-| [📘 Install Guide (PDF)](docs/installGuides/ClaudeCodeInstallGuide.pdf) | Printable, illustrated walkthrough |
-| [🖥️ Install Guide (HTML)](docs/installGuides/ClaudeCodeInstallGuide.html) | The same guide on-screen |
+| [📘 Visual Guide (PDF)](docs/installGuides/Claude%20Code%20Visual%20Guide.pdf) | **Start here** — one-page printable walkthrough |
+| [🖥️ Visual Guide (HTML)](docs/installGuides/Claude%20Code%20Visual%20Guide.html) | The same guide on-screen |
 | [💡 Tip Sheet (PDF)](docs/installGuides/ClaudeCodeTipSheet.pdf) | Everyday usage once you're running |
-| [📝 Install Guide (Markdown)](docs/INSTALL_GUIDE.md) | Plain-language version, readable on GitHub |
-| [⚡ Quick Reference](docs/QUICK_REFERENCE.md) | One-page command cheat-sheet |
+| [📝 Install Guide (Markdown)](docs/INSTALL_GUIDE.md) | Longer plain-language version, readable on GitHub |
+| [⚡ Quick Reference](docs/QUICK_REFERENCE.md) | Command cheat-sheet |
 | [🔑 Signing in](docs/CREDENTIALS.md) | **How to set up credentials** |
 
 ---
@@ -77,7 +77,7 @@ curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/in
 irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
 ```
 
-⏱️ The Docker image build takes **5-10 minutes**. Grab a coffee.
+⏱️ The Docker image build takes **10-15 minutes**. Grab a coffee.
 
 | Situation | Total time |
 |---|---|
@@ -139,6 +139,7 @@ Available from anywhere after installation:
 | `ccrestart` | Restart the container (applies `.env` changes) |
 | `cclogs` | View container logs |
 | `ccdiagnose` | Check the install for problems |
+| `ccbackup` | Back up your workspace |
 | `ccupdate` | Update to the latest version |
 
 <details>
@@ -170,6 +171,74 @@ it appears at `/home/claudeuser/workspace`, and the two stay in sync
 automatically.
 
 It survives container restarts, rebuilds and updates.
+
+---
+
+## Working on your own projects
+
+Claude Code can only see what's mounted into the container. By default that's
+exactly one folder: `cc-install/workspace/`. So to work on an existing project,
+it has to be reachable there.
+
+### The easy way — move or copy it into `workspace/`
+
+Drag your project folder into `cc-install/workspace/` in Finder or Explorer.
+That's it. **No restart needed** — it appears inside Claude Code immediately, and
+edits flow both ways in real time.
+
+```
+cc-install/workspace/my-research-paper/
+cc-install/workspace/thesis-data/
+```
+
+Then open it:
+
+**In the browser editor (`ccvscode`)**
+**File → Open Folder**, then enter `/home/claudeuser/workspace/my-research-paper`
+and press OK. VS Code reloads rooted at your project.
+
+**In the terminal (`ccdocker`)**
+`ccdocker` starts you in `workspace/`, which means Claude Code sees *all* your
+projects at once. To root it on one project:
+
+```bash
+ccdocker bash                  # opens a shell in the container
+cd my-research-paper
+claude
+```
+
+### ⚠️ Symlinks do not work
+
+Creating a shortcut/alias/symlink inside `workspace/` that points somewhere else
+on your computer **will not work**, and fails confusingly: the link shows up
+inside the container but every file under it reads as "No such file or
+directory". The container can't follow a link to a path that was never mounted.
+Copy or move the folder instead.
+
+### Keeping a project where it already lives
+
+If a project can't move — it's in OneDrive, or a Git repo you'd rather not
+relocate — mount it as a second folder:
+
+1. Copy `docker-compose.override.yml.example` to `docker-compose.override.yml`
+2. Uncomment the "Mount an extra folder" block and set your path:
+
+   ```yaml
+   services:
+     claude-code:
+       volumes:
+         - /Users/you/Documents/research:/home/claudeuser/research
+   ```
+
+   Windows paths use forward slashes: `C:/Users/you/Documents/research`.
+3. `ccrestart`
+
+It then appears at `/home/claudeuser/research`, read **and** write, alongside
+`workspace/`. Compose merges the two mounts, so `workspace/` keeps working.
+`docker-compose.override.yml` is gitignored, so it survives `ccupdate`.
+
+> Editing YAML is more than most people want to do. If you're setting this up for
+> someone else, do it for them once — they won't need to touch it again.
 
 ---
 
@@ -218,11 +287,13 @@ installer*. Running `ccupdate` gets you both that and the latest Claude Code.
 ## Backup and restore
 
 ```bash
-./scripts/maintenance/backup.sh              # timestamped archive of workspace/
+ccbackup                                     # timestamped archive of workspace/
 ./scripts/maintenance/restore.sh <file>      # restore from one
 ```
 
-Windows: `.\scripts\maintenance\backup.ps1` and `restore.ps1 <file>`.
+`ccbackup` works from anywhere. Restoring is deliberately not a shortcut — it
+overwrites files, so you run it from inside `cc-install` with the backup you mean.
+Windows: `.\scripts\maintenance\restore.ps1 <file>`.
 
 ---
 

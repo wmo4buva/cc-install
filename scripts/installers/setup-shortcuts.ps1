@@ -31,6 +31,7 @@ function ccstop     { Push-Location "$Dir"; try { & ".\scripts\launchers\run_cla
 function ccrestart  { Push-Location "$Dir"; try { & ".\scripts\launchers\run_claude.ps1" restart } finally { Pop-Location } }
 function cclogs     { Push-Location "$Dir"; try { & ".\scripts\launchers\run_claude.ps1" logs } finally { Pop-Location } }
 function ccdiagnose { Push-Location "$Dir"; try { & ".\scripts\maintenance\diagnose.ps1" } finally { Pop-Location } }
+function ccbackup   { Push-Location "$Dir"; try { & ".\scripts\maintenance\backup.ps1" @args } finally { Pop-Location } }
 function ccupdate   { Push-Location "$Dir"; try { & ".\scripts\maintenance\update.ps1" } finally { Pop-Location } }
 $EndMarker
 "@
@@ -128,6 +129,7 @@ function Set-PowerShellProfiles {
     Write-Host "  ccrestart   Restart the container" -ForegroundColor Green
     Write-Host "  cclogs      View container logs" -ForegroundColor Green
     Write-Host "  ccdiagnose  Check the install for problems" -ForegroundColor Green
+    Write-Host "  ccbackup    Back up your workspace" -ForegroundColor Green
     Write-Host "  ccupdate    Update to the latest version" -ForegroundColor Green
 }
 

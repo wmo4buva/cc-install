@@ -87,7 +87,7 @@ finally {
 Write-Info "Stopping container..."
 docker compose stop 2>&1 | Out-Null
 
-Write-Info "Rebuilding Docker image (this takes 5-10 minutes)..."
+Write-Info "Rebuilding Docker image (this takes 10-15 minutes)..."
 docker compose build --no-cache --progress plain
 if ($LASTEXITCODE -ne 0) {
     Write-ErrorMsg "Failed to rebuild Docker image"
