@@ -231,6 +231,57 @@ if (Test-Path "VERSION") {
 }
 else {
     Write-Host "[WARNING] VERSION file not found (older installation)" -ForegroundColor Yellow
+    Write-Host "[WARNING] Solution: Run .\scripts\maintenance\update.ps1 to refresh this install" -ForegroundColor Yellow
+}
+Write-Host ""
+
+# Sign-in / credentials
+Write-Host "═══ Claude Code Sign-in ═══" -ForegroundColor Blue
+$envLines = if (Test-Path ".env") { Get-Content ".env" } else { @() }
+if ($envLines -match '^\s*CLAUDE_CODE_USE_BEDROCK=') {
+    Write-Host "[SUCCESS] Configured for Amazon Bedrock (.env)" -ForegroundColor Green
+    if (($envLines -match '^\s*AWS_ACCESS_KEY_ID=.+') -or ($envLines -match '^\s*AWS_PROFILE=.+')) {
+        Write-Host "[SUCCESS] AWS credentials present" -ForegroundColor Green
+    }
+    else {
+        Write-Host "[ERROR] CLAUDE_CODE_USE_BEDROCK is set but no AWS credentials found" -ForegroundColor Red
+        Write-Host "[WARNING] Solution: Run: ccauth" -ForegroundColor Yellow
+    }
+}
+elseif ($envLines -match '^\s*(ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN)=.+') {
+    Write-Host "[SUCCESS] Configured with an Anthropic API key (.env)" -ForegroundColor Green
+}
+else {
+    docker compose exec -T claude-code test -s /home/claudeuser/.claude/.credentials.json 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[SUCCESS] Signed in interactively with a Claude account" -ForegroundColor Green
+    }
+    else {
+        Write-Host "[WARNING] No sign-in configured yet" -ForegroundColor Yellow
+        Write-Host "[WARNING] Solution: Run ccauth, or run ccdocker and sign in when prompted" -ForegroundColor Yellow
+        Write-Host "          See docs\CREDENTIALS.md" -ForegroundColor Yellow
+    }
+}
+Write-Host ""
+
+# Is the IDE port exposed beyond this machine?
+Write-Host "═══ Browser IDE Exposure ═══" -ForegroundColor Blue
+$published = docker compose port claude-code 8080 2>$null
+if (-not $published) {
+    Write-Host "[WARNING] Container not running - cannot check" -ForegroundColor Yellow
+}
+elseif ($published -match '^127\.0\.0\.1:') {
+    Write-Host "[SUCCESS] Published on $published (this machine only)" -ForegroundColor Green
+}
+else {
+    Write-Host "[ERROR] Published on $published - reachable from your network" -ForegroundColor Red
+    if ($envLines -match '^\s*CC_VSCODE_PASSWORD=.+') {
+        Write-Host "[SUCCESS] A password is set, so it is not wide open" -ForegroundColor Green
+    }
+    else {
+        Write-Host "[ERROR] No password set. Anyone who can reach this port gets a shell." -ForegroundColor Red
+        Write-Host "[WARNING] Solution: Set CC_VSCODE_PASSWORD in .env, or publish on 127.0.0.1 only" -ForegroundColor Yellow
+    }
 }
 Write-Host ""
 
@@ -242,7 +293,8 @@ Write-Host "1. Docker not running:" -ForegroundColor Yellow
 Write-Host "   Start Docker Desktop and wait ~30 seconds"
 Write-Host ""
 Write-Host "2. Port 8080 in use:" -ForegroundColor Yellow
-Write-Host "   Edit docker-compose.yml and change '8080:8080' to '8081:8080'"
+Write-Host "   Copy docker-compose.override.yml.example to docker-compose.override.yml"
+Write-Host "   and change the port to 127.0.0.1:8081:8080"
 Write-Host ""
 Write-Host "3. Container won't start:" -ForegroundColor Yellow
 Write-Host "   Run: docker compose down && docker compose up -d"
@@ -250,7 +302,13 @@ Write-Host ""
 Write-Host "4. Out of disk space:" -ForegroundColor Yellow
 Write-Host "   Run: docker system prune -a"
 Write-Host ""
-Write-Host "5. Need to rebuild:" -ForegroundColor Yellow
+Write-Host "5. Need to rebuild or get the latest fixes:" -ForegroundColor Yellow
 Write-Host "   Run: .\scripts\maintenance\update.ps1"
+Write-Host ""
+Write-Host "6. Claude Code asks you to sign in every time:" -ForegroundColor Yellow
+Write-Host "   Run: ccauth   (see docs\CREDENTIALS.md)"
+Write-Host ""
+Write-Host "7. Can't find Claude Code in the browser IDE:" -ForegroundColor Yellow
+Write-Host "   There's no button - open Terminal -> New Terminal and type: claude"
 Write-Host ""
 Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan

@@ -2,6 +2,167 @@
 
 All notable changes to the Claude Code Installer (cc-install) project.
 
+## [1.3.0] - 2026-08-24
+
+Sign-in actually works now, several scripts that were silently broken are fixed,
+and updates finally reach existing installs.
+
+### 🔑 Credentials — the headline change
+
+Previously there was **no working way to give the container credentials.** The
+README told users to `export AWS_ACCESS_KEY_ID=...` on the host, but
+`docker-compose.yml` passed no environment variables through, so those exports
+did nothing. Nothing at all explained how someone using `ccvscode` (the browser
+IDE) was supposed to sign in.
+
+- **New `ccauth` command** (`scripts/installers/setup-credentials.{sh,ps1}`).
+  Interactive, three options: your Claude account, an Anthropic API key, or UVA
+  Amazon Bedrock. Writes `.env` (`chmod 600`) and restarts the container.
+- **Options are mutually exclusive.** Picking one clears the others. A leftover
+  `ANTHROPIC_API_KEY` silently overriding an account login — and billing the
+  wrong place — was the most likely way to get confused.
+- **`docker-compose.yml` now reads `.env`** via `env_file`, so credentials reach
+  both `ccdocker` and `ccvscode`.
+- **New [docs/CREDENTIALS.md](docs/CREDENTIALS.md)**, including a dedicated
+  section on signing in from inside the browser IDE.
+- **`ccvscode` now explains itself.** It prints how to reach Claude Code in the
+  IDE (**Terminal → New Terminal**, then `claude`), reports whether you're
+  already signed in, and writes a `START-HERE.md` into your workspace.
+- **`ccdocker` warns on first run** if no credentials are configured, and points
+  at `ccauth` rather than letting you paste a key into a prompt where it won't
+  persist.
+- `.env.example` and `docker-compose.override.yml.example` added; `.env` was
+  already gitignored.
+
+### 🔒 Security
+
+- **The browser IDE is no longer exposed to your network.** The port was
+  published on `0.0.0.0:8080` while code-server ran with `--auth none` — anyone
+  on the same network had an unauthenticated shell in the container. It's now
+  bound to `127.0.0.1:8080`. Verified: reachable on loopback, refused on the LAN
+  address.
+- Optional `CC_VSCODE_PASSWORD` in `.env` enables `--auth password` for anyone
+  who does need to expose the port.
+- `ccdiagnose` now reports the port binding and warns if it's exposed without a
+  password, plus flags loose `.env` permissions.
+- New [SECURITY.md](SECURITY.md) documenting the posture and the deliberate
+  trade-offs (passwordless sudo in the container, piped install scripts,
+  unpinned third-party skills).
+
+### 🐛 Bug fixes
+
+- **`diagnose.sh` died halfway through.** It used `local` outside a function (a
+  hard error that aborts under `set -e`) and GNU-only `df -BG`, which fails on
+  macOS. The Workspace, Volumes, Image and Version sections never printed. The
+  tool the README tells you to run first was broken.
+- **`check-update.sh` exited 1 when run directly**, referencing a `local`
+  variable that was out of scope at the top level — an unbound-variable abort
+  under `set -u`.
+- **Windows `ccdocker` ran `claude claude`.** `run_claude.ps1` passed its
+  defaulted `$Command` through unconditionally, so a bare launch sent the literal
+  string "claude" to Claude Code as a prompt.
+- **Every install permanently reported "update available."** The installers
+  fetched a hardcoded list of files that never included `VERSION`, so
+  `check-update` compared against a fallback of `1.0.0` forever.
+- **The macOS app launcher went to the wrong directory.** `setup-shortcuts.sh`
+  built it with a quoted heredoc, baking in the literal text `$INSTALL_DIR`,
+  which expanded to nothing at runtime.
+- **Shortcut setup could fail on Windows and leave you with no commands.**
+  `[Environment]::GetFolderPath('MyDocuments')` returns an empty string when
+  Documents is redirected (OneDrive on managed machines); `Join-Path ""` threw and
+  aborted all setup. Now guarded, with per-profile error handling.
+- **Pressing Enter at the `ccauth` menu silently did nothing** while printing the
+  closing "all done" message, because PowerShell's `switch` skips every clause —
+  `default` included — on a null value. Input is validated before the switch.
+- `.env` written on Windows could carry a UTF-8 BOM (`Add-Content -Encoding utf8`
+  adds one on PowerShell 5.1) and CRLF endings. Docker Compose strips neither, so
+  the first variable was read as `<BOM>NAME` and ignored. Now written BOM-free
+  with LF.
+
+### 🔄 Updates now reach existing installs
+
+- **`update.sh` / `update.ps1` refresh the cc-install files too**, not just the
+  Docker image. Previously they only rebuilt, so a bug fixed in a launcher could
+  never reach anyone who had already installed — including every fix listed
+  above.
+- They also re-run `setup-shortcuts`, so newly added commands appear on existing
+  installs, and clear the 24-hour version-check cache.
+- **`setup-shortcuts` now always rewrites.** It used to skip entirely if
+  `ccvscode` already existed, meaning existing users never received new
+  shortcuts. The PowerShell version replaces a marked block in place, preserving
+  the rest of your profile and removing pre-1.3.0 unmarked blocks.
+- **Installers download the whole repo as an archive** rather than a hardcoded
+  file list, which is what had drifted and lost `VERSION`. Adding a file no longer
+  requires an installer change. `CC_INSTALL_REF` pins a tag or branch.
+- **This also properly fixes the Windows line-ending problem from 1.2.1.** The
+  `.gitattributes` `eol=crlf` rule added then only applies on *checkout*, so it
+  fixed `git clone` but not installed users — the installer was fetching files
+  individually from `raw.githubusercontent.com`, which serves the raw blob with
+  **LF**. GitHub's archive endpoint does apply the attribute, so the new download
+  path delivers CRLF. Verified against the live repo: archive → CRLF, raw → LF.
+  As a second layer, every `.ps1` was confirmed to parse with LF *and* CRLF
+  endings, so a stray LF is no longer fatal either.
+
+### 📦 Versions
+
+- **code-server 4.117.0 → 4.133.0**
+- **Node.js 20 → 22 LTS** (20 is end-of-life)
+- Both are now `Dockerfile` build args (`CODE_SERVER_VERSION`, `NODE_MAJOR`)
+- Added `ripgrep` (much faster file search for Claude Code), `less`, `unzip`
+- Verified in a real build: Claude Code 2.1.241, code-server 4.133.0, Node 22.23.2
+
+### ✨ Also
+
+- **Bundled skills survive updates.** They were baked into `~/.claude/skills`,
+  which is a Docker volume — and a volume is seeded from the image only once, so
+  the skills were frozen at each user's very first build forever. They now live
+  in `/opt/cc-install/skills` and a new container entrypoint copies them in on
+  every start, leaving skills you added yourself alone. Verified: 34 skills
+  present in the volume after a fresh start.
+- New `code-server-data` volume, so VS Code extensions and settings survive
+  container recreation.
+- New shortcuts: `ccauth`, `ccdiagnose`, `ccupdate`.
+- `init: true` for proper process reaping.
+- `run_vscode` reads the published port back from Compose instead of assuming
+  8080, so a `docker-compose.override.yml` port change still opens the right URL,
+  and polls for readiness instead of a blind `sleep`.
+- `run_vscode` no longer tails empty container logs on exit — the container runs
+  `sleep infinity`, so there was never anything to show.
+- `run_claude` accepts an `auth` subcommand.
+
+### 📚 Documentation
+
+Cut from ~4,500 lines across 17 files to a maintained set. Removed nine
+point-in-time documents that had gone stale: `INDEX.md`, `PROJECT_STATUS.md`,
+`ROADMAP.md`, `SECURITY_AUDIT.md`, `docs/README.md`, `docs/PROJECT_SUMMARY.md`,
+`docs/TEST_RESULTS.md`, `docs/WINDOWS_FIX_2026-05-28.md` and
+`docs/SKILLS_INSTALLATION.md` — their durable content is folded into
+`SECURITY.md`, `docs/DEVELOPMENT.md` and this changelog.
+
+Also removed `scripts/installers/install-shortcut.sh`, dead code that created an
+undocumented `cc` command superseded by `setup-shortcuts.sh`.
+
+`README.md`, `docs/INSTALL_GUIDE.md` and `docs/QUICK_REFERENCE.md` rewritten
+around `ccauth` and the browser-IDE workflow. `ATTRIBUTION.md` now credits the
+three bundled skill repositories, which it had omitted.
+
+### ⬆️ Upgrading from 1.2.x
+
+```bash
+cd cc-install
+./scripts/maintenance/update.sh     # or update.ps1 on Windows
+```
+
+Then, in a new terminal window:
+
+```bash
+ccauth
+```
+
+Your `workspace/`, settings and any existing sign-in are preserved. Running
+`ccauth` is worth doing even if Claude Code already works — it makes your
+credentials persist properly instead of living only in the current container.
+
 ## [1.2.2] - 2026-07-22
 
 ### 🐛 Critical Bug Fix

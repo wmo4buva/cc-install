@@ -1,598 +1,369 @@
 # Claude Code Installer (cc-install)
 
-A simple, Docker-based installer for Claude Code designed to help anyone get started with Claude Code quickly and easily, without dealing with complex technical setup.
+A Docker-based installer for [Claude Code](https://claude.ai/code) that gets you
+running in one command — no dependency management, no configuration, no prior
+Docker knowledge needed.
 
-**Inspired by the [DAAF project](https://github.com/DAAF-Contribution-Community/daaf)** — credit to their excellent Docker-based installation approach.
+You get Claude Code in your terminal, VS Code in your browser, and a folder on
+your computer that both of them share.
 
----
-
-## 📚 Start Here — Install Guides & Tip Sheets
-
-New to Claude Code? These approachable, step-by-step guides are the easiest place
-to begin — no technical background required.
-
-| Guide | Format | Best for |
-|-------|--------|----------|
-| **[📘 Install Guide (PDF)](docs/installGuides/ClaudeCodeInstallGuide.pdf)** | PDF | Printable, illustrated walkthrough of installation and first launch |
-| **[🖥️ Install Guide (HTML)](docs/installGuides/ClaudeCodeInstallGuide.html)** | HTML | The same guide to view or present on-screen |
-| **[💡 Claude Code Tip Sheet (PDF)](docs/installGuides/ClaudeCodeTipSheet.pdf)** | PDF | Quick tips and everyday usage once you're up and running |
-| **[📝 Install Guide (Markdown)](docs/INSTALL_GUIDE.md)** | Markdown | Plain-language reference you can read right here on GitHub |
-| **[⚡ Quick Reference](docs/QUICK_REFERENCE.md)** | Markdown | One-page command cheat-sheet |
-
-> 💡 **Tip:** open the **Install Guide (PDF)** first, then keep the **Tip Sheet**
-> handy. Everything below is the full technical reference.
+**Inspired by the [DAAF project](https://github.com/DAAF-Contribution-Community/daaf)** —
+credit to their Docker-based installation approach. See [ATTRIBUTION.md](ATTRIBUTION.md).
 
 ---
 
-## ✨ What This Does
+## New here? Start with a guide
 
-This project provides a one-line installation command that:
-- ✅ Creates an isolated Docker environment with Claude Code CLI
-- ✅ Includes VS Code Server for browser-based code editing
-- ✅ Handles all dependencies automatically
-- ✅ Sets up easy launcher commands (`ccdocker`, `ccvscode`)
-- ✅ Persists your work in a local `workspace/` directory
-- ✅ Pre-installs powerful Claude Code skills for productivity
+No technical background required.
 
----
-
-## 📋 What Happens During Installation?
-
-The installer will:
-1. ✅ Check that Docker is installed and running
-2. ⬇️ Download required files
-3. 🐳 Build a Docker image with Claude Code and VS Code Server (~5-10 minutes)
-4. 🚀 Start the container
-5. 📁 Create a `workspace/` directory for your files
-6. ⚡ Set up easy launch shortcuts
+| Guide | Best for |
+|-------|----------|
+| [📘 Install Guide (PDF)](docs/installGuides/ClaudeCodeInstallGuide.pdf) | Printable, illustrated walkthrough |
+| [🖥️ Install Guide (HTML)](docs/installGuides/ClaudeCodeInstallGuide.html) | The same guide on-screen |
+| [💡 Tip Sheet (PDF)](docs/installGuides/ClaudeCodeTipSheet.pdf) | Everyday usage once you're running |
+| [📝 Install Guide (Markdown)](docs/INSTALL_GUIDE.md) | Plain-language version, readable on GitHub |
+| [⚡ Quick Reference](docs/QUICK_REFERENCE.md) | One-page command cheat-sheet |
+| [🔑 Signing in](docs/CREDENTIALS.md) | **How to set up credentials** |
 
 ---
 
-## 🚀 Quick Start
+## Install
 
-### Step 1: Install Docker Desktop
+### Step 1 — Docker Desktop
 
-**Time Estimate:** 10-15 minutes (first time), 2 minutes (if Docker already installed)
+Download from <https://www.docker.com/products/docker-desktop/>.
 
-#### For All Users
+**Which build?**
+- **Windows:** Settings → System → About → System type. "x64-based" → **Windows x86_64**; "ARM64-based" → **Windows ARM64**
+- **Mac:**  → About This Mac. Apple M-series → **Mac with Apple chip**; Intel → **Mac with Intel chip**
 
-1. **Download Docker Desktop** from https://www.docker.com/products/docker-desktop/
+Install it, accept the defaults (enable WSL 2 on Windows), then **start Docker
+Desktop and wait for it to finish loading** (~30-60 seconds). The tray/menu-bar
+icon should say "Docker Desktop is running".
 
-   **Which version to download?**
-   - **Windows:** Check **Settings → System → About → System type**
-     - If it says "x64-based processor" → Download **Windows x86_64**
-     - If it says "ARM64-based processor" → Download **Windows ARM64**
-   - **Mac:** Check ** → About This Mac**
-     - **Apple Silicon (M1/M2/M3)** → Download **Mac with Apple chip**
-     - **Intel chip** → Download **Mac with Intel chip**
+<details>
+<summary><b>Windows only:</b> WSL setup</summary>
 
-2. **Install Docker Desktop**
-   - Run the installer
-   - Accept default options (enable WSL 2 on Windows)
-   - Restart if prompted
+Windows Subsystem for Linux lets Docker run Linux containers. Docker Desktop
+requires it.
 
-3. **Start Docker Desktop** and wait for it to fully initialize (~30-60 seconds)
-   - Look for the Docker icon in your system tray/menu bar
-   - Icon should show "Docker Desktop is running"
+Check whether you already have it:
 
-#### Windows Users Only: WSL Setup
-
-**What is WSL?** Windows Subsystem for Linux (WSL) lets Docker run Linux containers on Windows. Docker Desktop requires it.
-
-**Check if WSL is already installed:**
 ```powershell
 wsl --status
 ```
 
-If you see version information, WSL is installed and you can skip to Step 2.
+If that prints version information, you're set — skip to Step 2. Otherwise open
+**PowerShell as Administrator** (Windows+X → Terminal (Admin)), run:
 
-**If WSL is not installed or needs updating:**
+```powershell
+wsl --update
+```
 
-1. Open **PowerShell as Administrator**:
-   - Press **Windows + X** → Select **Terminal (Admin)** or **Windows PowerShell (Admin)**
-   - Click "Yes" when prompted
+then **restart your computer** and install Docker Desktop.
+</details>
 
-2. Run this command:
-   ```powershell
-   wsl --update
-   ```
+### Step 2 — Run one command
 
-3. **Restart your computer** after the update completes
-
-4. Then install Docker Desktop (see above)
-
-✅ Make sure Docker Desktop is **running** before continuing to Step 2.
-
----
-
-### Step 2: Run One Command
-
-#### 🍎 **macOS / Linux**
-
-Open **Terminal** and paste:
+**macOS / Linux** — open Terminal and paste:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh -o install.sh && bash install.sh
 ```
 
-**macOS Note:** You may see a prompt asking "Terminal would like to make changes to your computer." Click **OK** to allow the installation to proceed.
-
-#### 🪟 **Windows**
-
-**Open PowerShell** (NOT Command Prompt):
-- Press **Windows + X** → click **Terminal** or **Windows PowerShell**
-- Or: Press **Windows key**, type `powershell`, press Enter
-
-Then paste this command:
+**Windows** — open **PowerShell** (not Command Prompt: Windows+X → Terminal) and paste:
 
 ```powershell
 irm https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.ps1 | iex
 ```
 
-**Note:** This command won't work in Command Prompt (cmd.exe) - you must use PowerShell.
+⏱️ The Docker image build takes **5-10 minutes**. Grab a coffee.
 
-⏱️ **Time Estimate:** 10-15 minutes for the build process • ☕ Grab a coffee while it builds!
+| Situation | Total time |
+|---|---|
+| Docker already installed and running | 10-15 min |
+| Need to install Docker first | 20-30 min |
+| Need WSL + Docker + a restart | 30-45 min |
 
-**Total time including Docker setup:**
-- Already have Docker running: **10-15 minutes**
-- Need to install Docker first: **20-30 minutes**
-- Need to install WSL + Docker + restart: **30-45 minutes**
+### Step 3 — Open a new terminal window
+
+**This matters.** The shortcuts don't exist in the window you installed from.
+Close it and open a fresh Terminal (macOS/Linux) or PowerShell (Windows).
+
+### Step 4 — Sign in, once
+
+```bash
+ccauth
+```
+
+Pick one of three options — your Claude account, an Anthropic API key, or UVA
+Amazon Bedrock. Whatever you choose applies everywhere.
+
+→ Full detail, including SSO and troubleshooting: **[docs/CREDENTIALS.md](docs/CREDENTIALS.md)**
+
+### Step 5 — Go
+
+```bash
+ccdocker     # Claude Code in your terminal
+ccvscode     # VS Code in your browser (http://localhost:8080)
+```
 
 ---
 
-### Step 3: Launch Claude Code
+## Using the browser IDE
 
-After installation completes, **close and reopen PowerShell** (Windows) or restart your terminal (macOS/Linux), then you can launch from anywhere:
+`ccvscode` opens VS Code in your browser. **There's no Claude Code button** — VS
+Code Server is just the editor. To use Claude Code in it:
 
-```bash
-ccdocker    # Launch Claude Code CLI
-```
+1. **Terminal → New Terminal** (or <kbd>Ctrl</kbd>+<kbd>`</kbd>)
+2. Type `claude`
 
-Or use VS Code Server:
+That terminal runs inside the container, so it shares the same sign-in and
+settings as `ccdocker`. `ccvscode` also drops a **START-HERE.md** into your
+workspace with these instructions.
 
-```bash
-ccvscode    # Opens http://localhost:8080
-```
-
-**⚠️ Important:** The shortcuts (`ccdocker`, `ccvscode`) only work after you **restart your PowerShell/Terminal window**. If they don't work, make sure you opened a fresh window after installation.
+→ [docs/CREDENTIALS.md](docs/CREDENTIALS.md) covers signing in from the IDE.
 
 ---
 
-## More Usage Options
+## Commands
 
-After installation, navigate to the `cc-install` directory:
+Available from anywhere after installation:
 
-```bash
-cd cc-install
-```
+| Command | What it does |
+|---|---|
+| `ccauth` | Set up or change how you sign in |
+| `ccdocker` | Claude Code in your terminal |
+| `ccvscode` | VS Code in your browser |
+| `ccstop` | Stop the container |
+| `ccrestart` | Restart the container (applies `.env` changes) |
+| `cclogs` | View container logs |
+| `ccdiagnose` | Check the install for problems |
+| `ccupdate` | Update to the latest version |
 
-### Option 1: Claude Code CLI
+<details>
+<summary>Running the scripts directly instead</summary>
 
-Launch Claude Code in your terminal:
+From inside the `cc-install` directory:
 
-**macOS / Linux:**
-```bash
-./claude
-```
+| | macOS / Linux | Windows |
+|---|---|---|
+| Claude Code | `./claude` | `claude.cmd` |
+| VS Code Server | `./vscode` | `vscode.cmd` |
+| Sign-in setup | `./scripts/installers/setup-credentials.sh` | `.\scripts\installers\setup-credentials.ps1` |
+| Diagnostics | `./scripts/maintenance/diagnose.sh` | `.\scripts\maintenance\diagnose.ps1` |
+| Update | `./scripts/maintenance/update.sh` | `.\scripts\maintenance\update.ps1` |
+| Backup | `./scripts/maintenance/backup.sh` | `.\scripts\maintenance\backup.ps1` |
+| Restore | `./scripts/maintenance/restore.sh <file>` | `.\scripts\maintenance\restore.ps1 <file>` |
+| Uninstall | `./scripts/maintenance/uninstall.sh` | `.\scripts\maintenance\uninstall.ps1` |
 
-**Windows:**
-```cmd
-claude.cmd
-```
-
-**Or use full path:**
-```bash
-./scripts/launchers/run_claude.sh    # macOS/Linux
-.\scripts\launchers\run_claude.ps1   # Windows
-```
-
-### Option 2: VS Code Server (Browser-Based IDE)
-
-Open VS Code Server in your web browser:
-
-**macOS / Linux:**
-```bash
-./vscode
-```
-
-**Windows:**
-```cmd
-vscode.cmd
-```
-
-**Or use full path:**
-```bash
-./scripts/launchers/run_vscode.sh    # macOS/Linux
-.\scripts\launchers\run_vscode.ps1   # Windows
-```
-
-This will:
-- Start VS Code Server in the container
-- Automatically open http://localhost:8080 in your browser
-- Give you a full IDE experience for editing files
-
-### Additional Commands
-
-#### View Container Logs
-**macOS / Linux:**
-```bash
-./scripts/launchers/run_claude.sh logs
-```
-
-**Windows:**
-```powershell
-.\scripts\launchers\run_claude.ps1 logs
-```
-
-#### Stop the Container
-**macOS / Linux:**
-```bash
-./scripts/launchers/run_claude.sh stop
-```
-
-**Windows:**
-```powershell
-.\scripts\launchers\run_claude.ps1 stop
-```
-
-#### Restart the Container
-**macOS / Linux:**
-```bash
-./scripts/launchers/run_claude.sh restart
-```
-
-**Windows:**
-```powershell
-.\scripts\launchers\run_claude.ps1 restart
-```
-
-#### Open a Bash Shell in the Container
-**macOS / Linux:**
-```bash
-./scripts/launchers/run_claude.sh bash
-```
-
-**Windows:**
-```powershell
-.\scripts\launchers\run_claude.ps1 bash
-```
-
-## Diagnostic & Maintenance Tools
-
-### Check for Updates
-
-Check if a newer version is available:
-
-**macOS / Linux:**
-```bash
-./scripts/maintenance/check-update.sh
-```
-
-**Windows:**
-```powershell
-.\scripts\maintenance\check-update.ps1
-```
-
-The update check happens automatically (silently) when you launch Claude Code. It caches results for 24 hours to avoid excessive network calls.
-
-### Run Diagnostics
-
-If you encounter issues, run the diagnostic tool to check your system:
-
-**macOS / Linux:**
-```bash
-./scripts/maintenance/diagnose.sh
-```
-
-**Windows:**
-```powershell
-.\scripts\maintenance\diagnose.ps1
-```
-
-The diagnostic tool checks:
-- ✅ Docker installation and daemon status
-- ✅ Docker Compose availability
-- ✅ Container status and health
-- ✅ Port availability (8080)
-- ✅ Disk space
-- ✅ Workspace and volumes
-- ✅ Docker image status
-- ✅ Installation version
-
-It also provides solutions for common issues.
+`run_claude.sh` / `.ps1` also accept `bash`, `logs`, `stop`, `restart`, `auth`.
+</details>
 
 ---
 
-## Pre-Installed Skills
+## Your files
 
-This installation comes with powerful Claude Code skills pre-installed for enhanced productivity:
+Everything lives in `cc-install/workspace/` on your computer. It's a normal
+folder — open it in Finder or Explorer, back it up, sync it. Inside the container
+it appears at `/home/claudeuser/workspace`, and the two stay in sync
+automatically.
 
-- **Anthropic Official Skills** - Official skill collection from Anthropic
-- **Andrej Karpathy Guidelines** - AI/ML best practices and coding patterns
-- **Superpowers by Jesse Vincent** - Advanced workflow and productivity skills
-
-These skills are automatically available when you launch Claude Code. You can list them with `/skills` or invoke them with `/<skill-name>`.
-
----
-
-## First-Time Setup
-
-When you first launch Claude Code, you'll be prompted to configure it:
-
-### 🎯 **Recommended: Amazon Bedrock (for UVA/Batten Users)**
-
-1. **AWS Credentials**: Use your university Amazon Bedrock account
-   - **Access Key ID** and **Secret Access Key** from your AWS account
-   - **Region**: Typically `us-east-1` or your organization's region
-   - **Benefits**: 
-     - ✅ Organization billing
-     - ✅ Better cost management
-     - ✅ Compliance with university policies
-
-Configure Bedrock by setting these environment variables or during Claude Code setup:
-```bash
-export AWS_ACCESS_KEY_ID="your-access-key"
-export AWS_SECRET_ACCESS_KEY="your-secret-key"
-export AWS_REGION="us-east-1"
-```
-
-### 💳 **Alternative: Anthropic API (Personal Use)**
-
-2. **Anthropic API Key**: For personal accounts
-   - Get one at: https://console.anthropic.com/
-   - **Note**: This will bill to your personal account
-   - The key will be securely stored in the Docker volume
-
-### ⚙️ **Preferences**
-
-Claude Code will guide you through setting:
-- Your preferred model (Opus, Sonnet, or Haiku)
-- Thinking level
-- Other preferences
-
-These settings are stored in the persistent `claude-config` Docker volume and will be remembered across container restarts.
-
-## Workspace
-
-All your files are stored in:
-```
-cc-install/workspace/
-```
-
-This directory:
-- Is directly accessible on your host machine (no Docker knowledge needed)
-- Persists across container restarts
-- Can be backed up like any normal folder
-- Is automatically synced between your host and the container
-
-## Troubleshooting
-
-**🔍 Need help?** Run the diagnostic tool first:
-
-**macOS / Linux:**
-```bash
-./scripts/maintenance/diagnose.sh
-```
-
-**Windows:**
-```powershell
-.\scripts\maintenance\diagnose.ps1
-```
-
-This will check your system and provide specific solutions for common issues.
+It survives container restarts, rebuilds and updates.
 
 ---
 
-### Docker Not Running
-```
-[ERROR] Docker daemon is not running
-```
+## Pre-installed skills
 
-**Solution**: Start Docker Desktop and wait for it to fully load, then try again.
+The image bundles skills so they're available the moment you start:
 
-### Port 8080 Already in Use
-```
-Error: port 8080 is already allocated
-```
+- **[Anthropic official skills](https://github.com/anthropics/skills)**
+- **[Andrej Karpathy guidelines](https://github.com/multica-ai/andrej-karpathy-skills)** — AI/ML practices and coding patterns
+- **[Superpowers](https://github.com/obra/superpowers)** by Jesse Vincent — workflow and productivity
 
-**Solution**: 
-1. Stop any other applications using port 8080, or
-2. Edit `docker-compose.yml` to change `"8080:8080"` to a different port like `"8081:8080"`
+List them with `/skills`, invoke with `/<skill-name>`. They're refreshed on every
+`ccupdate`, and any skills you add yourself are left alone.
 
-### Container Won't Start
-```
-[ERROR] Container failed to start properly
-```
-
-**Solution**:
-1. Check Docker Desktop is running
-2. View logs: `docker compose logs`
-3. Try rebuilding: `./scripts/maintenance/update.sh` (macOS/Linux) or `.\scripts\maintenance\update.ps1` (Windows)
-
-### Claude Code Command Not Found
-```
-claude: command not found
-```
-
-**Solution**: The container may need a moment to fully start. Wait 10 seconds and try again. If it persists, rebuild with `./scripts/maintenance/update.sh`
-
-### Installation Fails During Build
-
-**Solution**:
-1. Ensure you have a stable internet connection
-2. Ensure you have enough disk space (~2GB)
-3. Try running the installation again
-4. Check Docker Desktop has enough resources allocated (Settings → Resources)
+---
 
 ## Updating
 
-To update to the latest versions of Claude Code and VS Code Server, run the update script from the `cc-install` directory:
-
-**macOS / Linux:**
 ```bash
-cd cc-install
-./scripts/maintenance/update.sh
+ccupdate
 ```
 
-**Windows:**
-```powershell
-cd cc-install
-.\scripts\maintenance\update.ps1
-```
+This updates **both** the cc-install scripts and the Docker image (which pulls
+the latest Claude Code and code-server). Your `workspace/`, sign-in and settings
+are untouched.
 
-This will rebuild the Docker image with the latest versions while preserving your workspace and settings.
+<details>
+<summary>Why you can't use Claude Code's built-in updater here</summary>
 
-### How updating works (important)
+Claude Code is baked into the Docker image, not stored in a persistent volume.
+An update applied inside a running container is discarded the next time the image
+is rebuilt. `ccupdate` is the durable path: it re-downloads the cc-install files,
+rebuilds the image from scratch (`--no-cache`, so the official installer re-runs
+and fetches the latest Claude Code), restarts the container, refreshes your
+shortcuts, and prints the new versions.
 
-Because Claude Code runs inside a Docker container here, you **cannot** update it the normal way (Claude Code's built-in self-updater). Any update made inside the running container is lost the next time the image is rebuilt, because the Claude Code CLI is baked into the image — not stored in a persistent volume.
+There's no way to pin a specific Claude Code version without editing the
+`Dockerfile`.
 
-**The update script is the only durable way to update.** When you run it, the script:
-
-1. Stops the container
-2. Rebuilds the Docker image from scratch (`--no-cache`), which re-runs the official Claude Code installer and pulls the **latest** version
-3. Restarts the container
-4. Prints the new Claude Code and code-server versions so you can confirm
-
-Your `workspace/` files and your Claude Code settings (the `claude-config` volume) are **not** touched — they live outside the image.
-
-> **Note on versions:** This always installs the *latest* available Claude Code. There is no way to pin a specific version without editing the `Dockerfile`.
-
-### About the "update available" notification
-
-When you launch Claude Code, you may occasionally see a notification that an update is available. This refers to a new version of **this installer (cc-install)** — not Claude Code itself. Running the update script above gets you both: the latest installer features *and* a rebuild with the latest Claude Code.
-
-## Backup and Restore
-
-### Create a Backup
-
-**macOS / Linux:**
-```bash
-./scripts/maintenance/backup.sh
-```
-
-**Windows:**
-```powershell
-.\scripts\maintenance\backup.ps1
-```
-
-This creates a timestamped backup of your workspace directory.
-
-### Restore from Backup
-
-**macOS / Linux:**
-```bash
-./scripts/maintenance/restore.sh <backup-file.tar.gz>
-```
-
-**Windows:**
-```powershell
-.\scripts\maintenance\restore.ps1 <backup-file.zip>
-```
-
-## Uninstalling
-
-To completely remove the installation:
-
-**macOS / Linux:**
-```bash
-./scripts/maintenance/uninstall.sh
-```
-
-**Windows:**
-```powershell
-.\scripts\maintenance\uninstall.ps1
-```
-
-This will:
-- Stop and remove the container
-- Remove the Docker image
-- Remove Docker volumes (with confirmation)
-- Optionally remove the installation directory
-
-**Note**: Your `workspace/` directory will NOT be deleted unless you explicitly confirm.
-
-## Architecture
-
-This project uses Docker to create a containerized environment with:
-
-- **Base OS**: Debian Bookworm (lightweight Linux)
-- **Claude Code**: Latest version installed via official script
-- **VS Code Server**: Browser-based VS Code (code-server v4.117.0)
-- **Node.js**: v20 LTS (required for code-server)
-- **User**: Non-root user `claudeuser` for security
-
-### File Structure
-
-```
-cc-install/
-├── docker-compose.yml    # Container orchestration
-├── Dockerfile            # Image definition
-├── workspace/            # Your files (persisted)
-├── run_claude.sh         # Claude Code launcher (macOS/Linux)
-├── run_claude.ps1        # Claude Code launcher (Windows)
-├── run_vscode.sh         # VS Code Server launcher (macOS/Linux)
-├── run_vscode.ps1        # VS Code Server launcher (Windows)
-├── update.sh/.ps1        # Update scripts
-├── backup.sh/.ps1        # Backup scripts
-├── uninstall.sh/.ps1     # Uninstall scripts
-└── README.md             # This file
-```
-
-## FAQ
-
-### Do I need to know Docker to use this?
-
-**No!** The installation and launcher scripts handle all Docker operations for you. You never need to run `docker` commands directly.
-
-### Where is my data stored?
-
-Your files are in `workspace/` on your computer and `/home/claudeuser/workspace` in the container. They're automatically synced.
-
-Your Claude Code settings are in a Docker volume named `claude-config` that persists across container restarts.
-
-### Can I use my existing Claude Code installation?
-
-This is a separate, containerized installation that won't conflict with any existing Claude Code installation on your host machine. They use different configuration directories.
-
-### What happens if I delete the container?
-
-Your workspace files and Claude Code settings are safe — they're stored in persistent locations outside the container. You can rebuild the container with `./scripts/maintenance/update.sh` and everything will still be there.
-
-### Can I customize the environment?
-
-Yes! You can edit the `Dockerfile` to add additional packages or tools, then run `./scripts/maintenance/update.sh` to rebuild with your changes.
-
-### How much disk space does this use?
-
-The Docker image is approximately **1.5-2 GB**. Your workspace will grow based on the files you create.
-
-### Can multiple people use this on the same computer?
-
-Yes, but each user should run the installation in their own user directory. Each installation will have its own workspace and settings.
-
-### Is this secure?
-
-- The container runs as a non-root user (`claudeuser`)
-- VS Code Server runs without authentication (localhost only by default)
-- Your API keys are stored securely in Docker volumes
-- The container is isolated from your host system
-
-For production or shared environments, you may want to add authentication to code-server.
-
-## Support
-
-- **Claude Code Documentation**: https://docs.anthropic.com/
-- **Code-Server Documentation**: https://coder.com/docs/code-server/
-- **DAAF Project** (inspiration): https://github.com/DAAF-Contribution-Community/daaf
-
-## Attribution
-
-This project is inspired by the [DAAF (Data Analysis Agent Framework)](https://github.com/DAAF-Contribution-Community/daaf) project. We've adapted their excellent Docker-based installation approach for Claude Code. See [ATTRIBUTION.md](ATTRIBUTION.md) for full details.
-
-## License
-
-This project is provided as-is for educational and research purposes. Claude Code is a product of Anthropic. See Anthropic's terms of service for Claude Code usage.
+**About the "update available" notice:** it refers to a new version of *this
+installer*. Running `ccupdate` gets you both that and the latest Claude Code.
+</details>
 
 ---
 
-**Made with ❤️ for anyone who wants to explore AI-assisted coding without the technical setup hassle.**
+## Backup and restore
+
+```bash
+./scripts/maintenance/backup.sh              # timestamped archive of workspace/
+./scripts/maintenance/restore.sh <file>      # restore from one
+```
+
+Windows: `.\scripts\maintenance\backup.ps1` and `restore.ps1 <file>`.
+
+---
+
+## Troubleshooting
+
+**Run this first:**
+
+```bash
+ccdiagnose
+```
+
+It checks Docker, the container, the port, disk space, volumes, your sign-in
+setup, and whether the browser IDE is exposed to your network — and suggests a
+fix for each problem it finds.
+
+<details>
+<summary>Common problems</summary>
+
+**`ccdocker: command not found`**
+Open a *new* terminal window. If it persists, run
+`bash scripts/installers/setup-shortcuts.sh` from your cc-install folder
+(`.\scripts\installers\setup-shortcuts.ps1` on Windows).
+
+**`[ERROR] Docker daemon is not running`**
+Start Docker Desktop, wait for it to finish loading, try again.
+
+**`port 8080 is already allocated`**
+Copy `docker-compose.override.yml.example` to `docker-compose.override.yml` and
+change the port to `127.0.0.1:8081:8080`. Then use `http://localhost:8081`.
+
+**Container won't start**
+`docker compose logs` to see why, then `ccupdate` to rebuild.
+
+**`claude: command not found` inside the container**
+Give the container ~10 seconds to finish starting. If it persists, `ccupdate`.
+
+**Build fails**
+Check your internet connection, confirm you have ~3 GB of free disk space, and
+check Docker Desktop has enough resources (Settings → Resources). Then retry.
+
+**Claude Code keeps asking me to sign in**
+See [docs/CREDENTIALS.md](docs/CREDENTIALS.md) — usually a leftover
+`ANTHROPIC_API_KEY` in `.env` overriding your account login.
+</details>
+
+---
+
+## Uninstalling
+
+```bash
+./scripts/maintenance/uninstall.sh      # or uninstall.ps1 on Windows
+```
+
+Stops and removes the container, removes the image, and removes the Docker
+volumes (with confirmation). Your `workspace/` is **not** deleted unless you
+explicitly confirm.
+
+---
+
+## How it works
+
+A single Docker container running:
+
+- **Debian Bookworm** (slim)
+- **Claude Code** — latest, via Anthropic's official installer
+- **code-server 4.133.0** — VS Code in the browser
+- **Node.js 22 LTS** — required by code-server
+- **Non-root user** `claudeuser` (UID 1000)
+
+Image size is roughly **1.5-2 GB**.
+
+```
+cc-install/
+├── Dockerfile                          # image definition
+├── docker-compose.yml                  # container orchestration
+├── docker-compose.override.yml.example # optional local tweaks (ports, ~/.aws)
+├── .env.example                         # credential template → copy to .env
+├── VERSION
+├── claude / claude.cmd                  # root launcher: Claude Code
+├── vscode / vscode.cmd                  # root launcher: VS Code Server
+├── workspace/                           # your files (persisted, gitignored)
+├── scripts/
+│   ├── container/   entrypoint.sh                       # runs inside the image
+│   ├── installers/  install, setup-shortcuts, setup-credentials
+│   ├── launchers/   run_claude, run_vscode
+│   └── maintenance/ update, backup, restore, uninstall, check-update, diagnose
+└── docs/
+    ├── CREDENTIALS.md      # signing in
+    ├── INSTALL_GUIDE.md    # step-by-step for non-technical users
+    ├── QUICK_REFERENCE.md  # cheat sheet
+    ├── DEVELOPMENT.md      # for maintainers
+    └── installGuides/      # PDF / HTML guides
+```
+
+Every script exists in both `.sh` (macOS/Linux) and `.ps1` (Windows) form.
+
+### Security
+
+- Container runs as a non-root user, isolated from your host filesystem apart
+  from `workspace/`.
+- The browser IDE is published on **`127.0.0.1` only** — reachable from your
+  computer and nothing else. It runs without a password on that basis; anyone who
+  can open the page gets a shell in the container, so if you expose the port to
+  your network, set `CC_VSCODE_PASSWORD` in `.env` first.
+- `.env` holds credentials in plain text, `chmod 600`, and is gitignored.
+- `ccdiagnose` flags an exposed port or loose `.env` permissions.
+
+---
+
+## FAQ
+
+**Do I need to know Docker?** No. The scripts handle all of it.
+
+**Will this conflict with Claude Code already installed on my machine?** No —
+it's fully containerized with its own config.
+
+**What if I delete the container?** Your files (`workspace/`) and settings
+(`claude-config` volume) live outside it. `ccupdate` rebuilds and everything's
+still there.
+
+**Can I customise the environment?** Yes — edit the `Dockerfile` and run
+`ccupdate`. For ports, extra mounts or resource limits, use
+`docker-compose.override.yml.example` instead, which survives updates.
+
+**Can several people use one computer?** Yes, but each person should install
+under their own user account so they get their own workspace and settings.
+
+---
+
+## Support
+
+- **Claude Code docs** — <https://docs.claude.com/en/docs/claude-code>
+- **code-server docs** — <https://coder.com/docs/code-server/>
+- **Docker docs** — <https://docs.docker.com/>
+- **DAAF** (inspiration) — <https://github.com/DAAF-Contribution-Community/daaf>
+
+## License
+
+Provided as-is for educational and research purposes. Claude Code is a product of
+Anthropic; see Anthropic's terms of service for usage.
+
+---
+
+**Made for anyone who wants to explore AI-assisted coding without the setup hassle.**

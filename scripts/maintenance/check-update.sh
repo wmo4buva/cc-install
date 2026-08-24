@@ -96,6 +96,8 @@ if [ "${1:-}" = "--silent" ]; then
     check_for_updates 2>/dev/null || true
 else
     if ! check_for_updates; then
-        echo -e "${GREEN}✓${NC} You're running the latest version ($local_version)"
+        # $local_version is `local` to check_for_updates and is NOT in scope
+        # here — referencing it used to abort the script under `set -u`.
+        echo -e "${GREEN}✓${NC} You're running the latest version ($(get_local_version))"
     fi
 fi

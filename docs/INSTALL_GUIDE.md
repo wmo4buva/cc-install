@@ -118,11 +118,14 @@ use with your mouse.
 
 | Command | What it does |
 |---|---|
+| `ccauth` | Set up or change how you sign in |
 | `ccdocker` | Launch Claude Code (the AI assistant) |
 | `ccvscode` | Launch the browser-based VS Code editor |
 | `ccstop` | Stop Claude Code when you're done for the day |
 | `ccrestart` | Restart it if something seems stuck |
 | `cclogs` | Show technical logs (mainly for troubleshooting) |
+| `ccdiagnose` | Check your install if something looks wrong |
+| `ccupdate` | Update to the newest version |
 
 > **Shortcuts not found?** Make sure you opened a **brand-new terminal window**
 > after the install finished. On Mac you can always fall back to:
@@ -130,20 +133,55 @@ use with your mouse.
 
 ---
 
-## Step 4 — First-time sign-in (Amazon Bedrock)
+## Step 4 — Sign in (once)
 
-The **first time** you run `ccdocker`, Claude Code asks how to connect to the AI.
-Choose **Amazon Bedrock** and enter the credentials Batten IT gave you:
+Before Claude Code can do anything, it needs to know who's paying for it. Type:
+
+```bash
+ccauth
+```
+
+It asks you to pick one of three options:
+
+**1) My Claude account** — choose this if you have a Claude Pro, Max or Team
+subscription. Nothing to type here. Afterwards run `ccdocker`; Claude Code shows
+a web address, you sign in there, and paste back the code it gives you. Once
+only.
+
+**2) Anthropic API key** — a personal key from
+<https://console.anthropic.com/settings/keys>. Usage is billed to whoever owns
+the key, so this is the personal-cost option.
+
+**3) Amazon Bedrock** — the **UVA option**. Usage is billed to the university,
+not to you. Enter the credentials Batten IT gave you:
 
 - **AWS Access Key ID**
 - **AWS Secret Access Key**
-- **Region** (usually `us-east-1` — Batten IT will confirm)
+- **Region** (press Enter to accept `us-east-1` unless told otherwise)
 
-This connects Claude Code to UVA's account, so **usage is billed to the
-university, not to you**. You only enter these once — they're remembered securely
-for next time.
+Whichever you pick, it applies to **both** `ccdocker` and `ccvscode`. You only do
+this once — it's remembered, and it survives updates.
 
-> Don't have Bedrock credentials yet? **Contact Batten IT** — they'll issue them.
+> Don't have Bedrock credentials? **Contact Batten IT** — they'll issue them.
+>
+> Need more detail, or hit a problem? See
+> [CREDENTIALS.md](CREDENTIALS.md).
+
+---
+
+## Using the browser editor
+
+If you prefer clicking to typing, run `ccvscode`. One thing surprises everyone:
+
+**There's no Claude Code button in the browser editor.** VS Code is just the
+editor. To use Claude Code inside it:
+
+1. In the menu, choose **Terminal → New Terminal**
+2. Type `claude` and press Enter
+
+Claude Code then runs in the panel at the bottom, with the same sign-in you set
+up in Step 4. There's also a **START-HERE.md** file waiting in your workspace
+with these instructions.
 
 ---
 
@@ -173,24 +211,18 @@ for next time.
 ## Keeping it up to date
 
 Because Claude Code runs inside a managed container, the normal "self-update"
-won't stick. To update properly, run the update script from the `cc-install`
-folder:
+won't stick. To update properly, type:
 
-**macOS / Linux:**
 ```bash
-cd cc-install
-./scripts/maintenance/update.sh
+ccupdate
 ```
 
-**Windows:**
-```powershell
-cd cc-install
-.\scripts\maintenance\update.ps1
-```
+That gets you the latest Claude Code, the latest editor, and the latest version
+of the installer scripts — **without touching your `workspace` files or your
+sign-in**. It's the right thing to do whenever you see an "update available"
+message.
 
-This rebuilds with the latest Claude Code **without touching your `workspace`
-files or your saved settings**. It's the recommended thing to do if you ever see
-an "update available" message.
+It takes 5-10 minutes, because it rebuilds the environment from scratch.
 
 ---
 
@@ -218,19 +250,11 @@ This creates a dated backup you can restore later with the matching
 
 ## Troubleshooting
 
-**Try the diagnostic tool first** — it checks Docker, ports, disk space, and your
-container, then tells you exactly what's wrong and how to fix it:
+**Try the diagnostic tool first** — it checks Docker, ports, disk space, your
+container and your sign-in, then tells you exactly what's wrong and how to fix it:
 
-**macOS / Linux:**
 ```bash
-cd cc-install
-./scripts/maintenance/diagnose.sh
-```
-
-**Windows:**
-```powershell
-cd cc-install
-.\scripts\maintenance\diagnose.ps1
+ccdiagnose
 ```
 
 ### Common issues
@@ -241,8 +265,10 @@ cd cc-install
 | *"Docker daemon is not running"* | Open **Docker Desktop** and wait until it says "running," then try again. |
 | The install command *"doesn't work"* on Windows | Make sure you're in **PowerShell**, not Command Prompt (cmd). |
 | Browser editor won't open | Wait ~10 seconds after `ccvscode`, then visit **http://localhost:8080** manually. |
-| *"port 8080 already allocated"* | Something else is using that port. Run the diagnostic tool, or contact Batten IT. |
-| Everything seems stuck | Run `ccrestart`, or run the diagnostic tool above. |
+| *"port 8080 already allocated"* | Something else is using that port. Run `ccdiagnose`, or contact Batten IT. |
+| **Can't find Claude Code in the browser editor** | There's no button. Use **Terminal → New Terminal** and type `claude`. |
+| It keeps asking you to sign in | Run `ccdiagnose`, then `ccauth`. See [CREDENTIALS.md](CREDENTIALS.md). |
+| Everything seems stuck | Run `ccrestart`, or run `ccdiagnose`. |
 
 ---
 

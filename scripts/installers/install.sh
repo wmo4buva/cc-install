@@ -1,23 +1,39 @@
 #!/usr/bin/env bash
-# Claude Code Installer - Installation Script for macOS/Linux
+# Claude Code Installer - installation script for macOS/Linux
 # Inspired by DAAF (https://github.com/DAAF-Contribution-Community/daaf)
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh -o install.sh && bash install.sh
+#
+# Environment overrides:
+#   CC_INSTALL_DIR=my-dir     install somewhere other than ./cc-install
+#   CC_INSTALL_REF=v1.3.0     install a specific tag/branch instead of main
+#   CC_INSTALL_VERBOSE=1      show every step
+#   CC_INSTALL_DRY_RUN=1      go through the motions without changing anything
 
 set -euo pipefail
 
-# Configuration
-REPO_URL="https://raw.githubusercontent.com/wmo4buva/cc-install/main"
+REPO_SLUG="wmo4buva/cc-install"
+REF="${CC_INSTALL_REF:-main}"
+TARBALL_URL="https://codeload.github.com/${REPO_SLUG}/tar.gz/${REF}"
 INSTALL_DIR="${CC_INSTALL_DIR:-cc-install}"
 VERBOSE="${CC_INSTALL_VERBOSE:-0}"
 DRY_RUN="${CC_INSTALL_DRY_RUN:-0}"
 
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+BOLD='\033[1m'
+NC='\033[0m'
 
-# Enable interactive mode detection
+log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+log_warn()    { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+log_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
+log_verbose() { [ "$VERBOSE" = "1" ] && echo -e "${BLUE}[VERBOSE]${NC} $1" || true; }
+
+# If stdin isn't a terminal (piped install), try to reattach so prompts work.
 if [ -t 0 ]; then
     INTERACTIVE=1
 else
@@ -25,55 +41,16 @@ else
     exec < /dev/tty 2>/dev/null || INTERACTIVE=0
 fi
 
-# Exit trap for interactive sessions
 if [ "$INTERACTIVE" = "1" ]; then
-    trap 'echo -e "\n${YELLOW}Press Enter to exit...${NC}"; read' EXIT
+    trap 'echo -e "\n${YELLOW}Press Enter to exit...${NC}"; read -r' EXIT
 fi
 
-# Logging functions
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-log_warn() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-log_verbose() {
-    if [ "$VERBOSE" = "1" ]; then
-        echo -e "${BLUE}[VERBOSE]${NC} $1"
-    fi
-}
-
-# Dry-run mock commands
 if [ "$DRY_RUN" = "1" ]; then
     log_warn "DRY RUN MODE - No actual changes will be made"
     docker() {
         echo "[DRY RUN] docker $*"
-        if [ "$1" = "info" ]; then
-            return 0
-        fi
-    }
-    curl() {
-        echo "[DRY RUN] curl $*"
-        touch "${@: -1}" 2>/dev/null || true
+        [ "${1:-}" = "info" ] && return 0
         return 0
-    }
-    mkdir() {
-        echo "[DRY RUN] mkdir $*"
-        command mkdir "$@"
-    }
-    cd() {
-        echo "[DRY RUN] cd $*"
-        command cd "$@"
     }
 fi
 
@@ -82,11 +59,18 @@ if [ "${CC_INSTALL_TEST_MODE:-0}" = "1" ]; then
     return 0 2>/dev/null || exit 0
 fi
 
-# Preflight checks
+# ---------------------------------------------------------------------------
+
 preflight_checks() {
     log_info "Running preflight checks..."
 
-    # Check Docker installation
+    for tool in curl tar; do
+        if ! command -v "$tool" &> /dev/null; then
+            log_error "'$tool' is required but not installed"
+            exit 1
+        fi
+    done
+
     if ! command -v docker &> /dev/null; then
         log_error "Docker is not installed or not in PATH"
         echo ""
@@ -107,12 +91,11 @@ preflight_checks() {
     fi
     log_verbose "Docker found: $(docker --version)"
 
-    # Check Docker daemon
     if ! docker info &> /dev/null; then
         log_error "Docker daemon is not running"
         echo ""
         echo "╔═══════════════════════════════════════════════════════════╗"
-        echo "║  Docker is installed but not running                     ║"
+        echo "║  Docker is installed but not running                      ║"
         echo "╚═══════════════════════════════════════════════════════════╝"
         echo ""
         echo "🚀 Please start Docker Desktop:"
@@ -126,7 +109,6 @@ preflight_checks() {
             echo "   • Find Docker Desktop in your applications menu"
             echo "   • Start it and wait ~30 seconds"
             echo "   • Look for the Docker icon in your system tray"
-            echo "   • Icon should indicate 'running' status"
         fi
         echo ""
         echo "⏱️  Docker typically takes 20-30 seconds to start"
@@ -137,112 +119,76 @@ preflight_checks() {
     fi
     log_verbose "Docker daemon is running"
 
-    # Check for existing installation
+    if ! docker compose version &> /dev/null; then
+        log_error "Docker Compose V2 is not available"
+        echo "Please update Docker Desktop to a recent version and try again."
+        exit 1
+    fi
+
     if [ -d "$INSTALL_DIR" ]; then
         log_warn "Directory '$INSTALL_DIR' already exists"
-        echo -n "Do you want to overwrite it? This will remove existing data. (y/N): "
+        echo ""
+        echo "If this is an existing cc-install, you probably want to UPDATE it"
+        echo "instead — that keeps your files and sign-in:"
+        echo -e "    ${GREEN}cd $INSTALL_DIR && ./scripts/maintenance/update.sh${NC}"
+        echo ""
+        echo -n "Overwrite it instead? Your workspace/ and .env will be kept. (y/N): "
         read -r response
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
             log_info "Installation cancelled"
             exit 0
         fi
-        log_info "Removing existing directory..."
-        rm -rf "$INSTALL_DIR"
     fi
 
     log_success "Preflight checks passed"
 }
 
-# Download required files
+# Download the whole repository as a tarball.
+#
+# This used to fetch a hardcoded list of individual files, which drifted out of
+# sync every time a file was added — that's how VERSION went missing (making
+# every install permanently report "update available") and it would now also
+# miss the Dockerfile's entrypoint. One archive can't drift.
 download_files() {
-    log_info "Step 1/5: Downloading required files..."
+    log_info "Step 1/5: Downloading cc-install ($REF)..."
 
-    # Root files
-    local root_files=(
-        "Dockerfile"
-        "docker-compose.yml"
-        ".dockerignore"
-        "README.md"
-        "claude"
-        "vscode"
-        "claude.cmd"
-        "vscode.cmd"
-    )
+    if [ "$DRY_RUN" = "1" ]; then
+        echo "[DRY RUN] Would download $TARBALL_URL into $INSTALL_DIR"
+        mkdir -p "$INSTALL_DIR"
+        return 0
+    fi
 
-    # Launcher scripts
-    local launcher_files=(
-        "scripts/launchers/run_claude.sh"
-        "scripts/launchers/run_vscode.sh"
-    )
+    local tmp_dir tarball
+    tmp_dir="$(mktemp -d)"
+    tarball="$tmp_dir/cc-install.tar.gz"
 
-    # Installer scripts
-    local installer_files=(
-        "scripts/installers/setup-shortcuts.sh"
-        "scripts/installers/setup-shortcuts.ps1"
-    )
+    if ! curl -fsSL "$TARBALL_URL" -o "$tarball"; then
+        rm -rf "$tmp_dir"
+        log_error "Failed to download from $TARBALL_URL"
+        echo "Check your internet connection, then try again."
+        exit 1
+    fi
 
-    # Maintenance scripts
-    local maintenance_files=(
-        "scripts/maintenance/update.sh"
-        "scripts/maintenance/backup.sh"
-        "scripts/maintenance/uninstall.sh"
-        "scripts/maintenance/restore.sh"
-        "scripts/maintenance/check-update.sh"
-        "scripts/maintenance/diagnose.sh"
-        "scripts/maintenance/check-update.ps1"
-        "scripts/maintenance/diagnose.ps1"
-    )
+    mkdir -p "$INSTALL_DIR"
+    # --strip-components=1 drops the "cc-install-main/" wrapper directory.
+    # Extracting over an existing directory deliberately leaves workspace/ and
+    # .env alone — the archive doesn't contain them.
+    if ! tar -xzf "$tarball" -C "$INSTALL_DIR" --strip-components=1; then
+        rm -rf "$tmp_dir"
+        log_error "Failed to extract the download"
+        exit 1
+    fi
+    rm -rf "$tmp_dir"
 
-    # Download root files
-    for file in "${root_files[@]}"; do
-        log_verbose "Downloading $file..."
-        if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
-            log_error "Failed to download $file"
-            exit 1
-        fi
-    done
+    chmod +x "$INSTALL_DIR/claude" "$INSTALL_DIR/vscode" 2>/dev/null || true
+    find "$INSTALL_DIR/scripts" -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
 
-    # Download launcher scripts
-    mkdir -p scripts/launchers
-    for file in "${launcher_files[@]}"; do
-        log_verbose "Downloading $file..."
-        if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
-            log_error "Failed to download $file"
-            exit 1
-        fi
-    done
-
-    # Download installer scripts
-    mkdir -p scripts/installers
-    for file in "${installer_files[@]}"; do
-        log_verbose "Downloading $file..."
-        if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
-            log_error "Failed to download $file"
-            exit 1
-        fi
-    done
-
-    # Download maintenance scripts
-    mkdir -p scripts/maintenance
-    for file in "${maintenance_files[@]}"; do
-        log_verbose "Downloading $file..."
-        if ! curl -fsSL "$REPO_URL/$file" -o "$file"; then
-            log_error "Failed to download $file"
-            exit 1
-        fi
-    done
-
-    # Make scripts executable
-    chmod +x claude vscode
-    chmod +x scripts/launchers/*.sh
-    chmod +x scripts/maintenance/*.sh
-
-    log_success "All files downloaded successfully"
+    log_success "Files downloaded"
 }
 
-# Build Docker image
 build_image() {
-    log_info "Step 2/5: Building Docker image (this may take a few minutes)..."
+    log_info "Step 2/5: Building Docker image (this takes 5-10 minutes)..."
+    echo "        ☕ Good time to grab a coffee."
 
     if ! docker compose build --progress plain; then
         log_error "Failed to build Docker image"
@@ -253,7 +199,6 @@ build_image() {
     log_success "Docker image built successfully"
 }
 
-# Start container
 start_container() {
     log_info "Step 3/5: Starting container..."
 
@@ -262,19 +207,16 @@ start_container() {
         exit 1
     fi
 
-    # Wait for container to be ready
     log_info "Waiting for container to be ready..."
-    local max_attempts=30
     local attempt=0
-
-    while [ $attempt -lt $max_attempts ]; do
-        if docker compose exec -T claude-code test -f /home/claudeuser/.local/bin/claude 2>/dev/null; then
+    while [ $attempt -lt 30 ]; do
+        if docker compose exec -T claude-code test -x /home/claudeuser/.local/bin/claude 2>/dev/null; then
             log_success "Container is ready"
             return 0
         fi
         sleep 2
-        ((attempt++))
-        log_verbose "Attempt $attempt/$max_attempts..."
+        attempt=$((attempt + 1))
+        log_verbose "Attempt $attempt/30..."
     done
 
     log_error "Container failed to start properly"
@@ -282,102 +224,100 @@ start_container() {
     exit 1
 }
 
-# Initialize workspace
 initialize_workspace() {
     log_info "Step 4/5: Initializing workspace..."
 
-    # Create workspace directory if it doesn't exist
     mkdir -p workspace
 
-    # Create a welcome file
+    # Seed .env so credentials have somewhere to live and Compose always finds
+    # the file. It contains only comments until the user runs ccauth.
+    if [ ! -f .env ] && [ -f .env.example ]; then
+        cp .env.example .env
+        chmod 600 .env
+    fi
+
     cat > workspace/WELCOME.md << 'EOF'
-# Welcome to Claude Code!
+# Welcome to Claude Code
 
-This is your workspace directory. All files you create or edit in Claude Code will be stored here.
+Everything you put in this folder is saved on your computer (in `workspace/`)
+and is visible inside Claude Code. It survives restarts and updates.
 
-## Getting Started
+## Two ways to use it
 
-1. Your Claude Code installation is ready to use
-2. Run `./claude` (or `ccdocker`) to start Claude Code CLI
-3. Run `./vscode` (or `ccvscode`) to open VS Code Server in your browser
-4. Your files in this directory will persist across container restarts
+| Command | What you get |
+|---|---|
+| `ccdocker` | Claude Code in your terminal |
+| `ccvscode` | VS Code in your browser, with Claude Code in its terminal |
 
-## Need Help?
+## Signing in
 
-- See README.md for detailed usage instructions
-- Visit https://claude.ai/code for Claude Code documentation
-- Check the ATTRIBUTION.md file to learn about the project inspiration
+Run `ccauth` once and pick how you want to sign in — your Claude account, an
+Anthropic API key, or UVA Amazon Bedrock. It applies to both commands above.
 
-Happy coding!
+Using `ccvscode`? There's no Claude Code button in the browser IDE. Open
+**Terminal → New Terminal** and type `claude`.
+
+Full detail: `docs/CREDENTIALS.md`.
+
+## Other commands
+
+`ccstop` stop the container · `ccrestart` restart it · `cclogs` view logs
+
+Docs: `README.md`, `docs/QUICK_REFERENCE.md`
 EOF
 
     log_success "Workspace initialized"
 }
 
-# Print success message
 print_success_message() {
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║                                                           ║${NC}"
     echo -e "${GREEN}║   Claude Code Installation Complete!                      ║${NC}"
-    echo -e "${GREEN}║                                                           ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${BLUE}Next Steps:${NC}"
+    echo -e "${YELLOW}⚠  First: open a NEW Terminal window.${NC}"
+    echo -e "   The shortcuts below won't exist in this one."
     echo ""
-    echo -e "  ${GREEN}1.${NC} Navigate to the installation directory:"
-    echo -e "     ${YELLOW}cd $INSTALL_DIR${NC}"
+    echo -e "${BOLD}Then, in the new window:${NC}"
     echo ""
-    echo -e "  ${GREEN}2.${NC} Launch Claude Code CLI:"
-    echo -e "     ${YELLOW}./claude${NC}"
+    echo -e "  ${GREEN}1.${NC} Set up how you sign in (once):"
+    echo -e "     ${YELLOW}ccauth${NC}"
     echo ""
-    echo -e "  ${GREEN}3.${NC} Or open VS Code Server in your browser:"
-    echo -e "     ${YELLOW}./vscode${NC}"
+    echo -e "  ${GREEN}2.${NC} Start Claude Code:"
+    echo -e "     ${YELLOW}ccdocker${NC}     in your terminal"
+    echo -e "     ${YELLOW}ccvscode${NC}     in your browser (VS Code)"
     echo ""
-    echo -e "  ${GREEN}4.${NC} Your files will be stored in:"
-    echo -e "     ${YELLOW}$INSTALL_DIR/workspace/${NC}"
+    echo -e "  ${GREEN}3.${NC} Your files live in:"
+    echo -e "     ${YELLOW}$(pwd)/workspace/${NC}"
     echo ""
-    echo -e "${BLUE}Useful Commands (from $INSTALL_DIR directory):${NC}"
+    echo -e "${BLUE}Using ccvscode?${NC} There's no Claude Code button in the browser IDE."
+    echo -e "Open ${BOLD}Terminal → New Terminal${NC} and type ${YELLOW}claude${NC}."
     echo ""
-    echo -e "  ${YELLOW}./scripts/maintenance/update.sh${NC}      - Update to latest versions"
-    echo -e "  ${YELLOW}./scripts/maintenance/backup.sh${NC}      - Backup your workspace"
-    echo -e "  ${YELLOW}./scripts/maintenance/uninstall.sh${NC}   - Remove everything"
+    echo -e "${BLUE}Maintenance:${NC}"
+    echo -e "  ${YELLOW}./scripts/maintenance/update.sh${NC}     update to the latest version"
+    echo -e "  ${YELLOW}./scripts/maintenance/diagnose.sh${NC}   check for problems"
+    echo -e "  ${YELLOW}./scripts/maintenance/backup.sh${NC}     back up your workspace"
     echo ""
-    echo -e "${BLUE}First-Time Setup:${NC}"
-    echo ""
-    echo -e "  When you first launch Claude Code, you'll need to:"
-    echo -e "  - ${YELLOW}Enter your UVA Amazon Bedrock credentials${NC}"
-    echo -e "    (AWS access key, secret key, and region — billed to UVA)"
-    echo -e "  - Configure your preferences"
-    echo -e "  ${BLUE}See README.md → \"First-Time Setup\" for details.${NC}"
-    echo ""
-    echo -e "${GREEN}For more information, see README.md${NC}"
+    echo -e "Docs: ${BLUE}README.md${NC} · sign-in help: ${BLUE}docs/CREDENTIALS.md${NC}"
     echo ""
 }
 
-# Main installation flow
 main() {
     echo ""
     echo -e "${BLUE}╔═══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║                                                           ║${NC}"
     echo -e "${BLUE}║   Claude Code Installer                                   ║${NC}"
     echo -e "${BLUE}║   Inspired by DAAF                                        ║${NC}"
-    echo -e "${BLUE}║                                                           ║${NC}"
     echo -e "${BLUE}╚═══════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
     preflight_checks
-
-    # Create installation directory
-    mkdir -p "$INSTALL_DIR"
+    download_files
     cd "$INSTALL_DIR"
 
-    download_files
     build_image
     start_container
     initialize_workspace
 
-    # Setup easy launch shortcuts
     log_info "Step 5/5: Setting up launch shortcuts..."
     if [ -f "scripts/installers/setup-shortcuts.sh" ]; then
         bash scripts/installers/setup-shortcuts.sh || {
@@ -392,5 +332,4 @@ main() {
     print_success_message
 }
 
-# Run main function
 main

@@ -1,353 +1,151 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) working in this repository.
 
-## Project Overview
+## What this project is
 
-**cc-install** (Claude Code Install) is a Docker-based installer that simplifies Claude Code distribution to users. It provides one-line installation commands for macOS and Windows that create an isolated, reproducible environment with Claude Code CLI and VS Code Server.
+**cc-install** is a Docker-based installer that gives non-technical users a
+working Claude Code environment from one command. It ships Claude Code CLI plus
+code-server (VS Code in the browser), with host-side scripts to install, launch,
+update and diagnose it.
 
-### Purpose
+The audience is the whole point: someone with no Docker knowledge must be able to
+install it, sign in, and get working without help. Optimise for that over
+elegance.
 
-- Make Claude Code accessible to non-technical users
-- Eliminate complex dependency management and system configuration
-- Provide a consistent environment across different machines and operating systems
-- Include browser-based IDE (code-server) for users who prefer GUI over CLI
+Full maintainer detail — architecture, gotchas, release process, pre-release
+checklist — is in **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)**. Read it before
+changing scripts. This file is the short version.
 
-### Inspiration
+## Hard rules
 
-This project is heavily inspired by [DAAF (Data Analysis Agent Framework)](https://github.com/DAAF-Contribution-Community/daaf). We adapted their Docker-based installation patterns while simplifying for Claude Code specifically. See [ATTRIBUTION.md](ATTRIBUTION.md) for full details.
+**1. Both platforms, every time.** Every script exists as `.sh` and `.ps1`. If you
+change one, change the other. A one-sided fix is a bug, not a partial fix.
 
-## Architecture
+**2. `.ps1` files must be CRLF.** `.gitattributes` enforces this. LF endings have
+already shipped once and broke every Windows install with "the string is missing
+the terminator".
 
-### Components
+**3. Never break existing installs.** Fixes reach users only through
+`scripts/maintenance/update.sh`, which refreshes the host-side files *and*
+rebuilds the image. If a change needs a matching update-path change, do both.
 
-1. **Dockerfile** — Defines container image with:
-   - Debian Bookworm base
-   - Node.js v20 LTS
-   - Claude Code (installed via Anthropic's official script)
-   - code-server v4.117.0
-   - Non-root user `claudeuser` (UID 1000)
+**4. `.claude` is a Docker volume, seeded from the image only once.** Anything
+written into `~/.claude` in the `Dockerfile` is frozen at the user's first build
+forever. Bundled skills therefore live in `/opt/cc-install/skills` and
+`scripts/container/entrypoint.sh` copies them in on every start. Don't move them
+back.
 
-2. **docker-compose.yml** — Orchestrates container with:
-   - Persistent volume mounts (`./workspace` and `claude-config`)
-   - Port 8080 exposed for code-server
-   - Resource limits (2-4GB RAM, 1-2 CPUs)
+**5. `.env` is the only source of credentials.** Do not add bare passthrough
+entries (`- ANTHROPIC_API_KEY`) to `environment:` in `docker-compose.yml`.
+`environment` takes precedence over `env_file`, and a bare entry that's unset on
+the host resolves to `null` and *shadows* the `.env` value — silently breaking
+`ccauth` entirely. If it's set on the host it overrides `.env` just as silently.
+Both behaviours were verified against Docker Compose.
 
-3. **Installation Scripts** — Platform-specific installers:
-   - `install.sh` (macOS/Linux) — Bash script with preflight checks, downloads, builds, and setup
-   - `install.ps1` (Windows) — PowerShell equivalent
+**6. Never commit secrets.** `.env` is gitignored; `.env.example` holds
+placeholders only. No AWS keys, account IDs, or personal profile names in the
+repo.
 
-4. **Launcher Scripts** — Start containers and launch applications:
-   - `run_claude.sh/.ps1` — Launch Claude Code CLI or access bash shell
-   - `run_vscode.sh/.ps1` — Start code-server and open in browser
+**7. Don't weaken the port binding.** `docker-compose.yml` publishes code-server
+on `127.0.0.1:8080:8080`. It runs `--auth none`, so a `0.0.0.0` binding hands
+anyone on the network a shell in the container.
 
-5. **Helper Scripts** — Maintenance operations:
-   - `update.sh/.ps1` — Rebuild image with latest versions
-   - `backup.sh/.ps1` — Backup workspace directory
-   - `uninstall.sh/.ps1` — Remove everything cleanly
+## Verifying changes without the target OS
 
-### File Structure
+Bash syntax:
 
-```
-cc-install/
-├── Dockerfile                  # Image definition
-├── docker-compose.yml          # Container orchestration
-├── .dockerignore               # Build context exclusions
-├── claude / claude.cmd         # Root launcher: Claude Code (macOS/Linux + Windows)
-├── vscode / vscode.cmd         # Root launcher: VS Code Server (macOS/Linux + Windows)
-├── scripts/
-│   ├── installers/             # install.sh, install.ps1, setup-shortcuts.{sh,ps1}
-│   ├── launchers/              # run_claude.{sh,ps1}, run_vscode.{sh,ps1}
-│   └── maintenance/            # update, backup, restore, uninstall, check-update, diagnose (.sh/.ps1)
-├── README.md                   # User documentation
-├── ATTRIBUTION.md              # Credits to DAAF and third-party software
-└── CLAUDE.md                   # This file
+```bash
+for f in $(find scripts -name '*.sh'); do bash -n "$f" || echo "SYNTAX: $f"; done
 ```
 
-> **Note:** The one-line install command downloads `scripts/installers/install.sh`
-> (or `install.ps1`). All launcher and maintenance scripts live under `scripts/`;
-> the root `claude`/`vscode` wrappers just forward into `scripts/launchers/`.
+PowerShell parse-check (no Windows needed):
 
-## Common Development Tasks
+```bash
+docker run --rm -v "$PWD/scripts:/s:ro" mcr.microsoft.com/powershell:lts-ubuntu-22.04 \
+  pwsh -NoProfile -Command '
+    Get-ChildItem /s -Recurse -Filter *.ps1 | ForEach-Object {
+      $e = $null
+      [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$e) | Out-Null
+      if ($e.Count) { Write-Output "FAIL $($_.Name)"; $e | ForEach-Object { $_.Message } }
+      else { Write-Output "OK   $($_.Name)" }
+    }'
+```
 
-### Building the Docker Image
+On Apple Silicon use the `lts-ubuntu-22.04` tag — `:latest` is a 32-bit
+`linux/arm` image that hangs under emulation.
+
+Both `setup-credentials` scripts take a menu option as an argument
+(`setup-credentials.sh 3`, `-Choice 3`), so the non-secret paths are testable
+non-interactively. Secrets are always prompted for — never accept one as an
+argument, it would land in shell history.
+
+Installer, without touching a real install:
+
+```bash
+CC_INSTALL_DRY_RUN=1 bash scripts/installers/install.sh
+CC_INSTALL_DIR=test-dir bash scripts/installers/install.sh
+```
+
+Container:
 
 ```bash
 docker compose build --progress plain
+docker compose up -d
+docker compose exec claude-code claude --version
+docker compose exec claude-code bash -lc 'command -v claude'   # login shell, as code-server spawns
+docker compose exec claude-code sh -c 'ls ~/.claude/skills | wc -l'
+docker compose down
 ```
 
-The `--progress plain` flag shows detailed build output, useful for debugging.
+Build under a throwaway tag (`docker build -t cc-install-test .`) if the user may
+have a real install on the machine.
 
-### Testing Locally
+## Language and tone in user-facing output
 
-1. Build the image:
-   ```bash
-   docker compose build
-   ```
+Error messages and script output are read by people who don't know Docker. Name
+the fix, not just the fault. "Docker daemon is not running" is followed by the
+steps to start Docker Desktop, and that pattern should hold everywhere.
 
-2. Start the container:
-   ```bash
-   docker compose up -d
-   ```
+Documentation avoids "simply", "just" and "obviously". The
+[docs/CREDENTIALS.md](docs/CREDENTIALS.md) and
+[docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md) voice is the target.
 
-3. Test Claude Code:
-   ```bash
-   docker compose exec claude-code claude --version
-   ```
+The single most-missed thing by users: **there is no Claude Code button in the
+browser IDE** — you open a terminal in it and type `claude`. Any doc or output
+touching `ccvscode` should say so.
 
-4. Test code-server:
-   ```bash
-   docker compose exec claude-code code-server --version
-   ```
+## Files
 
-5. Open code-server in browser:
-   ```
-   http://localhost:8080
-   ```
-
-6. Check logs:
-   ```bash
-   docker compose logs -f
-   ```
-
-7. Stop when done:
-   ```bash
-   docker compose down
-   ```
-
-### Testing Installation Scripts
-
-**Dry-run mode** (no actual changes):
-```bash
-CC_INSTALL_DRY_RUN=1 bash install.sh
+```
+Dockerfile  docker-compose.yml  docker-compose.override.yml.example  .env.example
+VERSION     claude/vscode (+ .cmd)
+scripts/container/    entrypoint.sh          (runs inside the image)
+scripts/installers/   install, setup-shortcuts, setup-credentials
+scripts/launchers/    run_claude, run_vscode
+scripts/maintenance/  update, backup, restore, uninstall, check-update, diagnose
+docs/                 CREDENTIALS, INSTALL_GUIDE, QUICK_REFERENCE, DEVELOPMENT, installGuides/
+README.md  CHANGELOG.md  SECURITY.md  ATTRIBUTION.md  CLAUDE.md
 ```
 
-**Verbose mode** (detailed output):
-```bash
-CC_INSTALL_VERBOSE=1 bash install.sh
-```
+Adding a file needs no installer change — the installers download the whole repo
+as an archive. Do add new user-facing commands to **both** `setup-shortcuts`
+scripts, and document them in `README.md` and `docs/QUICK_REFERENCE.md`.
 
-**Custom directory**:
-```bash
-CC_INSTALL_DIR=my-test-dir bash install.sh
-```
+## Releasing
 
-### Modifying the Dockerfile
+1. Bump `VERSION` (single source of truth for the update check).
+2. Add a `CHANGELOG.md` entry.
+3. Work through the pre-release checklist in `docs/DEVELOPMENT.md`.
+4. Push to `main` — the one-line installer tracks `main`, so pushing *is* the
+   release. Tag with `git tag vX.Y.Z && git push --tags`.
 
-When adding packages or changing the environment:
+Repo: `wmo4buva/cc-install` (public — the one-line installer needs unauthenticated
+`raw.githubusercontent.com` and `codeload.github.com` access).
+Remote must be `git@github.com-uva:wmo4buva/cc-install.git`.
 
-1. Edit `Dockerfile`
-2. Test build locally: `docker compose build`
-3. Test the running container: `docker compose up -d`
-4. Verify changes: `docker compose exec claude-code bash`
-5. Update README.md if adding new features
+## Attribution
 
-### Adding New Scripts
-
-When creating new helper scripts:
-
-1. Create both `.sh` (bash) and `.ps1` (PowerShell) versions
-2. Make bash scripts executable: `chmod +x script.sh`
-3. Add error handling and user feedback
-4. Use consistent logging functions (log_info, log_error, log_success)
-5. Test on both macOS and Windows if possible
-6. Document in README.md
-7. Add to installation script downloads
-
-## Key Patterns from DAAF
-
-### Installation Script Structure
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail  # Strict error handling
-
-# Configuration
-REPO_URL="..."
-INSTALL_DIR="..."
-
-# Logging functions
-log_info() { ... }
-log_error() { ... }
-
-# Preflight checks
-preflight_checks() {
-    # Check Docker installed
-    # Check Docker running
-    # Check existing installation
-}
-
-# Main steps
-download_files() { ... }
-build_image() { ... }
-start_container() { ... }
-
-# Run
-main() {
-    preflight_checks
-    download_files
-    build_image
-    start_container
-}
-
-main
-```
-
-### Launcher Script Pattern
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Check prerequisites
-# Check container status
-# Start container if needed
-# Execute command
-```
-
-### PowerShell Equivalents
-
-Use PowerShell-appropriate patterns:
-- `$ErrorActionPreference = "Stop"`
-- Functions instead of bash functions
-- `try/catch` blocks for error handling
-- PowerShell cmdlets (`Test-Path`, `Start-Process`, etc.)
-
-## Testing Checklist
-
-Before pushing changes:
-
-- [ ] Dockerfile builds successfully
-- [ ] Container starts and Claude Code is accessible
-- [ ] code-server starts and is accessible in browser
-- [ ] Workspace persistence works (create file, restart container, file persists)
-- [ ] All launcher scripts work (run_claude, run_vscode)
-- [ ] Scripts have proper error handling
-- [ ] README.md is up to date
-- [ ] Both bash and PowerShell versions tested (if modified)
-
-## Common Issues and Solutions
-
-### Claude Code Installation Fails
-
-The Claude Code install script URL might have changed. The Dockerfile uses
-`https://claude.ai/install.sh` (which redirects to the current bootstrap script).
-Check it still resolves:
-```bash
-curl -IL https://claude.ai/install.sh
-```
-
-Update Dockerfile if needed.
-
-### code-server Won't Start
-
-Check that Node.js is properly installed:
-```bash
-docker compose exec claude-code node --version
-```
-
-### Port 8080 Conflicts
-
-If port 8080 is already in use, edit `docker-compose.yml`:
-```yaml
-ports:
-  - "8081:8080"  # Change host port
-```
-
-### Container Size Too Large
-
-The image is currently ~1.5-2GB. To reduce size:
-- Use multi-stage builds
-- Clean up apt caches: `rm -rf /var/lib/apt/lists/*`
-- Minimize layers in Dockerfile
-
-### Workspace Permissions
-
-The container uses UID 1000. If host user has different UID, permissions may conflict. Consider:
-- Using UID matching in Dockerfile
-- Or documenting the limitation
-
-## Version Management
-
-### Updating Claude Code Version
-
-The Dockerfile uses Anthropic's installer which installs the latest version by default. To pin a specific version, modify the Dockerfile:
-
-```dockerfile
-RUN curl -fsSL https://claude.ai/install.sh | bash -s -- <VERSION>
-```
-
-### Updating code-server Version
-
-Change in Dockerfile:
-```dockerfile
-RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version=<VERSION>
-```
-
-### Updating Node.js Version
-
-Change in Dockerfile:
-```dockerfile
-RUN curl -fsSL https://deb.nodesource.com/setup_<VERSION>.x | bash -
-```
-
-## Distribution
-
-### Hosting the Installation Scripts
-
-For one-line installation to work, scripts must be publicly accessible. Options:
-
-1. **GitHub (Recommended)**:
-   - Public repository: `wmo4buva/cc-install`
-   - Use `https://raw.githubusercontent.com/wmo4buva/cc-install/main/scripts/installers/install.sh`
-   - Benefit: Version control, easy updates
-
-2. **Batten Web Server**:
-   - Host files on UVA/Batten server
-   - Use direct URLs
-   - Benefit: Control and privacy
-
-### Creating a Release
-
-1. Test everything thoroughly
-2. Tag the release: `git tag v1.0.0`
-3. Push tags: `git push --tags`
-4. Update README.md with tested one-line commands
-5. Create GitHub release with notes
-
-### Distribution
-
-Provide users with:
-- One-line installation command
-- Link to README.md
-- Support contact (Batten IT)
-- Estimated installation time (~10 minutes)
-
-## Future Enhancements
-
-Ideas for future versions:
-
-- Auto-update mechanism
-- Pre-installed Batten-specific Claude Code skills
-- Integration with UVA SSO
-- Fleet management for IT (central dashboard)
-- Usage analytics
-- Custom Batten branding and templates
-- Integration with Canvas/Collab
-
-## Support and Documentation
-
-- **Claude Code Docs**: https://docs.anthropic.com/
-- **code-server Docs**: https://coder.com/docs/code-server/
-- **Docker Docs**: https://docs.docker.com/
-- **DAAF Project**: https://github.com/DAAF-Contribution-Community/daaf
-
-## Contributing
-
-When contributing:
-
-1. Follow existing patterns (especially from DAAF)
-2. Test on both macOS and Windows
-3. Update documentation (README.md, CLAUDE.md)
-4. Credit sources and inspirations
-5. Keep it simple — this is for anyone, not DevOps engineers
+Installer patterns follow
+[DAAF](https://github.com/DAAF-Contribution-Community/daaf); keep
+[ATTRIBUTION.md](ATTRIBUTION.md) accurate when borrowing more.

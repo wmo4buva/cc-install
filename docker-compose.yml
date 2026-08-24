@@ -4,16 +4,46 @@ services:
     container_name: cc-install
     image: cc-install:latest
 
-    # Persistent volumes
+    # Reap zombie processes. code-server and claude both spawn children.
+    init: true
+
     volumes:
+      # Your files. Directly visible on the host in ./workspace.
       - ./workspace:/home/claudeuser/workspace
+      # Claude Code config + credentials + skills. Survives rebuilds.
       - claude-config:/home/claudeuser/.claude
+      # code-server settings and extensions. Survives rebuilds.
+      - code-server-data:/home/claudeuser/.local/share/code-server
 
-    # Port mappings
     ports:
-      - "8080:8080"  # code-server web interface
+      # Bound to 127.0.0.1 on purpose. code-server runs with --auth none by
+      # default, so publishing on 0.0.0.0 would hand anyone on your network a
+      # shell in this container. Loopback-only means only this machine can
+      # reach it. See docs/CREDENTIALS.md if you need network access.
+      - "127.0.0.1:8080:8080"
 
-    # Resource limits (adjust based on user laptop specs)
+    # Credentials live in .env (written by scripts/installers/setup-credentials.sh,
+    # a.k.a. `ccauth`). required: false so the container still starts before
+    # you've set one up — you can also sign in interactively with `claude`.
+    #
+    # .env is the ONLY source of credentials, deliberately. Do NOT add bare
+    # passthrough entries like `- ANTHROPIC_API_KEY` to `environment` below:
+    #   * `environment` takes precedence over `env_file`, and a bare entry whose
+    #     variable is unset on the host resolves to null — which SHADOWS the
+    #     .env value and leaves it unset in the container. That silently breaks
+    #     ccauth completely.
+    #   * If the variable IS set on the host, it overrides .env just as silently.
+    #     Anyone who exports AWS_PROFILE or CLAUDE_CODE_USE_BEDROCK for their own
+    #     work would have those leak in and defeat whatever ccauth configured.
+    # Both were verified against Docker Compose, not assumed.
+    env_file:
+      - path: .env
+        required: false
+
+    environment:
+      - CODE_SERVER_CONFIG=/home/claudeuser/.config/code-server/config.yaml
+
+    # Resource limits (tune for the host laptop)
     deploy:
       resources:
         limits:
@@ -23,16 +53,13 @@ services:
           cpus: '1'
           memory: 2G
 
-    # Keep container running
-    command: tail -f /dev/null
+    # Idle forever; the launchers `docker compose exec` into it.
+    command: ["sleep", "infinity"]
 
-    # Restart policy
     restart: unless-stopped
-
-    # Environment variables
-    environment:
-      - CODE_SERVER_CONFIG=/home/claudeuser/.config/code-server/config.yaml
 
 volumes:
   claude-config:
+    driver: local
+  code-server-data:
     driver: local

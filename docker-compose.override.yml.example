@@ -1,0 +1,47 @@
+# Optional local overrides for docker-compose.yml.
+#
+# Copy to `docker-compose.override.yml` to use it — Docker Compose picks that
+# filename up automatically, and it is gitignored so your changes survive
+# updates. Delete the sections you don't need.
+
+services:
+  claude-code:
+
+    # --- Use AWS SSO / a named profile from your host ~/.aws ----------------
+    # Mounts your host AWS config read-only so `AWS_PROFILE=...` in .env works
+    # without copying keys anywhere. Refresh with `aws sso login` on the HOST,
+    # then `ccrestart`.
+    #
+    # Note: if ~/.aws does not exist, Docker will create an empty directory
+    # there. Run `aws configure` (or `aws sso login`) on the host first.
+    #
+    # volumes:
+    #   - ${HOME}/.aws:/home/claudeuser/.aws:ro
+
+    # --- Change the port the browser IDE uses -------------------------------
+    # Use this if something else on your machine already owns 8080.
+    # Remember to open the new port in your browser instead.
+    #
+    # ports:
+    #   - "127.0.0.1:8081:8080"
+
+    # --- Reach the IDE from another machine on your network -----------------
+    # DANGER: this exposes code-server beyond this computer. code-server gives
+    # whoever opens it a full shell in the container. If you do this you MUST
+    # set CC_VSCODE_PASSWORD in .env first.
+    #
+    # ports:
+    #   - "0.0.0.0:8080:8080"
+
+    # --- Give the container more memory / CPU -------------------------------
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '4'
+    #       memory: 8G
+
+    # --- Mount an extra folder from your computer ---------------------------
+    # Makes host files available inside the container at /home/claudeuser/<name>.
+    #
+    # volumes:
+    #   - ${HOME}/Documents/research:/home/claudeuser/research

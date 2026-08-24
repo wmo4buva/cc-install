@@ -1,195 +1,153 @@
-# Quick Reference Guide
+# Quick Reference
 
-One-page reference for common tasks.
+One page, everything you'll actually use.
 
-## 🚀 Quick Start
-
-```bash
-# Launch Claude Code
-ccdocker
-
-# Or launch VS Code in browser
-ccvscode
-```
-
-## 📝 Common Commands
-
-### Using Shortcut (Recommended)
-```bash
-ccdocker           # Launch Claude Code
-ccdocker bash      # Open bash shell
-ccdocker logs      # View container logs
-ccdocker stop      # Stop container
-ccdocker restart   # Restart container
-```
-
-### Using Scripts Directly
-```bash
-./claude                                    # Launch Claude Code
-./vscode                                    # Launch VS Code Server (browser)
-./scripts/maintenance/update.sh             # Update to latest versions
-./scripts/maintenance/backup.sh             # Backup workspace
-./scripts/maintenance/restore.sh backup.tar.gz  # Restore from backup
-./scripts/maintenance/uninstall.sh          # Remove everything
-```
-
-## 🐳 Docker Commands
+## Commands (work from anywhere)
 
 ```bash
-# View running containers
-docker compose ps
-
-# View logs
-docker compose logs -f
-
-# Stop container
-docker compose stop
-
-# Start container
-docker compose up -d
-
-# Rebuild image
-docker compose build --no-cache
-
-# Remove everything (including volumes)
-docker compose down -v
+ccauth        # set up or change how you sign in    ← run this first
+ccdocker      # Claude Code in your terminal
+ccvscode      # VS Code in your browser (http://localhost:8080)
+ccstop        # stop the container
+ccrestart     # restart it (applies .env changes)
+cclogs        # view container logs
+ccdiagnose    # check the install for problems
+ccupdate      # update to the latest version
 ```
 
-## 📁 File Locations
+Shortcut not found? Open a **new** terminal window.
 
-| Item | Location |
-|------|----------|
-| User workspace | `./workspace/` |
+## Claude Code in the browser IDE
+
+There is no Claude Code button. In VS Code: **Terminal → New Terminal**, then
+type `claude`. Same sign-in and settings as `ccdocker`.
+
+→ [CREDENTIALS.md](CREDENTIALS.md)
+
+## Signing in
+
+| Option | When | Stored in |
+|---|---|---|
+| Claude account | You have Pro/Max/Team | `claude-config` volume |
+| Anthropic API key | Personal, pay-as-you-go | `.env` |
+| Amazon Bedrock | UVA / Batten AWS account | `.env` |
+
+`ccauth` sets one and clears the others. Only one applies at a time.
+
+## Running the scripts directly
+
+From inside the `cc-install` directory:
+
+```bash
+./claude                                          # Claude Code       (Windows: claude.cmd)
+./vscode                                          # VS Code Server    (Windows: vscode.cmd)
+./scripts/installers/setup-credentials.sh         # same as ccauth
+./scripts/maintenance/diagnose.sh                 # same as ccdiagnose
+./scripts/maintenance/update.sh                   # same as ccupdate
+./scripts/maintenance/backup.sh                   # archive workspace/
+./scripts/maintenance/restore.sh backup.tar.gz    # restore one
+./scripts/maintenance/uninstall.sh                # remove everything
+```
+
+`run_claude.sh` also takes: `bash`, `logs`, `stop`, `restart`, `auth`.
+
+Windows: same paths with `.ps1`.
+
+## File locations
+
+| Item | Where |
+|---|---|
+| Your files | `./workspace/` |
+| Credentials | `./.env` (chmod 600, gitignored) |
+| Local Compose tweaks | `./docker-compose.override.yml` |
 | Backups | `./backups/` |
-| Claude config | Docker volume `claude-config` |
-| Shortcut command | `~/.local/bin/ccdocker` |
-| Container name | `cc-install` |
-| Docker image | `cc-install:latest` |
+| Claude config, login, skills | Docker volume `claude-config` |
+| VS Code settings, extensions | Docker volume `code-server-data` |
+| Shortcuts | `~/.local/bin/cc*` · Windows: your PowerShell profile |
+| Container / image | `cc-install` · `cc-install:latest` |
 
-## 🔧 Troubleshooting
+## Raw Docker commands
 
-### Container won't start
+Only needed if something's badly stuck.
+
+```bash
+docker compose ps                    # what's running
+docker compose logs -f               # follow logs
+docker compose up -d                 # start
+docker compose stop                  # stop
+docker compose build --no-cache      # rebuild image
+docker compose down -v               # remove container AND volumes (destroys your sign-in)
+docker stats cc-install              # live resource usage
+```
+
+## Troubleshooting
+
+Always start with `ccdiagnose`.
+
+**Container won't start**
 ```bash
 docker compose logs
-docker compose down
-docker compose up -d
+docker compose down && docker compose up -d
 ```
 
-### Port 8080 in use
-Edit `docker-compose.yml`:
-```yaml
-ports:
-  - "8081:8080"  # Change left number
-```
+**Port 8080 in use** — copy `docker-compose.override.yml.example` to
+`docker-compose.override.yml`, set the port to `127.0.0.1:8081:8080`, then use
+`http://localhost:8081`.
 
-### Docker not running
-Start Docker Desktop, wait for it to fully load.
+**Docker not running** — start Docker Desktop, wait for it to finish loading.
 
-### Reset everything
+**Signed out every time** — see [CREDENTIALS.md](CREDENTIALS.md). Usually a
+leftover `ANTHROPIC_API_KEY` in `.env` overriding an account login.
+
+**Start over**
 ```bash
-./scripts/maintenance/uninstall.sh  # Follow prompts
-# Then re-run the one-line installer from the README to reinstall
+./scripts/maintenance/uninstall.sh   # then re-run the installer from README.md
 ```
 
-## 📊 Quick Stats
+## What's inside
 
-- **Docker Image Size:** ~1.4 GB
-- **Build Time:** 2-3 minutes
-- **Startup Time:** ~3 seconds
-- **Claude Code Version:** 2.1.148
-- **code-server Version:** 4.117.0
-- **Base OS:** Debian Bookworm
-- **Node.js:** v20 LTS
+| | |
+|---|---|
+| Base OS | Debian Bookworm (slim) |
+| Claude Code | latest, at image build time |
+| code-server | 4.133.0 |
+| Node.js | 22 LTS |
+| Image size | ~1.5-2 GB |
+| Build time | 5-10 min |
+| Container user | `claudeuser` (UID 1000, non-root) |
 
-## 🌐 Web Interfaces
+Check what you're actually running:
 
-- **VS Code Server:** http://localhost:8080
-
-## 📚 Documentation
-
-- [README.md](../README.md) - User guide
-- [CLAUDE.md](../CLAUDE.md) - Developer guide
-- [ATTRIBUTION.md](../ATTRIBUTION.md) - Credits
-- [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) - Implementation details
-- [TEST_RESULTS.md](TEST_RESULTS.md) - Test report
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Development history
-
-## ⚡ Power User Tips
-
-### Create workspace subdirectories
-```bash
-mkdir -p workspace/{projects,research,teaching}
-```
-
-### Quick backup before major changes
-```bash
-./scripts/maintenance/backup.sh && echo "Backup created: $(ls -t backups/ | head -1)"
-```
-
-### Check Claude Code version
 ```bash
 docker compose exec claude-code claude --version
+docker compose exec claude-code code-server --version
+cat VERSION
 ```
 
-### Access bash shell quickly
-```bash
-ccdocker bash
-# Or
-docker compose exec claude-code bash
-```
+## Keyboard shortcuts
 
-### Monitor resource usage
-```bash
-docker stats cc-install
-```
+**VS Code Server** — <kbd>Ctrl</kbd>+<kbd>`</kbd> terminal ·
+<kbd>Ctrl</kbd>+<kbd>B</kbd> sidebar · <kbd>Ctrl</kbd>+<kbd>P</kbd> open file ·
+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> command palette
 
-## 🔑 Keyboard Shortcuts
+**Claude Code** — <kbd>Ctrl</kbd>+<kbd>C</kbd> interrupt ·
+<kbd>Ctrl</kbd>+<kbd>D</kbd> exit · `/help` commands · `/skills` list skills
 
-### In VS Code Server (browser)
-- `Ctrl+` ` - Toggle terminal
-- `Ctrl+B` - Toggle sidebar
-- `Ctrl+P` - Quick file open
-- `Ctrl+Shift+P` - Command palette
-
-### In Claude Code CLI
-- `Ctrl+C` - Exit/interrupt
-- `Ctrl+D` - Exit session
-
-## 📦 Update Workflow
+## Safe update routine
 
 ```bash
-# 1. Backup current workspace
-./scripts/maintenance/backup.sh
-
-# 2. Update to latest versions
-./scripts/maintenance/update.sh
-
-# 3. Test that everything works
-ccdocker --version
-
-# 4. If issues, restore and report
-./scripts/maintenance/restore.sh backups/latest_backup.tar.gz
+./scripts/maintenance/backup.sh    # 1. back up
+ccupdate                           # 2. update scripts + image
+ccdocker --version                 # 3. confirm
 ```
 
-## 🎯 One-Liners
+If something broke: `./scripts/maintenance/restore.sh backups/<file>`
 
-```bash
-# Quick status check
-docker compose ps && docker images | grep cc-install
+## Docs
 
-# Force rebuild everything
-docker compose down -v && docker compose build --no-cache && docker compose up -d
-
-# Clean workspace
-rm -rf workspace/* && echo "Workspace cleaned"
-
-# View container size
-docker images cc-install:latest --format "{{.Size}}"
-
-# Count workspace files
-find workspace -type f | wc -l
-```
-
----
-
-**For detailed information, see the full documentation in the links above.**
+- [README.md](../README.md) — install and usage
+- [CREDENTIALS.md](CREDENTIALS.md) — signing in
+- [INSTALL_GUIDE.md](INSTALL_GUIDE.md) — step-by-step, non-technical
+- [../SECURITY.md](../SECURITY.md) — security posture and trade-offs
+- [DEVELOPMENT.md](DEVELOPMENT.md) — for maintainers
+- [../CHANGELOG.md](../CHANGELOG.md) — what changed

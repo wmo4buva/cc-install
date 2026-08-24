@@ -1,278 +1,227 @@
-# Development Guide
+# Development
 
-This document tracks the development process, decisions made, and how to work with this project.
+For anyone maintaining cc-install. End users want [../README.md](../README.md).
 
-## Project History
+## What this is
 
-### Creation Date
-**May 22-24, 2026**
+A Docker image with Claude Code + code-server, plus host-side scripts that
+install, launch and maintain it. Nothing clever — the value is that a
+non-technical user runs one command and gets a working environment.
 
-### Inspiration
-This project is inspired by [DAAF (Data Analysis Agent Framework)](https://github.com/DAAF-Contribution-Community/daaf), which pioneered the Docker-based installation approach for AI tools.
+Design constraints, in priority order:
 
-### Goal
-Make Claude Code accessible to non-technical users members through a simple, Docker-based installation that requires only Docker Desktop as a prerequisite.
+1. **A non-technical user must succeed unattended.** Every error message names
+   the fix. No step assumes Docker knowledge.
+2. **Two platforms, always in sync.** Every script exists as `.sh` and `.ps1`.
+   A fix to one that isn't applied to the other is a bug.
+3. **User data is sacred.** `workspace/`, `.env` and the `claude-config` volume
+   survive updates, rebuilds and reinstalls.
+4. **Fixes must reach existing installs.** See "Update path" below — this is the
+   constraint that's easiest to forget and most expensive to get wrong.
 
-## Development Timeline
-
-### Phase 1: Initial Setup (May 22, 2026)
-- Created project structure
-- Developed Dockerfile with Claude Code + VS Code Server
-- Created docker-compose.yml for orchestration
-- Built installation scripts (install.sh, install.ps1)
-
-### Phase 2: Launcher Scripts (May 22, 2026)
-- Created run_claude.sh/ps1 (launch Claude Code CLI)
-- Created run_vscode.sh/ps1 (launch browser-based IDE)
-- Added support for multiple commands (bash, logs, stop, restart)
-
-### Phase 3: Helper Scripts (May 22, 2026)
-- Created update.sh/ps1 (rebuild with latest versions)
-- Created backup.sh/ps1 (backup workspace)
-- Created restore.sh/ps1 (restore from backup)
-- Created uninstall.sh/ps1 (clean removal)
-
-### Phase 4: Documentation (May 22, 2026)
-- Comprehensive README.md for end users
-- ATTRIBUTION.md crediting DAAF
-- CLAUDE.md for developers
-- PROJECT_SUMMARY.md tracking implementation
-
-### Phase 5: Testing & Fixes (May 22, 2026)
-- Fixed Claude Code install URL (404 issue)
-- Removed obsolete docker-compose version attribute
-- Tested all core functionality
-- Created TEST_RESULTS.md
-
-### Phase 6: Usability Improvements (May 24, 2026)
-- Created install-shortcut.sh for easy command access
-- Added `ccdocker` command for system-wide access
-- Organized project structure with docs/ folder
-
-## Project Structure
+## Layout
 
 ```
-cc-install/
-├── .git/                       # Git repository
-├── .github/                    # GitHub Actions (future)
-├── docs/                       # Additional documentation
-│   ├── PROJECT_SUMMARY.md      # Implementation summary
-│   ├── TEST_RESULTS.md         # Test report
-│   └── DEVELOPMENT.md          # This file
-├── workspace/                  # User workspace (gitignored)
-├── backups/                    # Workspace backups (gitignored)
-│
-├── Dockerfile                  # Container image definition
-├── docker-compose.yml          # Container orchestration
-├── .dockerignore              # Build context exclusions
-├── .gitignore                 # Git exclusions
-│
-├── install.sh                 # macOS/Linux installer
-├── install.ps1                # Windows installer
-├── install-shortcut.sh        # System command installer
-│
-├── run_claude.sh              # Claude Code launcher (macOS/Linux)
-├── run_claude.ps1             # Claude Code launcher (Windows)
-├── run_vscode.sh              # VS Code Server launcher (macOS/Linux)
-├── run_vscode.ps1             # VS Code Server launcher (Windows)
-│
-├── update.sh / update.ps1     # Update to latest versions
-├── backup.sh / backup.ps1     # Backup workspace
-├── restore.sh / restore.ps1   # Restore from backup
-├── uninstall.sh / uninstall.ps1  # Complete removal
-│
-├── README.md                  # User documentation
-├── ATTRIBUTION.md             # Credits and licenses
-└── CLAUDE.md                  # Developer guidance
+Dockerfile                              image: Debian + Node + code-server + Claude Code
+docker-compose.yml                      volumes, loopback port binding, env passthrough
+docker-compose.override.yml.example     user-editable local overrides
+.env.example                            credential template
+scripts/
+  container/entrypoint.sh               runs INSIDE the image on every start
+  installers/install.{sh,ps1}           one-line installer
+  installers/setup-shortcuts.{sh,ps1}   creates the cc* commands
+  installers/setup-credentials.{sh,ps1} the ccauth flow
+  launchers/run_claude.{sh,ps1}         ccdocker
+  launchers/run_vscode.{sh,ps1}         ccvscode
+  maintenance/{update,backup,restore,uninstall,check-update,diagnose}.{sh,ps1}
+claude, vscode, claude.cmd, vscode.cmd  thin wrappers into scripts/launchers/
+VERSION                                 single source of truth for the version
 ```
 
-## Key Design Decisions
+## Local development
 
-### 1. Docker-Based Approach
-**Decision:** Use Docker for isolation and reproducibility  
-**Rationale:** 
-- Eliminates "works on my machine" problems
-- Isolates dependencies from host system
-- Makes distribution trivial (one Docker image)
-- Users don't need to understand Docker internals
+```bash
+docker compose build --progress plain      # plain shows full build output
+docker compose up -d
+docker compose exec claude-code claude --version
+docker compose exec claude-code code-server --version
+docker compose exec claude-code bash       # poke around
+docker compose logs -f
+docker compose down
+```
 
-### 2. Two Access Methods
-**Decision:** Provide both CLI and browser-based IDE  
-**Rationale:**
-- CLI for technical users who prefer terminal
-- VS Code Server for GUI-preferring users
-- Browser access removes installation friction
+Test the installer without touching your real setup:
 
-### 3. Persistent Workspace
-**Decision:** Mount `./workspace` as host directory, not Docker volume  
-**Rationale:**
-- Users can access files directly without Docker knowledge
-- Easy to backup (just copy a folder)
-- Compatible with existing file backup workflows
-- Transparent file location
+```bash
+CC_INSTALL_DRY_RUN=1 bash scripts/installers/install.sh     # no changes
+CC_INSTALL_VERBOSE=1 bash scripts/installers/install.sh     # every step
+CC_INSTALL_DIR=test-dir bash scripts/installers/install.sh  # elsewhere
+CC_INSTALL_REF=v1.2.2 bash scripts/installers/install.sh    # a specific tag
+```
 
-### 4. Launcher Scripts Over Direct Docker Commands
-**Decision:** Wrap all Docker commands in simple scripts  
-**Rationale:**
-- Users never need to learn Docker commands
-- Scripts handle container lifecycle automatically
-- Can add logic (preflight checks, error handling)
-- Easier to support ("just run run_claude.sh")
+### Checking scripts without the target OS
 
-### 5. Cross-Platform Scripts
-**Decision:** Maintain both .sh and .ps1 versions  
-**Rationale:**
-- Users use diverse operating systems
-- Bash for macOS/Linux, PowerShell for Windows
-- Keep feature parity between platforms
+Bash:
 
-### 6. Minimal Docker Image
-**Decision:** Start with Debian Bookworm slim, add only what's needed  
-**Rationale:**
-- Smaller images = faster downloads
-- Fewer dependencies = fewer security concerns
-- Only Claude Code + code-server + essentials
+```bash
+for f in $(find scripts -name '*.sh'); do bash -n "$f" || echo "SYNTAX: $f"; done
+```
 
-## Technical Challenges & Solutions
+PowerShell, if you're not on Windows — use the official image:
 
-### Challenge 1: Claude Code Install URL
-**Problem:** Original URL `https://console.anthropic.com/install.sh` returned 404  
-**Solution:** Changed to `https://claude.ai/install.sh` which redirects to the correct location  
-**Status:** Fixed in commit 9744516
+```bash
+docker run --rm -v "$PWD/scripts:/s:ro" mcr.microsoft.com/powershell:lts-ubuntu-22.04 \
+  pwsh -NoProfile -Command '
+    Get-ChildItem /s -Recurse -Filter *.ps1 | ForEach-Object {
+      $e = $null
+      [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$e) | Out-Null
+      if ($e.Count) { Write-Output "FAIL $($_.Name)"; $e | ForEach-Object { $_.Message } }
+      else { Write-Output "OK   $($_.Name)" }
+    }'
+```
 
-### Challenge 2: docker-compose Version Warning
-**Problem:** `version: '3.8'` attribute is obsolete in modern Docker Compose  
-**Solution:** Removed the version line entirely (modern compose doesn't need it)  
-**Status:** Fixed in commit 9744516
+On Apple Silicon, request `lts-ubuntu-22.04` rather than `:latest` — `:latest`
+resolves to a 32-bit `linux/arm` image that hangs under emulation.
 
-### Challenge 3: PATH in docker-compose exec
-**Problem:** `claude` command not in PATH when using `docker compose exec`  
-**Solution:** Launcher scripts use full path `/home/claudeuser/.local/bin/claude`  
-**Impact:** No user-facing impact; launcher scripts work correctly
+Both `setup-credentials` scripts accept a menu option as an argument
+(`setup-credentials.sh 3`, `setup-credentials.ps1 -Choice 3`), which makes the
+non-secret paths testable non-interactively. Secrets are always prompted for.
 
-### Challenge 4: Memorable Command
-**Problem:** `./run_claude.sh` is verbose and location-dependent  
-**Solution:** Created `install-shortcut.sh` that installs `ccdocker` command system-wide  
-**Status:** Implemented in install-shortcut.sh
+## Update path — read this before changing any script
 
-## Development Workflow
+Claude Code is baked into the image, and `~/.claude` is a Docker **volume**.
+Those two facts cause most of the non-obvious bugs in this project.
 
-### Making Changes to Docker Image
+**A volume is seeded from the image only once, when the volume is first
+created.** So anything written into `~/.claude` in the `Dockerfile` is frozen at
+whatever the user's very first build produced and can never be updated. That's
+why bundled skills live in `/opt/cc-install/skills` and
+`scripts/container/entrypoint.sh` copies them into `~/.claude/skills` on every
+container start. Don't move them back.
 
-1. Edit `Dockerfile`
-2. Rebuild: `docker compose build`
-3. Test: `docker compose up -d`
-4. Verify: `docker compose exec claude-code claude --version`
-5. Update README.md if needed
-6. Commit changes
+**`update.sh` must refresh the host-side files, not just rebuild the image.**
+For a long time it only rebuilt, which meant a bug fixed in `run_vscode.sh` could
+never reach anyone who had already installed. It now re-downloads the repo
+archive over the install directory (leaving `workspace/`, `.env` and
+`docker-compose.override.yml` alone) and re-runs `setup-shortcuts` so newly added
+commands appear.
 
-### Adding New Scripts
+**`setup-shortcuts` must be idempotent and must overwrite.** Both versions
+rewrite unconditionally. An early-exit "already installed" check meant existing
+users never received new shortcuts.
 
-1. Create `.sh` version (macOS/Linux)
-2. Create `.ps1` version (Windows)
-3. Make `.sh` executable: `chmod +x script.sh`
-4. Test on macOS/Linux
-5. Test on Windows (if possible)
-6. Document in README.md
-7. Update installation scripts to download new files
+**The installers fetch the whole repo as an archive, not a file list.** The old
+hardcoded list drifted every time a file was added — that's how `VERSION` came to
+be missing from installs, which made every user permanently see "update
+available". Adding a file now requires no installer change.
 
-### Testing Before Release
+## Adding a script
 
-See [TEST_RESULTS.md](TEST_RESULTS.md) for the testing checklist.
+1. Write both `.sh` and `.ps1`.
+2. `chmod +x` the `.sh`.
+3. Use the existing logging helpers (`log_info`/`Write-Info`, etc.).
+4. Add a `cc*` shortcut in **both** `setup-shortcuts` files if users need it.
+5. Document it in `README.md` and `docs/QUICK_REFERENCE.md`.
+6. No installer change needed — the archive picks it up.
 
-## Git Workflow
+### Bash gotchas that have bitten this repo
 
-### Commits
-- Use descriptive commit messages
-- Include "Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
-- Keep commits atomic (one logical change per commit)
+- `local` outside a function is a hard error and aborts the script under
+  `set -e`. It shipped in `diagnose.sh` and silently truncated the report.
+- Variables declared `local` are not in scope at the top level. Referencing one
+  there aborts under `set -u`. It shipped in `check-update.sh`.
+- `df -BG` is GNU-only and fails on macOS. Use `df -k` and divide.
+- A quoted heredoc (`<< 'EOF'`) does not expand variables. `setup-shortcuts.sh`
+  baked the literal string `$INSTALL_DIR` into the generated macOS app.
 
-### Branches
-- `main` - stable, tested code
-- Feature branches for major changes
+### PowerShell gotchas that have bitten this repo
 
-### Tags
-Use semantic versioning:
-- `v1.0.0` - Initial release
-- `v1.1.0` - Minor features
-- `v1.0.1` - Bug fixes
+- `.ps1` files **must** be CRLF. `.gitattributes` enforces `*.ps1 text eol=crlf`;
+  LF endings caused "the string is missing the terminator" on Windows.
+- Don't name a parameter `$Args` or `$Verbose` — they collide with automatic and
+  common parameters.
+- `switch ($null)` skips every clause, `default` included. Validate input before
+  the switch rather than relying on `default` to catch it.
+- `Add-Content -Encoding utf8` writes a **BOM** on PowerShell 5.1 when it creates
+  the file. Docker Compose doesn't strip BOMs, so the first variable in `.env`
+  would be read as `<BOM>NAME` and ignored. Write `.env` via
+  `[System.IO.File]::AppendAllText` with `UTF8Encoding($false)`, using LF.
+- `[Environment]::GetFolderPath('MyDocuments')` can return an **empty string**
+  (Documents redirected to OneDrive, unusual shell contexts). `Join-Path ""`
+  throws, which used to abort all shortcut setup and leave the user with no
+  commands at all. Guard it, and wrap per-profile writes in `try/catch`.
+- `$LASTEXITCODE` reflects the last *external* command, not the script. End
+  scripts with an explicit `exit 0` if a caller checks it.
 
-## Distribution Checklist
+## Versioning
 
-Before releasing to users:
+`VERSION` is the single source of truth. `check-update` compares it against
+`raw.githubusercontent.com/.../main/VERSION`, caching for 24 hours in
+`~/.cache/cc-install-version-check` (`%TEMP%` on Windows).
 
-- [ ] All tests pass (see TEST_RESULTS.md)
-- [ ] Documentation is complete and accurate
-- [ ] README installation URLs point to correct repository
-- [ ] Scripts have been tested on both macOS and Windows
-- [ ] Docker image builds successfully
-- [ ] Claude Code and code-server versions are current
-- [ ] ATTRIBUTION.md is up to date
-- [ ] Create GitHub release with notes
+Releasing:
 
-## Support & Maintenance
+1. Update `VERSION` and `CHANGELOG.md`.
+2. Run the checklist below.
+3. `git tag vX.Y.Z && git push --tags`
+4. Push to `main` — the one-line installer tracks `main`, so this is the release.
 
-### Common Support Issues
+Pinned versions live in the `Dockerfile` as build args (`CODE_SERVER_VERSION`,
+`NODE_MAJOR`). Claude Code is deliberately unpinned — the official installer
+always fetches the latest.
 
-1. **Docker not running**
-   - Solution: Start Docker Desktop
-   - Scripts check for this automatically
+## Pre-release checklist
 
-2. **Port 8080 in use**
-   - Solution: Edit docker-compose.yml to use different port
+- [ ] `docker compose build` succeeds from scratch
+- [ ] Container starts; `claude --version` and `code-server --version` both work
+- [ ] Bundled skills present in `~/.claude/skills` after start
+- [ ] `ccvscode` serves the IDE, and `claude` runs in its terminal
+- [ ] Workspace persists across `docker compose down && up -d`
+- [ ] All three `ccauth` options write the right `.env` and clear the others
+- [ ] `.env` ends up `chmod 600`, no BOM, LF endings
+- [ ] `ccdiagnose` runs to completion on macOS and Windows
+- [ ] `update.sh` refreshes files *and* rebuilds, keeping `workspace/` and `.env`
+- [ ] Port published on `127.0.0.1` only
+- [ ] Every bash script passes `bash -n`; every `.ps1` parses
+- [ ] `.ps1` files are CRLF in the committed tree
+- [ ] `README.md`, `QUICK_REFERENCE.md`, `CHANGELOG.md`, `VERSION` all updated
 
-3. **Container won't start**
-   - Solution: Check `docker compose logs`
-   - Rebuild if needed: `./scripts/maintenance/update.sh`
+## Bundled skills
 
-4. **Workspace permissions**
-   - Container uses UID 1000
-   - May conflict if host user has different UID
+Cloned at build time (`--depth 1`, default branch) into `/opt/cc-install/skills`:
 
-### Maintenance Schedule
+| Source | Contents |
+|---|---|
+| [anthropics/skills](https://github.com/anthropics/skills) | Anthropic's official collection |
+| [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | AI/ML practices and coding patterns |
+| [obra/superpowers](https://github.com/obra/superpowers) | Workflow and productivity (Jesse Vincent) |
 
-- **Weekly:** Check for Claude Code updates
-- **Monthly:** Check for code-server updates
-- **Quarterly:** Update dependencies in Dockerfile
-- **As Needed:** Update documentation
+Each clone is best-effort: a repository that has moved or renamed its `skills/`
+directory prints a warning rather than failing the build. Check build output for
+`WARNING: could not bundle skills` when bumping.
 
-## Future Enhancements
+They're unpinned, so you inherit whatever is on those default branches at build
+time. See [../SECURITY.md](../SECURITY.md). To add a source, extend the loop in
+the `Dockerfile`; the entrypoint needs no change.
 
-Ideas for future versions:
+## Ideas not yet built
 
-### High Priority
-- [ ] Auto-update mechanism
-- [ ] Pre-installed Batten-specific Claude Code skills
-- [ ] Better error messages in scripts
-- [ ] GitHub Actions for CI/CD
+Kept short on purpose — a long speculative roadmap ages badly.
 
-### Medium Priority
-- [ ] Integration with UVA SSO
-- [ ] Custom Batten branding
-- [ ] Usage analytics for IT
-- [ ] Fleet management dashboard
+- **Batten-specific skills** — course/policy templates bundled alongside the
+  public ones.
+- **UVA SSO** — the Bedrock path currently needs keys or `aws sso login` on the
+  host. Entra ID integration would remove that.
+- **Fleet visibility for IT** — which version each machine is on. Needs a
+  privacy decision first; nothing is collected today.
+- **Pinned skill revisions** — pin to commit SHAs for reproducible builds, at the
+  cost of manual bumps.
+- **Smaller image** — multi-stage build to get under ~1 GB.
+- **UID matching** — the container is UID 1000; hosts with a different UID can
+  hit `workspace/` permission friction on Linux.
 
-### Low Priority
-- [ ] Integration with Canvas/Collab
-- [ ] Jupyter notebook support
-- [ ] Multi-container setup for specialized tools
+## Attribution
 
-## Resources
-
-- **Claude Code Documentation:** https://docs.anthropic.com/
-- **code-server Documentation:** https://coder.com/docs/code-server/
-- **Docker Documentation:** https://docs.docker.com/
-- **DAAF Project:** https://github.com/DAAF-Contribution-Community/daaf
-
-## Contact
-
-For questions or contributions:
-- **Repository:** https://github.com/wmo4buva/cc-install
-- **Support:** Batten IT Team
-- **Issues:** GitHub Issues (after repo creation)
-
----
-
-**Last Updated:** May 24, 2026  
-**Project Status:** Testing & Refinement Phase  
-**Next Milestone:** GitHub Release v1.0.0
+Structure and installer patterns follow
+[DAAF](https://github.com/DAAF-Contribution-Community/daaf). See
+[../ATTRIBUTION.md](../ATTRIBUTION.md).

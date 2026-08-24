@@ -1,28 +1,22 @@
 #!/usr/bin/env bash
-# Claude Code Launcher Script for macOS/Linux
+# Claude Code launcher for macOS/Linux.
+#
+# Usage: run_claude.sh [claude args...]
+#        run_claude.sh bash | logs | stop | restart | auth
 
 set -euo pipefail
 
-# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+BOLD='\033[1m'
 NC='\033[0m'
 
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+log_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
+log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-# Check docker-compose.yml exists
 if [ ! -f "docker-compose.yml" ]; then
     log_error "docker-compose.yml not found"
     echo "Please run this script from the cc-install directory"
@@ -34,7 +28,6 @@ if [ -f "scripts/maintenance/check-update.sh" ]; then
     bash scripts/maintenance/check-update.sh --silent || true
 fi
 
-# Check Docker is installed
 if ! command -v docker &> /dev/null; then
     log_error "Docker is not installed"
     echo ""
@@ -45,7 +38,6 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check Docker daemon is running
 if ! docker info &> /dev/null; then
     log_error "Docker daemon is not running"
     echo ""
@@ -65,16 +57,12 @@ if ! docker info &> /dev/null; then
     exit 1
 fi
 
-# Check if container is running
-if ! docker compose ps | grep -q "Up"; then
+if ! docker compose ps --status running 2>/dev/null | grep -q claude-code; then
     log_info "Starting container..."
     docker compose up -d
-
-    # Wait a moment for startup
     sleep 2
 fi
 
-# Determine command to run
 COMMAND="${1:-claude}"
 
 case "$COMMAND" in
@@ -93,10 +81,32 @@ case "$COMMAND" in
         ;;
     restart)
         log_info "Restarting container..."
-        docker compose restart
+        docker compose up -d --force-recreate
         log_success "Container restarted"
         ;;
+    auth)
+        exec bash scripts/installers/setup-credentials.sh
+        ;;
     *)
+        # First run with no credentials anywhere? Point at ccauth before Claude
+        # Code drops the user into a sign-in prompt they weren't expecting.
+        if [ "$#" -eq 0 ]; then
+            has_env_creds=0
+            if [ -f .env ] && grep -qE '^[[:space:]]*(ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN|CLAUDE_CODE_USE_BEDROCK)=.+' .env; then
+                has_env_creds=1
+            fi
+            if [ "$has_env_creds" = "0" ] && \
+               ! docker compose exec -T claude-code test -s /home/claudeuser/.claude/.credentials.json 2>/dev/null; then
+                echo ""
+                echo -e "${YELLOW}First time here — you'll be asked to sign in.${NC}"
+                echo ""
+                echo -e "  ${BOLD}Claude subscription (Pro/Max/Team)?${NC} Just follow the prompts below."
+                echo -e "  ${BOLD}API key or UVA Bedrock credentials?${NC} Ctrl+C and run ${YELLOW}ccauth${NC} instead."
+                echo ""
+                echo -e "  Details: ${BLUE}docs/CREDENTIALS.md${NC}"
+                echo ""
+            fi
+        fi
         log_info "Launching Claude Code..."
         docker compose exec claude-code claude "$@"
         ;;

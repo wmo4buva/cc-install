@@ -108,9 +108,12 @@ if command -v df &> /dev/null; then
     echo -e "${BLUE}Available disk space:${NC}"
     df -h . | tail -n 1 | awk '{print "  Total: " $2 "\n  Used:  " $3 "\n  Free:  " $4 " (" $5 " used)"}'
 
-    # Check if less than 5GB free
-    local free_gb=$(df -BG . | tail -n 1 | awk '{print $4}' | sed 's/G//')
-    if [ "$free_gb" -lt 5 ]; then
+    # Check if less than 5GB free. `df -BG` is GNU-only and fails on macOS;
+    # `df -k` (1K blocks) is POSIX and works everywhere. Also note: `local` is
+    # only valid inside a function, and using it out here used to abort the
+    # whole script under `set -e`.
+    free_gb=$(df -k . | tail -n 1 | awk '{print int($4/1048576)}')
+    if [ "${free_gb:-99}" -lt 5 ]; then
         echo -e "${YELLOW}⚠${NC} Low disk space (less than 5GB free)"
         echo -e "${YELLOW}⚠ Solution:${NC} Free up disk space before installing"
     fi
@@ -121,10 +124,10 @@ echo ""
 echo -e "${BLUE}═══ Workspace ═══${NC}"
 if [ -d "workspace" ]; then
     echo -e "${GREEN}✓${NC} Workspace directory exists"
-    local ws_size=$(du -sh workspace 2>/dev/null | cut -f1)
-    echo -e "  Size: $ws_size"
-    local ws_files=$(find workspace -type f 2>/dev/null | wc -l | tr -d ' ')
-    echo -e "  Files: $ws_files"
+    ws_size=$(du -sh workspace 2>/dev/null | cut -f1)
+    echo -e "  Size: ${ws_size:-unknown}"
+    ws_files=$(find workspace -type f 2>/dev/null | wc -l | tr -d ' ')
+    echo -e "  Files: ${ws_files:-0}"
 else
     echo -e "${YELLOW}⚠${NC} Workspace directory not found"
     echo -e "${YELLOW}⚠ Solution:${NC} Will be created on first run"
@@ -156,10 +159,58 @@ echo ""
 # Version Check
 echo -e "${BLUE}═══ Installation Version ═══${NC}"
 if [ -f "VERSION" ]; then
-    local version=$(cat VERSION)
-    echo -e "${GREEN}✓${NC} Installed version: $version"
+    echo -e "${GREEN}✓${NC} Installed version: $(cat VERSION)"
 else
     echo -e "${YELLOW}⚠${NC} VERSION file not found (older installation)"
+    echo -e "${YELLOW}⚠ Solution:${NC} Run ./scripts/maintenance/update.sh to refresh this install"
+fi
+echo ""
+
+# Sign-in / credentials
+echo -e "${BLUE}═══ Claude Code Sign-in ═══${NC}"
+if [ -f ".env" ] && grep -qE '^[[:space:]]*CLAUDE_CODE_USE_BEDROCK=' .env; then
+    echo -e "${GREEN}✓${NC} Configured for Amazon Bedrock (.env)"
+    if grep -qE '^[[:space:]]*AWS_ACCESS_KEY_ID=.+' .env || grep -qE '^[[:space:]]*AWS_PROFILE=.+' .env; then
+        echo -e "${GREEN}✓${NC} AWS credentials present"
+    else
+        echo -e "${RED}✗${NC} CLAUDE_CODE_USE_BEDROCK is set but no AWS credentials found"
+        echo -e "${YELLOW}⚠ Solution:${NC} Run: ccauth"
+    fi
+elif [ -f ".env" ] && grep -qE '^[[:space:]]*(ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN)=.+' .env; then
+    echo -e "${GREEN}✓${NC} Configured with an Anthropic API key (.env)"
+elif docker compose exec -T claude-code test -s /home/claudeuser/.claude/.credentials.json 2>/dev/null; then
+    echo -e "${GREEN}✓${NC} Signed in interactively with a Claude account"
+else
+    echo -e "${YELLOW}⚠${NC} No sign-in configured yet"
+    echo -e "${YELLOW}⚠ Solution:${NC} Run ${GREEN}ccauth${NC}, or run ${GREEN}ccdocker${NC} and sign in when prompted"
+    echo -e "            See docs/CREDENTIALS.md"
+fi
+if [ -f ".env" ]; then
+    env_perms=$(stat -f '%Lp' .env 2>/dev/null || stat -c '%a' .env 2>/dev/null || echo "")
+    if [ -n "$env_perms" ] && [ "$env_perms" != "600" ]; then
+        echo -e "${YELLOW}⚠${NC} .env permissions are $env_perms (it holds secrets)"
+        echo -e "${YELLOW}⚠ Solution:${NC} Run: chmod 600 .env"
+    fi
+fi
+echo ""
+
+# Is the IDE port exposed beyond this machine?
+echo -e "${BLUE}═══ Browser IDE Exposure ═══${NC}"
+if [ -f "docker-compose.yml" ]; then
+    published=$(docker compose port claude-code 8080 2>/dev/null || true)
+    if [ -z "$published" ]; then
+        echo -e "${YELLOW}⚠${NC} Container not running — cannot check"
+    elif echo "$published" | grep -q '^127\.0\.0\.1:'; then
+        echo -e "${GREEN}✓${NC} Published on $published (this machine only)"
+    else
+        echo -e "${RED}✗${NC} Published on $published — reachable from your network"
+        if [ -f ".env" ] && grep -qE '^[[:space:]]*CC_VSCODE_PASSWORD=.+' .env; then
+            echo -e "${GREEN}✓${NC} A password is set, so it is not wide open"
+        else
+            echo -e "${RED}✗${NC} No password set. Anyone who can reach this port gets a shell."
+            echo -e "${YELLOW}⚠ Solution:${NC} Set CC_VSCODE_PASSWORD in .env, or publish on 127.0.0.1 only"
+        fi
+    fi
 fi
 echo ""
 
@@ -171,7 +222,8 @@ echo -e "${YELLOW}1. Docker not running:${NC}"
 echo -e "   Start Docker Desktop and wait ~30 seconds"
 echo -e ""
 echo -e "${YELLOW}2. Port 8080 in use:${NC}"
-echo -e "   Edit docker-compose.yml and change '8080:8080' to '8081:8080'"
+echo -e "   Copy docker-compose.override.yml.example to docker-compose.override.yml"
+echo -e "   and change the port to 127.0.0.1:8081:8080"
 echo -e ""
 echo -e "${YELLOW}3. Container won't start:${NC}"
 echo -e "   Run: docker compose down && docker compose up -d"
@@ -179,7 +231,13 @@ echo -e ""
 echo -e "${YELLOW}4. Out of disk space:${NC}"
 echo -e "   Run: docker system prune -a"
 echo -e ""
-echo -e "${YELLOW}5. Need to rebuild:${NC}"
+echo -e "${YELLOW}5. Need to rebuild or get the latest fixes:${NC}"
 echo -e "   Run: ./scripts/maintenance/update.sh"
+echo -e ""
+echo -e "${YELLOW}6. Claude Code asks you to sign in every time:${NC}"
+echo -e "   Run: ccauth   (see docs/CREDENTIALS.md)"
+echo -e ""
+echo -e "${YELLOW}7. Can't find Claude Code in the browser IDE:${NC}"
+echo -e "   There's no button — open Terminal → New Terminal and type: claude"
 echo -e ""
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"

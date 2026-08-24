@@ -38,6 +38,13 @@ logs/
 .env
 .env.local
 
+# Local planning notes. This repo is PUBLIC (the one-line installer needs
+# unauthenticated raw/codeload access), so unpublished drafts stay out of it.
+# UNIFIED_INSTALLER_PLAN.md in particular contains a personal AWS account ID and
+# profile name and must never be committed.
+docs/UNIFIED_INSTALLER_PLAN.md
+docs/*.local.md
+
 # Documentation builds (if added later)
 docs/_build/
 docs/.doctrees/

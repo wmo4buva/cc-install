@@ -72,7 +72,8 @@ This project bundles or installs the following third-party software:
 - **Purpose**: AI-powered coding assistant
 - **Website**: https://claude.ai/code
 - **License**: Proprietary (Anthropic Terms of Service)
-- **Installation**: Via official script from https://console.anthropic.com/install.sh
+- **Installation**: Via official script from https://claude.ai/install.sh
+  (redirects to Anthropic's current bootstrap script)
 
 ### code-server
 - **Developer**: Coder
@@ -99,7 +100,25 @@ This project bundles or installs the following third-party software:
 - **Purpose**: JavaScript runtime (required for code-server)
 - **Website**: https://nodejs.org/
 - **License**: MIT License
-- **Version Used**: v20 LTS
+- **Version Used**: v22 LTS
+
+### Bundled Claude Code Skills
+
+The Docker image clones these at build time into `/opt/cc-install/skills`, which
+the container entrypoint copies into the user's `~/.claude/skills`. They are
+third-party content redistributed inside the image — each remains under its own
+license, and we claim no ownership.
+
+| Project | Author | Repository |
+|---|---|---|
+| Anthropic Skills | Anthropic | https://github.com/anthropics/skills |
+| Andrej Karpathy Guidelines | multica-ai | https://github.com/multica-ai/andrej-karpathy-skills |
+| Superpowers | Jesse Vincent (obra) | https://github.com/obra/superpowers |
+
+Clones are unpinned (`--depth 1` of the default branch), so an image reflects
+whatever those repositories contained at build time. Consult each repository for
+its license and terms. Remove the skills block from the `Dockerfile` if you need
+to exclude them.
 
 ## License for This Project
 
@@ -109,6 +128,7 @@ This project (`cc-install`) is provided as-is for educational and research purpo
 - Claude Code itself is subject to Anthropic's terms of service
 - code-server is subject to its MIT License
 - DAAF patterns used are subject to GPL-3.0
+- Bundled skills remain under their respective upstream licenses (see above)
 
 ## Questions or Concerns?
 
@@ -121,6 +141,7 @@ Special thanks to:
 - **Anthropic** for Claude Code
 - **Coder** for code-server
 - **Docker, Inc.** for Docker containerization technology
+- **Jesse Vincent (obra)** and the **multica-ai** maintainers for the skill collections
 - **Users** who provided feedback on installation usability
 
 ---

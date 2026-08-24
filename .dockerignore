@@ -1,26 +1,38 @@
-# Exclude workspace data from Docker build context
-workspace/
+# Keep the build context small. The image only needs the container entrypoint;
+# everything else (launchers, installers, maintenance scripts, docs) runs on the
+# host and must NOT be copied in.
 
-# Git files
+# User data and local state
+workspace/
+backups/
+.env
+.env.local
+docker-compose.override.yml
+
+# Git
 .git/
+.gitattributes
 .gitignore
 
-# Documentation (copied separately)
-README.md
-ATTRIBUTION.md
+# Docs (not needed inside the image)
+*.md
+docs/
 
-# Scripts (copied separately)
-*.sh
-*.ps1
+# Host-side scripts. scripts/container/ is re-included below because the
+# Dockerfile COPYs the entrypoint from there.
+scripts/*
+!scripts/container/
 
-# IDE files
+# Root launcher wrappers
+claude
+claude.cmd
+vscode
+vscode.cmd
+
+# IDE / OS noise
 .vscode/
 .idea/
-
-# macOS files
 .DS_Store
-
-# Temporary files
 *.tmp
 *.log
 *.swp
