@@ -67,7 +67,14 @@ if (-not $signedIn) {
 # Drop a sign-in cheat sheet into the workspace. It's the first thing the user
 # sees in the IDE's file explorer, which makes it the right place to explain
 # something the browser IDE itself can't prompt for.
+#
+# Only into the bundled .\workspace, which is ours to write into. Once ccpath can
+# point the workspace at a folder the user already owns, seeding a file into it is
+# no longer harmless: that folder is often a git repo, where an unexpected
+# START-HERE.md shows up as untracked and can be committed by accident. The same
+# instructions are printed to the terminal below and live in README/RUNBOOK.
 $wsDir = Get-CcWorkspaceDir
+$seedStartHere = -not (Test-CcWorkspaceRelocated)
 if (-not (Test-Path $wsDir)) { New-Item -Path $wsDir -ItemType Directory -Force | Out-Null }
 
 # Literal here-string on purpose: the body contains backticks, which an
@@ -116,8 +123,10 @@ and it survives updates.
 
 Full detail: `docs\CREDENTIALS.md` in the cc-install folder.
 '@
-$startHere = $startHere.Replace('__CC_WORKSPACE__', $wsDir)
-Set-Content -Path (Join-Path $wsDir "START-HERE.md") -Value $startHere -Encoding utf8
+if ($seedStartHere) {
+    $startHere = $startHere.Replace('__CC_WORKSPACE__', $wsDir)
+    Set-Content -Path (Join-Path $wsDir "START-HERE.md") -Value $startHere -Encoding utf8
+}
 
 Write-Info "Starting VS Code Server..."
 
@@ -194,7 +203,12 @@ else {
     Write-Host "  Details: docs\CREDENTIALS.md" -ForegroundColor Blue
 }
 Write-Host ""
-Write-Host "Open START-HERE.md in the IDE for these instructions again." -ForegroundColor Blue
+# Only point at START-HERE.md when we actually wrote one.
+if ($seedStartHere) {
+    Write-Host "Open START-HERE.md in the IDE for these instructions again." -ForegroundColor Blue
+} else {
+    Write-Host "These instructions are also in RUNBOOK.md in the cc-install folder." -ForegroundColor Blue
+}
 Write-Host ""
 
 Write-Info "Opening browser..."

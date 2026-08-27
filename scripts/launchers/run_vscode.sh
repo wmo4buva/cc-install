@@ -99,10 +99,21 @@ fi
 # Drop a sign-in cheat sheet into the workspace. This is the first thing the
 # user sees in the IDE's file explorer, which makes it the right place to
 # explain something the browser IDE itself can't prompt for.
+#
+# Only into the bundled ./workspace, which is ours to write into. Once ccpath can
+# point the workspace at a folder the user already owns, seeding a file into it is
+# no longer harmless: that folder is often a git repo, where an unexpected
+# START-HERE.md shows up as untracked and can be committed by accident. The same
+# instructions are printed to the terminal below and live in README/RUNBOOK.
 # ---------------------------------------------------------------------------
 write_start_here() {
     local ws
     ws="$(cc_workspace_dir)"
+
+    if cc_workspace_is_relocated; then
+        return 0
+    fi
+
     mkdir -p "$ws"
     cat > "$ws/START-HERE.md" << EOF
 # Start here
@@ -219,7 +230,12 @@ else
     echo -e "  Details: ${BLUE}docs/CREDENTIALS.md${NC}"
 fi
 echo ""
-echo -e "${BLUE}Open ${BOLD}START-HERE.md${NC}${BLUE} in the IDE for these instructions again.${NC}"
+# Only point at START-HERE.md when we actually wrote one (see write_start_here).
+if cc_workspace_is_relocated; then
+    echo -e "${BLUE}These instructions are also in ${BOLD}RUNBOOK.md${NC}${BLUE} in the cc-install folder.${NC}"
+else
+    echo -e "${BLUE}Open ${BOLD}START-HERE.md${NC}${BLUE} in the IDE for these instructions again.${NC}"
+fi
 echo ""
 
 if command -v open &> /dev/null; then

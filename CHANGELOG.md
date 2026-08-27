@@ -2,6 +2,21 @@
 
 All notable changes to the Claude Code Installer (cc-install) project.
 
+## [1.4.1] - 2026-08-27
+
+### Fixed — `ccvscode` no longer writes into a relocated workspace
+
+`run_vscode.{sh,ps1}` seeds a `START-HERE.md` into the workspace so the browser
+IDE's file tree explains the thing it can't prompt for. That was harmless while the
+workspace was always the bundled `./workspace`. With `ccpath` it can be a folder
+the user already owns — often a git repo, where an unexpected `START-HERE.md`
+appears as untracked and can be committed by accident.
+
+It now seeds only the bundled `./workspace`. When the workspace is relocated the
+launcher points at `RUNBOOK.md` instead, and the same instructions are still
+printed to the terminal either way. Verified both paths: relocated leaves the
+folder untouched, default still seeds as before.
+
 ## [1.4.0] - 2026-08-27
 
 ### Added — `ccpath`, to put your files wherever you want them
