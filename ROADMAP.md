@@ -136,11 +136,29 @@ The full list, from auditing the scripts:
 |---|---|---|
 | 1 | `docker-compose.yml` `container_name: cc-install` | Absolute, not namespaced by project. Hard collision. **Verified.** |
 | 2 | `docker-compose.yml` `127.0.0.1:8080:8080` | Second instance can't bind the port. |
-| 3 | `docker-compose.yml` `./workspace` | Same path → instances share files. |
+| 3 | `docker-compose.yml` workspace mount | **Partly solved in 1.4.0.** Now `${CC_WORKSPACE:-./workspace}`, so instances *can* have separate workspaces — but only if each has its own `.env`, since that's where `CC_WORKSPACE` lives. Unset in both → both fall back to their own `./workspace`, which is per-directory and therefore already distinct. |
 | 4 | `setup-shortcuts.{sh,ps1}` | Shortcut names are fixed (`ccdocker`, `ccvscode`, …) and always rewritten. A second install **silently repoints every shortcut at itself**, breaking the first. Sharpest edge here. |
 | 5 | `uninstall.{sh,ps1}` | `docker rmi cc-install:latest` and `docker volume rm cc-install_claude-config` are hardcoded. In a multi-instance setup this removes the **shared image** and the **wrong volume**. Data-loss hazard — fix before promoting multi-instance. |
 | 6 | `diagnose.{sh,ps1}` | Greps for a container called `cc-install` and inspects `cc-install_claude-config`. Both names change per project, so diagnostics report false failures. |
 | 7 | `diagnose.{sh,ps1}` | Port availability check is hardcoded to 8080. |
+| 8 | `set-workspace.{sh,ps1}` (`ccpath`, added 1.4.0) | Writes `CC_WORKSPACE` into `./.env` relative to the install it runs from, and recreates the container by that project's compose file. With several instances there is no way to say *which* one you mean, and item 4 means the bare `ccpath` shortcut points at whichever install was set up last. Needs the same per-instance targeting as the rest. |
+
+### Rejected: move the host scripts into the container
+
+Tempting, because it looks like it would make instances self-contained. It doesn't
+work, and it's worth writing down so it isn't proposed again.
+
+The scripts that matter *drive* Docker rather than run under it. `run_claude` and
+`run_vscode` call `docker compose exec`; `update` calls `docker compose build`;
+`diagnose` checks the daemon and host ports; `install` builds the image. A container
+cannot rebuild or recreate itself. Doing any of it from inside means mounting the
+host Docker socket, which gives anything in that container effective root on the
+host — an unacceptable trade for an image whose purpose is running an LLM with file
+access. `setup-shortcuts` and `setup-credentials` are host-side by definition: they
+write the user's shell config and `.env`.
+
+Nothing of value is left to move in. The lever for multi-instance is Compose project
+parameterisation (below), not relocating the scripts.
 
 ### Target design
 
