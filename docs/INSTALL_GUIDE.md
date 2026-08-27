@@ -130,7 +130,7 @@ use with your mouse.
 
 > **Shortcuts not found?** Make sure you opened a **brand-new terminal window**
 > after the install finished. On Mac you can always fall back to:
-> `cd cc-install` then `./claude` (or `./vscode`).
+> `cd cc-install` then `./bin/claude` (or `./bin/vscode`).
 
 ---
 
@@ -319,7 +319,7 @@ ccdiagnose
 
 | Problem | Fix |
 |---|---|
-| *"command not found: ccdocker"* | Open a **fresh terminal window** after installing. On Mac you can also `cd cc-install` and run `./claude`. |
+| *"command not found: ccdocker"* | Open a **fresh terminal window** after installing. On Mac you can also `cd cc-install` and run `./bin/claude`. |
 | *"Docker daemon is not running"* | Open **Docker Desktop** and wait until it says "running," then try again. |
 | The install command *"doesn't work"* on Windows | Make sure you're in **PowerShell**, not Command Prompt (cmd). |
 | Browser editor won't open | Wait ~10 seconds after `ccvscode`, then visit **http://localhost:8088** manually. |

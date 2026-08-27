@@ -3,6 +3,8 @@
 
 $ErrorActionPreference = "Stop"
 
+. (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\lib\Workspace.ps1")
+
 # Logging functions
 function Write-ErrorMsg {
     param([string]$Message)
@@ -19,10 +21,17 @@ function Write-Success {
     Write-Host "[SUCCESS] $Message" -ForegroundColor Green
 }
 
-# Check workspace exists
-if (-not (Test-Path "workspace")) {
-    Write-ErrorMsg "workspace directory not found"
-    Write-Host "Please run this script from the cc-install directory"
+# Where the user's files actually live - .\workspace unless ccpath moved it.
+$workspaceDir = Get-CcWorkspaceDir
+
+if (-not (Test-Path $workspaceDir)) {
+    Write-ErrorMsg "workspace directory not found: $workspaceDir"
+    if (Test-CcWorkspaceRelocated) {
+        Write-Host "CC_WORKSPACE in .env points there, but the folder is missing."
+        Write-Host "Check it still exists, or repoint it with: ccpath"
+    } else {
+        Write-Host "Please run this script from the cc-install directory"
+    }
     exit 1
 }
 
@@ -43,12 +52,14 @@ Write-Host "║                                                           ║" -
 Write-Host "╚═══════════════════════════════════════════════════════════╝" -ForegroundColor Blue
 Write-Host ""
 
+Write-Info "Backing up: $(Get-CcWorkspaceLabel)"
+
 # Check workspace size
-$workspaceSize = (Get-ChildItem -Path "workspace" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+$workspaceSize = (Get-ChildItem -Path $workspaceDir -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
 Write-Info "Workspace size: $([math]::Round($workspaceSize, 2)) MB"
 
 # Count files
-$fileCount = (Get-ChildItem -Path "workspace" -Recurse -File).Count
+$fileCount = (Get-ChildItem -Path $workspaceDir -Recurse -File).Count
 Write-Info "Files to backup: $fileCount"
 
 Write-Host ""
@@ -56,7 +67,7 @@ Write-Info "Creating backup: $backupFile"
 
 try {
     # Create backup using Compress-Archive
-    Compress-Archive -Path "workspace\*" -DestinationPath $backupFile -CompressionLevel Optimal
+    Compress-Archive -Path (Join-Path $workspaceDir "*") -DestinationPath $backupFile -CompressionLevel Optimal
 
     $backupSize = (Get-Item $backupFile).Length / 1MB
 

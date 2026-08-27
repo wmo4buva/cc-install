@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Quick launcher for Claude Code
+# Usage: ./bin/claude [args]
+#
+# cd's to the repo root (one level up from bin/), not to bin/ — every
+# `docker compose` call downstream resolves docker-compose.yml from the
+# working directory.
+cd "$(dirname "$0")/.." && ./scripts/launchers/run_claude.sh "$@"

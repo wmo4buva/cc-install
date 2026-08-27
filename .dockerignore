@@ -24,11 +24,8 @@ archive/
 scripts/*
 !scripts/container/
 
-# Root launcher wrappers
-claude
-claude.cmd
-vscode
-vscode.cmd
+# Host-side launcher wrappers
+bin/
 
 # IDE / OS noise
 .vscode/

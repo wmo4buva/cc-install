@@ -1,7 +1,10 @@
 services:
   claude-code:
     build:
+      # context stays at the repo root — the Dockerfile COPYs
+      # scripts/container/entrypoint.sh, which lives above docker/.
       context: .
+      dockerfile: docker/Dockerfile
       args:
         # Set CC_INSTALL_VSCODE_EXTENSION=1 in .env and run ccupdate to bake the
         # Claude Code VS Code extension into the image. Off by default because it
@@ -15,8 +18,14 @@ services:
     init: true
 
     volumes:
-      # Your files. Directly visible on the host in ./workspace.
-      - ./workspace:/home/claudeuser/workspace
+      # Your files. Directly visible on the host — in ./workspace by default, or
+      # wherever CC_WORKSPACE points if you've run `ccpath`.
+      #
+      # Quoted because a relocated path may contain spaces. The container side
+      # never changes, so nothing inside the image cares where this comes from.
+      # Compose reads CC_WORKSPACE from the shell environment first, then .env;
+      # scripts/lib/workspace.sh resolves it the same way so the two can't drift.
+      - "${CC_WORKSPACE:-./workspace}:/home/claudeuser/workspace"
       # Claude Code config + credentials + skills. Survives rebuilds.
       - claude-config:/home/claudeuser/.claude
       # code-server settings and extensions. Survives rebuilds.

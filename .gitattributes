@@ -1,6 +1,10 @@
 # Ensure PowerShell scripts use Windows (CRLF) line endings
 *.ps1 text eol=crlf
 
+# Batch launchers too. cmd.exe tolerates LF for simple one-liners, but not for
+# labels/goto, and LF endings in *.ps1 have already broken a Windows release once.
+*.cmd text eol=crlf
+
 # Shell scripts use Unix (LF) line endings
 *.sh text eol=lf
 

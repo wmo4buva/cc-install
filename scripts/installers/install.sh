@@ -180,7 +180,7 @@ download_files() {
     fi
     rm -rf "$tmp_dir"
 
-    chmod +x "$INSTALL_DIR/claude" "$INSTALL_DIR/vscode" 2>/dev/null || true
+    chmod +x "$INSTALL_DIR/bin/claude" "$INSTALL_DIR/bin/vscode" 2>/dev/null || true
     find "$INSTALL_DIR/scripts" -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
 
     log_success "Files downloaded"
@@ -322,11 +322,11 @@ main() {
     if [ -f "scripts/installers/setup-shortcuts.sh" ]; then
         bash scripts/installers/setup-shortcuts.sh || {
             log_warn "Failed to setup shortcuts, but installation is complete"
-            echo -e "${YELLOW}You can still launch using: cd $INSTALL_DIR && ./claude${NC}"
+            echo -e "${YELLOW}You can still launch using: cd $INSTALL_DIR && ./bin/claude${NC}"
         }
     else
         log_warn "setup-shortcuts.sh not found, skipping shortcut setup"
-        echo -e "${YELLOW}You can launch using: cd $INSTALL_DIR && ./claude${NC}"
+        echo -e "${YELLOW}You can launch using: cd $INSTALL_DIR && ./bin/claude${NC}"
     fi
 
     print_success_message

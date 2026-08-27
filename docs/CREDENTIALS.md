@@ -116,7 +116,7 @@ This writes `CLAUDE_CODE_USE_BEDROCK=1` plus the AWS variables to `.env`.
 If you sign in with `aws sso login` on your own machine, you can share that
 session with the container rather than copying keys:
 
-1. Copy `docker-compose.override.yml.example` to `docker-compose.override.yml`
+1. Copy `docs/docker-compose.override.yml.example` to `docker-compose.override.yml`
 2. Uncomment the `${HOME}/.aws` volume mount
 3. Put `AWS_PROFILE=<your-profile>` in `.env`
 4. `ccrestart`

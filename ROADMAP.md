@@ -251,15 +251,15 @@ points at whichever install ran last.
 **4. Launch from inside each directory.**
 
 ```bash
-cd cc-bedrock && ./claude     # or ./vscode
+cd cc-bedrock && ./bin/claude     # or ./bin/vscode
 ```
 
-The `./claude` and `./vscode` wrappers resolve relative to their own folder, so
+The `./bin/claude` and `./bin/vscode` wrappers resolve relative to their own folder, so
 they're always instance-correct. **Verified.**
 
 **5. Know the rough edges.**
 
-- Global `cc*` shortcuts point at the last install. Either use `./claude` per
+- Global `cc*` shortcuts point at the last install. Either use `./bin/claude` per
   folder, or hand-write your own suffixed shortcuts in `~/.local/bin`.
 - `ccdiagnose` will report the container and volume as missing in any instance
   not named `cc-install` (item 6). The install still works.

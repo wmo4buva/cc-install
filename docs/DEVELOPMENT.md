@@ -22,21 +22,86 @@ Design constraints, in priority order:
 ## Layout
 
 ```
-Dockerfile                              image: Debian + Node + code-server + Claude Code
 docker-compose.yml                      volumes, loopback port binding, env passthrough
-docker-compose.override.yml.example     user-editable local overrides
+VERSION                                 single source of truth for the version
 .env.example                            credential template
+docker/Dockerfile                       image: Debian + Node + code-server + Claude Code
+docs/docker-compose.override.yml.example  user-editable local overrides
+bin/
+  claude, vscode, claude.cmd, vscode.cmd  thin wrappers into scripts/launchers/
 scripts/
   container/entrypoint.sh               runs INSIDE the image on every start
+  lib/workspace.sh, lib/Workspace.ps1   shared workspace-path resolution
   installers/install.{sh,ps1}           one-line installer
   installers/setup-shortcuts.{sh,ps1}   creates the cc* commands
   installers/setup-credentials.{sh,ps1} the ccauth flow
   launchers/run_claude.{sh,ps1}         ccdocker
   launchers/run_vscode.{sh,ps1}         ccvscode
+  maintenance/set-workspace.{sh,ps1}    ccpath
   maintenance/{update,backup,restore,uninstall,check-update,diagnose}.{sh,ps1}
-claude, vscode, claude.cmd, vscode.cmd  thin wrappers into scripts/launchers/
-VERSION                                 single source of truth for the version
 ```
+
+### Develop in a clone, never in an install
+
+`ccupdate` runs `cp -R extracted/. $INSTALL_DIR/` — it copies the whole repo over
+an installed copy, with no backup. Files that exist upstream are overwritten;
+locally-created files survive. So editing an installed copy directly means every
+change to a tracked file is silently destroyed on the user's next `ccupdate`, and
+there is nothing to recover from unless the install happens to be a git clone.
+
+Clone the repo to work on it, and let installs receive changes the normal way
+(`ccupdate` after a push to `main`).
+
+### What can and can't move out of the root
+
+`docker-compose.yml` and `VERSION` are pinned there.
+
+- **`docker-compose.yml`** — roughly 130 `docker compose` calls across 14 scripts
+  resolve it from the working directory, and `env_file` / `build.context` resolve
+  relative to the compose file itself, so moving it shifts those too. Every
+  documented `docker compose exec …` a user copy-pastes would also break.
+  `COMPOSE_FILE` in `.env` is not a way out: `.env` doesn't exist yet when
+  `install.sh` runs its first build.
+- **`VERSION`** — `check-update.{sh,ps1}` already shipped to users with
+  `raw.githubusercontent.com/.../main/VERSION` baked in. Moving it makes those
+  fetches 404, which the script reads as "no update available", so existing
+  installs would silently never see another release. That's hard rule 3.
+- **`docker-compose.override.yml`** — Compose auto-loads it only from the compose
+  file's own directory. The `.example` is pure documentation and does live in `docs/`.
+
+The `bin/` wrappers `cd "$(dirname "$0")/.."` (and `cd /d "%~dp0.."` on Windows)
+before calling into `scripts/launchers/`, so the working directory is the repo root
+no matter where the user invokes them from.
+
+### The workspace mount is relocatable
+
+`docker-compose.yml` mounts `${CC_WORKSPACE:-./workspace}`, and `ccpath`
+(`set-workspace.{sh,ps1}`) writes `CC_WORKSPACE` into `.env`. The container path
+never changes, so nothing in the image is aware of any of this.
+
+**Never hardcode `workspace/`.** Resolve through `scripts/lib/workspace.sh`
+(`cc_workspace_dir`, `cc_workspace_label`, `cc_workspace_is_relocated`,
+`cc_workspace_validate`) or the `Workspace.ps1` equivalents. They mirror Compose's
+resolution order exactly — shell environment, then `.env`, then `./workspace` — so
+the scripts and the container can't drift apart. Six scripts hardcoded the path
+before this existed; the failure mode is `ccbackup` cheerfully archiving an empty
+`./workspace` while the real files sit somewhere else.
+
+Three things that bite here:
+
+- **A bind mount is fixed at container creation.** Changing `CC_WORKSPACE` needs
+  `docker compose up -d --force-recreate`, not `restart`. `ccpath` does this and
+  then reads the mount back out of `docker inspect` to prove it landed.
+- **Compose doesn't expand `~`,** and a relative path resolves against the caller's
+  cwd. `ccpath` always writes an absolute path; `cc_workspace_validate` catches
+  hand-edited `.env` files, and `ccdiagnose` surfaces it.
+- **A path Docker Desktop can't share mounts empty, with no error.** macOS shares
+  `/Users`, `/Volumes`, `/private`, `/tmp` by default. `ccpath` warns on anything
+  outside that, and on UNC paths and non-C: drives on Windows.
+
+Anything that deletes workspace contents must refuse to run on `$HOME` or a
+filesystem root — `ccpath ~` followed by `ccrestore` would otherwise wipe the home
+directory. See `guard_destructive_path` in `restore.sh` and its `.ps1` counterpart.
 
 ## Local development
 
@@ -93,7 +158,7 @@ Claude Code is baked into the image, and `~/.claude` is a Docker **volume**.
 Those two facts cause most of the non-obvious bugs in this project.
 
 **A volume is seeded from the image only once, when the volume is first
-created.** So anything written into `~/.claude` in the `Dockerfile` is frozen at
+created.** So anything written into `~/.claude` in the `docker/Dockerfile` is frozen at
 whatever the user's very first build produced and can never be updated. That's
 why bundled skills live in `/opt/cc-install/skills` and
 `scripts/container/entrypoint.sh` copies them into `~/.claude/skills` on every
@@ -105,7 +170,7 @@ empty volume; if the path doesn't exist, the mountpoint is `root:root` and the
 container user is locked out. This shipped in 1.3.0 with the `code-server-data`
 volume: code-server died with `EACCES: permission denied, mkdir .../coder-logs`
 and every extension install failed. Two-part fix — `mkdir -p` the path in the
-`Dockerfile` as `claudeuser` (fixes new installs), and repair via `sudo chown` in
+`docker/Dockerfile` as `claudeuser` (fixes new installs), and repair via `sudo chown` in
 `scripts/container/entrypoint.sh` (fixes existing ones, since a non-empty volume
 is never re-seeded). **Any new volume mount needs the same treatment.**
 
@@ -176,7 +241,7 @@ Releasing:
 3. `git tag vX.Y.Z && git push --tags`
 4. Push to `main` — the one-line installer tracks `main`, so this is the release.
 
-Pinned versions live in the `Dockerfile` as build args (`CODE_SERVER_VERSION`,
+Pinned versions live in the `docker/Dockerfile` as build args (`CODE_SERVER_VERSION`,
 `NODE_MAJOR`). Claude Code is deliberately unpinned — the official installer
 always fetches the latest.
 
@@ -212,7 +277,7 @@ directory prints a warning rather than failing the build. Check build output for
 
 They're unpinned, so you inherit whatever is on those default branches at build
 time. See [../SECURITY.md](../SECURITY.md). To add a source, extend the loop in
-the `Dockerfile`; the entrypoint needs no change.
+the `docker/Dockerfile`; the entrypoint needs no change.
 
 ## Regenerating the Visual Guide PDF
 
@@ -265,4 +330,4 @@ Kept short on purpose — a long speculative roadmap ages badly.
 
 Structure and installer patterns follow
 [DAAF](https://github.com/DAAF-Contribution-Community/daaf). See
-[../ATTRIBUTION.md](../ATTRIBUTION.md).
+[ATTRIBUTION.md](ATTRIBUTION.md).

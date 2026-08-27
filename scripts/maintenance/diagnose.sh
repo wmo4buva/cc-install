@@ -3,6 +3,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/workspace.sh
+. "$SCRIPT_DIR/../lib/workspace.sh"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -126,15 +130,52 @@ echo ""
 
 # Workspace Check
 echo -e "${BLUE}═══ Workspace ═══${NC}"
-if [ -d "workspace" ]; then
+ws_dir="$(cc_workspace_dir)"
+echo -e "  Host folder: ${ws_dir}"
+if cc_workspace_is_relocated; then
+    echo -e "  ${BLUE}Relocated via ccpath${NC} (the bundled ./workspace is not in use)"
+fi
+
+# A bad CC_WORKSPACE is worth catching here rather than letting it surface as an
+# empty folder in the IDE with no explanation.
+if ! cc_workspace_validate 2>/dev/null; then
+    echo -e "${RED}✗${NC} CC_WORKSPACE in .env is not usable"
+    cc_workspace_validate 2>&1 >/dev/null | sed 's/^/  /'
+    echo -e "${YELLOW}⚠ Solution:${NC} Reset it with: ccpath --reset"
+elif [ -d "$ws_dir" ]; then
     echo -e "${GREEN}✓${NC} Workspace directory exists"
-    ws_size=$(du -sh workspace 2>/dev/null | cut -f1)
+    ws_size=$(du -sh "$ws_dir" 2>/dev/null | cut -f1)
     echo -e "  Size: ${ws_size:-unknown}"
-    ws_files=$(find workspace -type f 2>/dev/null | wc -l | tr -d ' ')
+    ws_files=$(find "$ws_dir" -type f 2>/dev/null | wc -l | tr -d ' ')
     echo -e "  Files: ${ws_files:-0}"
 else
     echo -e "${YELLOW}⚠${NC} Workspace directory not found"
-    echo -e "${YELLOW}⚠ Solution:${NC} Will be created on first run"
+    if cc_workspace_is_relocated; then
+        echo -e "${YELLOW}⚠ Solution:${NC} The folder ccpath points at is missing."
+        echo -e "             Recreate it, or repoint with: ccpath"
+    else
+        echo -e "${YELLOW}⚠ Solution:${NC} Will be created on first run"
+    fi
+fi
+
+# Cross-check against what the container actually mounted. These can disagree if
+# .env changed without a container recreate — a bind mount is fixed at creation.
+if docker info >/dev/null 2>&1; then
+    mounted="$(docker inspect cc-install \
+        --format '{{range .Mounts}}{{if eq .Destination "/home/claudeuser/workspace"}}{{.Source}}{{end}}{{end}}' \
+        2>/dev/null || true)"
+    if [ -n "$mounted" ]; then
+        expected="$ws_dir"
+        [ "$expected" = "./workspace" ] && expected="$(pwd)/workspace"
+        if cc_mount_matches "$mounted" "$expected"; then
+            echo -e "${GREEN}✓${NC} Container is mounting this folder"
+        else
+            echo -e "${RED}✗${NC} Container is mounting a DIFFERENT folder"
+            echo -e "  Configured: $expected"
+            echo -e "  Mounted:    $mounted"
+            echo -e "${YELLOW}⚠ Solution:${NC} Recreate the container: ccrestart"
+        fi
+    fi
 fi
 echo ""
 
@@ -255,8 +296,9 @@ echo -e "${YELLOW}1. Docker not running:${NC}"
 echo -e "   Start Docker Desktop and wait ~30 seconds"
 echo -e ""
 echo -e "${YELLOW}2. Port 8080 in use:${NC}"
-echo -e "   Copy docker-compose.override.yml.example to docker-compose.override.yml"
-echo -e "   and uncomment the 'ports: !override' block (the !override tag is"
+echo -e "   Copy docs/docker-compose.override.yml.example to docker-compose.override.yml"
+echo -e "   here in the install folder, then uncomment the 'ports: !override' block"
+echo -e "   (the !override tag is"
 echo -e "   required — without it Compose publishes BOTH ports)"
 echo -e ""
 echo -e "${YELLOW}3. Container won't start:${NC}"

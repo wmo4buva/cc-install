@@ -3,6 +3,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/workspace.sh
+. "$SCRIPT_DIR/../lib/workspace.sh"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -97,12 +101,14 @@ fi
 # explain something the browser IDE itself can't prompt for.
 # ---------------------------------------------------------------------------
 write_start_here() {
-    mkdir -p workspace
-    cat > workspace/START-HERE.md << EOF
+    local ws
+    ws="$(cc_workspace_dir)"
+    mkdir -p "$ws"
+    cat > "$ws/START-HERE.md" << EOF
 # Start here
 
 You're in **VS Code Server**, running inside the Claude Code container. Your
-files live in this folder and are also on your computer at \`workspace/\`.
+files live in this folder and are also on your computer at \`${ws}\`.
 
 ## How to use Claude Code in here
 
@@ -188,7 +194,7 @@ echo -e "${GREEN}║   VS Code Server is running                               �
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${BLUE}Open in your browser:${NC} ${YELLOW}${URL}${NC}"
-echo -e "  ${BLUE}Your files:${NC}            workspace/"
+echo -e "  ${BLUE}Your files:${NC}            $(cc_workspace_label)"
 echo ""
 
 # The bit people get stuck on: there is no Claude Code button in the IDE.

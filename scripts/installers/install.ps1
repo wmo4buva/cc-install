@@ -303,8 +303,8 @@ function Main {
         Write-Err "Failed to setup shortcuts: $_"
         Write-Warn "Installation is complete, but shortcuts were not configured"
         Write-Host "You can still launch using:" -ForegroundColor Yellow
-        Write-Host "  .\claude.cmd   (from this directory)" -ForegroundColor Yellow
-        Write-Host "  .\vscode.cmd   (from this directory)" -ForegroundColor Yellow
+        Write-Host "  .\bin\claude.cmd   (from this directory)" -ForegroundColor Yellow
+        Write-Host "  .\bin\vscode.cmd   (from this directory)" -ForegroundColor Yellow
         Write-Host ""
         Write-Host "To set up shortcuts later, run:" -ForegroundColor Yellow
         Write-Host "  .\scripts\installers\setup-shortcuts.ps1" -ForegroundColor Yellow

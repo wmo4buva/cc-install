@@ -2,6 +2,154 @@
 
 All notable changes to the Claude Code Installer (cc-install) project.
 
+## [1.4.0] - 2026-08-27
+
+### Added — `ccpath`, to put your files wherever you want them
+
+`ccpath` repoints the workspace mount at any folder on your computer, so your
+files don't have to live inside the install directory.
+
+```bash
+ccpath ~/Dev/projects     # point the workspace there
+ccpath --show             # where is it now?
+ccpath --reset            # back to ./workspace
+ccpath                    # show current, then prompt
+```
+
+`docker-compose.yml` now mounts `${CC_WORKSPACE:-./workspace}`, and `ccpath`
+writes `CC_WORKSPACE` into `.env`. Existing installs are unaffected: with the
+variable unset the mount resolves to `./workspace` exactly as before. The
+container path is still `/home/claudeuser/workspace`, so nothing moves in the IDE.
+
+It edits `.env` surgically — drops any existing `CC_WORKSPACE` line and appends,
+the same approach `setup-credentials.sh` uses — so credentials are untouched.
+Verified by diffing `.env` before and after a relocate-and-reset cycle: byte
+identical.
+
+What it handles that a hand-edited `.env` doesn't:
+- **Recreates the container, not just restarts it.** A bind mount is fixed at
+  container creation, so `restart` silently keeps the old folder. Then it reads the
+  mount back out of `docker inspect` and tells you if they disagree.
+- **Offers to copy your existing files across.** Copy, never move; the originals
+  are never deleted.
+- **Warns on folders Docker Desktop can't share** (outside `/Users`, `/Volumes`,
+  `/private`, `/tmp` on macOS; UNC paths and non-`C:` drives on Windows). These
+  mount *empty*, with no error at all — a genuinely awful thing to debug.
+- **Warns on cloud-synced folders** (Dropbox, OneDrive, iCloud, Google Drive),
+  where the sync client and the container both write the same files.
+- **Rejects `~` and relative paths.** Compose expands neither; `~/foo` would mount
+  a folder literally named `~`. `ccdiagnose` also flags a hand-edited `.env`.
+
+**Six scripts no longer hardcode `workspace/`.** `backup`, `restore`, `diagnose`,
+`run_vscode`, `uninstall` and `set-workspace` resolve the path through new shared
+helpers, `scripts/lib/workspace.sh` and `scripts/lib/Workspace.ps1`, which mirror
+Compose's own resolution order (shell environment, then `.env`, then the default)
+so the scripts and the container cannot drift apart. Without this, `ccbackup`
+would have archived an empty `./workspace` while the real files sat elsewhere.
+
+`ccdiagnose` now reports the configured folder, flags it as relocated, and
+cross-checks it against what the container actually mounted.
+
+The cross-check normalises Docker Desktop's `/host_mnt` prefix before comparing.
+Docker doesn't echo back the path you gave it — on macOS and Windows it reports
+bind sources through its VM, so `/Users/you/cc-install/workspace` comes back as
+`/host_mnt/Users/you/cc-install/workspace` and `C:\Users\you` as
+`/host_mnt/c/Users/you`. A naive compare flagged a mismatch on *every* Docker
+Desktop install — worse than no check, since it tells people to recreate a
+container that's already correct and trains them to ignore the warning when a
+real mismatch happens. Caught by running `ccdiagnose` on a live install.
+
+### Added — RUNBOOK.md
+
+[RUNBOOK.md](RUNBOOK.md) collects the operational procedures: changing the
+workspace folder, configuring which models appear in the VS Code picker on
+Bedrock, and troubleshooting. Verified Bedrock inference-profile IDs are listed
+with their context windows.
+
+Two corrections worth calling out, because the wrong versions circulated first:
+current model IDs carry **no date suffix** (`us.anthropic.claude-opus-5`, not
+`us.anthropic.claude-opus-5-20251201-v1:0`), and **Haiku 4.5 is 200K, not 1M** —
+there is no 1M variant of it to select. Every ID in the runbook was confirmed
+present with `list-inference-profiles` and confirmed to return a completion with
+`bedrock-runtime converse`.
+
+### Fixed — `ccrestore` on Windows extracted to the wrong folder
+
+Pre-existing. `backup.ps1` archives `workspace\*`, so the zip holds the workspace
+*contents* at its root — but `restore.ps1` called
+`Expand-Archive -DestinationPath "."`, scattering those files across the install
+directory and then reporting "0 files restored" because it counted the
+freshly-emptied workspace. It now extracts into the workspace folder. The
+macOS/Linux path was never affected.
+
+### Fixed — restore could have deleted your home directory
+
+`restore.{sh,ps1}` clears the workspace before extracting. That was safe while the
+path was always `./workspace`; with a user-chosen path, `ccpath ~` followed by
+`ccrestore` would have deleted everything in `$HOME`. Both now refuse outright on
+a home directory, a filesystem root, a Windows drive root, or a system directory.
+Verified against a decoy `$HOME` — the guard fires, exits 1, and the decoy's
+contents survive.
+
+Restore also now clears the workspace *contents* rather than removing and
+recreating the directory. The folder is a live bind-mount source: deleting it
+detaches the running container's mount, and on a relocated path it may carry
+file-sharing permissions that can't be recreated.
+
+Backups keep a single top-level directory, and restore strips it with
+`--strip-components=1`. Archives made before this change (rooted at `workspace/`)
+and after it (rooted at the relocated folder's name) both restore correctly —
+verified in both directions.
+
+### Fixed — `.cmd` launchers shipped with LF line endings
+
+`.gitattributes` forced CRLF on `*.ps1` but never on `*.cmd`. `cmd.exe` tolerates
+LF for plain one-liners, which is why it never surfaced, but it breaks on labels
+and `goto` — and LF in `*.ps1` has already broken a Windows release once.
+
+### Changed — repository root reorganised
+
+The root held five non-documentation files that made it hard to see what matters.
+Four moved; the rest are pinned by tooling and the reasons are now recorded in
+`CLAUDE.md` and `docs/DEVELOPMENT.md` so this doesn't get re-litigated.
+
+- `Dockerfile` → **`docker/Dockerfile`**. `docker-compose.yml` gained
+  `dockerfile: docker/Dockerfile`; `context` stays `.` because the image COPYs
+  `scripts/container/entrypoint.sh` from above `docker/`.
+- `claude`, `vscode`, `claude.cmd`, `vscode.cmd` → **`bin/`**. The wrappers now
+  `cd "$(dirname "$0")/.."` (`cd /d "%~dp0.."` on Windows) so the working directory
+  is still the repo root wherever they're invoked from — verified by running
+  `bin/claude logs` from `/tmp`. Updated to match: `setup-shortcuts.ps1`, the macOS
+  `.app` generator in `setup-shortcuts.sh`, the `chmod +x` lines in `install.sh` and
+  `update.sh`, the fallback launch hints in `install.{sh,ps1}` and
+  `setup-shortcuts.ps1`, and `.dockerignore`.
+- `docker-compose.override.yml.example` → **`docs/`**. Docker never loads it; it's
+  documentation. The copy target is still `docker-compose.override.yml` in the
+  root, since Compose auto-loads an override only from the compose file's own
+  directory — `diagnose.{sh,ps1}`, `README.md`, `docs/CREDENTIALS.md` and
+  `docs/QUICK_REFERENCE.md` all now say so explicitly.
+- `ATTRIBUTION.md` → **`docs/`**.
+- Root now holds only `README`, `CHANGELOG`, `ROADMAP`, `SECURITY`, `RUNBOOK`,
+  `CLAUDE.md`, plus `VERSION` and `docker-compose.yml`.
+
+**Deliberately left at the root**, with the reasoning captured in
+`docs/DEVELOPMENT.md`:
+- `docker-compose.yml` — ~130 `docker compose` calls across 14 scripts resolve it
+  from the working directory, and `env_file`/`build.context` resolve relative to
+  the compose file, so moving it shifts those too. `COMPOSE_FILE` in `.env` is not
+  an escape hatch: `.env` doesn't exist yet when `install.sh` runs its first build.
+- `VERSION` — `check-update.{sh,ps1}` already shipped with
+  `raw.githubusercontent.com/.../main/VERSION` baked in. Moving it would 404 those
+  fetches, which the script reads as "no update available", so existing installs
+  would silently stop seeing releases. Hard rule 3.
+
+### Changed — new hard rules in CLAUDE.md
+
+Rule 8: never hardcode `workspace/`; resolve through `scripts/lib/`. Rule 9:
+develop in a clone, never inside an install — `ccupdate` copies the repo over an
+install with `cp -R` and no backup, so edits to tracked files in an installed copy
+are destroyed on the next update with nothing to recover from.
+
 ### Housekeeping (previously unreleased)
 
 Planning and archive work that now ships alongside the fix above.

@@ -31,7 +31,7 @@ the terminator".
 rebuilds the image. If a change needs a matching update-path change, do both.
 
 **4. `.claude` is a Docker volume, seeded from the image only once.** Anything
-written into `~/.claude` in the `Dockerfile` is frozen at the user's first build
+written into `~/.claude` in the `docker/Dockerfile` is frozen at the user's first build
 forever. Bundled skills therefore live in `/opt/cc-install/skills` and
 `scripts/container/entrypoint.sh` copies them in on every start. Don't move them
 back.
@@ -50,6 +50,20 @@ repo.
 **7. Don't weaken the port binding.** `docker-compose.yml` publishes code-server
 on `127.0.0.1:8080:8080`. It runs `--auth none`, so a `0.0.0.0` binding hands
 anyone on the network a shell in the container.
+
+**8. Never hardcode `workspace/`.** The mount source is user-configurable via
+`CC_WORKSPACE` (`ccpath`). Any script touching the user's files must resolve it
+through `scripts/lib/workspace.sh` (`cc_workspace_dir`) or
+`scripts/lib/Workspace.ps1` (`Get-CcWorkspaceDir`), which mirror Compose's own
+resolution order: shell env, then `.env`, then `./workspace`. A hardcoded
+`workspace/` means `ccbackup` silently archives an empty folder while the real
+files sit elsewhere. Anything that *deletes* must also refuse to run on `$HOME`
+or a filesystem root — see the guard in `restore.{sh,ps1}`.
+
+**9. This repo is the source of truth, not an install directory.** `ccupdate`
+copies the whole repo over an install with `cp -R` and no backup, so any edit made
+directly inside an installed copy is destroyed the next time the user updates.
+Develop in a clone; let installs receive changes through `ccupdate`.
 
 ## Verifying changes without the target OS
 
@@ -118,16 +132,28 @@ touching `ccvscode` should say so.
 ## Files
 
 ```
-Dockerfile  docker-compose.yml  docker-compose.override.yml.example  .env.example
-VERSION     claude/vscode (+ .cmd)
+docker-compose.yml  VERSION  .env.example
+bin/                  claude, vscode (+ .cmd)  thin wrappers into scripts/launchers/
+docker/               Dockerfile
+scripts/lib/          workspace.sh / Workspace.ps1  shared path resolution
 scripts/container/    entrypoint.sh          (runs inside the image)
 scripts/installers/   install, setup-shortcuts, setup-credentials
 scripts/launchers/    run_claude, run_vscode
-scripts/maintenance/  update, backup, restore, uninstall, check-update, diagnose
-docs/                 CREDENTIALS, INSTALL_GUIDE, QUICK_REFERENCE, DEVELOPMENT, installGuides/
-README.md  CHANGELOG.md  ROADMAP.md  SECURITY.md  ATTRIBUTION.md  CLAUDE.md
+scripts/maintenance/  update, backup, restore, uninstall, check-update, diagnose,
+                      set-workspace (ccpath)
+docs/                 CREDENTIALS, INSTALL_GUIDE, QUICK_REFERENCE, DEVELOPMENT,
+                      ATTRIBUTION, docker-compose.override.yml.example, installGuides/
+README.md  CHANGELOG.md  ROADMAP.md  SECURITY.md  RUNBOOK.md  CLAUDE.md
 archive/              superseded docs, excluded from the image and installers
 ```
+
+**Two files cannot leave the root.** `docker-compose.yml`, because all ~130
+`docker compose` invocations across the scripts resolve it from the working
+directory, and `env_file`/`build.context` resolve relative to the compose file.
+`VERSION`, because `check-update.{sh,ps1}` on already-shipped installs fetches
+`raw.githubusercontent.com/.../main/VERSION` — moving it 404s their update check
+silently, so they never learn an update exists (rule 3). `docker-compose.override.yml`
+is also root-only: Compose auto-loads it just from the compose file's own directory.
 
 Adding a file needs no installer change — the installers download the whole repo
 as an archive. Do add new user-facing commands to **both** `setup-shortcuts`
@@ -149,4 +175,4 @@ Remote must be `git@github.com-uva:wmo4buva/cc-install.git`.
 
 Installer patterns follow
 [DAAF](https://github.com/DAAF-Contribution-Community/daaf); keep
-[ATTRIBUTION.md](ATTRIBUTION.md) accurate when borrowing more.
+[docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) accurate when borrowing more.

@@ -80,7 +80,7 @@ if curl -fsSL "$TARBALL_URL" -o "$tmp_dir/cc-install.tar.gz"; then
     mkdir -p "$tmp_dir/extracted"
     if tar -xzf "$tmp_dir/cc-install.tar.gz" -C "$tmp_dir/extracted" --strip-components=1; then
         cp -R "$tmp_dir/extracted/." "$INSTALL_DIR/"
-        chmod +x "$INSTALL_DIR/claude" "$INSTALL_DIR/vscode" 2>/dev/null || true
+        chmod +x "$INSTALL_DIR/bin/claude" "$INSTALL_DIR/bin/vscode" 2>/dev/null || true
         find "$INSTALL_DIR/scripts" -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
         log_success "Files updated to $(cat "$INSTALL_DIR/VERSION" 2>/dev/null || echo "latest")"
     else

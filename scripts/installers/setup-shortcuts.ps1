@@ -24,14 +24,15 @@ function Get-ShortcutBlock {
 
     return @"
 $BeginMarker
-function ccdocker   { Push-Location "$Dir"; try { & ".\claude.cmd" @args } finally { Pop-Location } }
-function ccvscode   { Push-Location "$Dir"; try { & ".\vscode.cmd" @args } finally { Pop-Location } }
+function ccdocker   { Push-Location "$Dir"; try { & ".\bin\claude.cmd" @args } finally { Pop-Location } }
+function ccvscode   { Push-Location "$Dir"; try { & ".\bin\vscode.cmd" @args } finally { Pop-Location } }
 function ccauth     { Push-Location "$Dir"; try { & ".\scripts\installers\setup-credentials.ps1" @args } finally { Pop-Location } }
 function ccstop     { Push-Location "$Dir"; try { & ".\scripts\launchers\run_claude.ps1" stop } finally { Pop-Location } }
 function ccrestart  { Push-Location "$Dir"; try { & ".\scripts\launchers\run_claude.ps1" restart } finally { Pop-Location } }
 function cclogs     { Push-Location "$Dir"; try { & ".\scripts\launchers\run_claude.ps1" logs } finally { Pop-Location } }
 function ccdiagnose { Push-Location "$Dir"; try { & ".\scripts\maintenance\diagnose.ps1" } finally { Pop-Location } }
 function ccbackup   { Push-Location "$Dir"; try { & ".\scripts\maintenance\backup.ps1" @args } finally { Pop-Location } }
+function ccpath     { Push-Location "$Dir"; try { & ".\scripts\maintenance\set-workspace.ps1" @args } finally { Pop-Location } }
 function ccupdate   { Push-Location "$Dir"; try { & ".\scripts\maintenance\update.ps1" } finally { Pop-Location } }
 $EndMarker
 "@
@@ -130,6 +131,7 @@ function Set-PowerShellProfiles {
     Write-Host "  cclogs      View container logs" -ForegroundColor Green
     Write-Host "  ccdiagnose  Check the install for problems" -ForegroundColor Green
     Write-Host "  ccbackup    Back up your workspace" -ForegroundColor Green
+    Write-Host "  ccpath      Change which folder is your workspace" -ForegroundColor Green
     Write-Host "  ccupdate    Update to the latest version" -ForegroundColor Green
 }
 
@@ -161,7 +163,7 @@ try {
 catch {
     Write-Host "Error setting up shortcuts: $_" -ForegroundColor Red
     Write-Warn "You can still use the launchers from the installation directory:"
-    Write-Host "  .\claude.cmd" -ForegroundColor Yellow
-    Write-Host "  .\vscode.cmd" -ForegroundColor Yellow
+    Write-Host "  .\bin\claude.cmd" -ForegroundColor Yellow
+    Write-Host "  .\bin\vscode.cmd" -ForegroundColor Yellow
     exit 1
 }

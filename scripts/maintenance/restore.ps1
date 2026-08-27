@@ -8,6 +8,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+. (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\lib\Workspace.ps1")
+
 # Logging functions
 function Write-ErrorMsg {
     param([string]$Message)
@@ -63,9 +65,37 @@ $backupSize = (Get-Item $BackupFile).Length / 1MB
 Write-Host "  Size: $([math]::Round($backupSize, 2)) MB"
 Write-Host ""
 
+# Where the user's files actually live - .\workspace unless ccpath moved it.
+if (-not (Test-CcWorkspaceValid)) { exit 1 }
+$workspaceDir = Get-CcWorkspaceDir
+
+# This script clears the workspace before extracting. Once the path is
+# user-chosen that stops being a harmless operation on a folder we created, so
+# refuse outright on anything that looks like a home directory or a drive root.
+# Without this, pointing ccpath at %USERPROFILE% then restoring would wipe it.
+if (Test-Path $workspaceDir) {
+    $resolved = (Resolve-Path $workspaceDir).Path.TrimEnd('\', '/')
+
+    if ($resolved -match '^[A-Za-z]:\\?$') {
+        Write-ErrorMsg "Refusing to restore into $resolved"
+        Write-Host "That's a drive root. Restoring would delete everything on it."
+        Write-Host "Point your workspace somewhere dedicated first: ccpath"
+        exit 1
+    }
+
+    if ($resolved -eq $env:USERPROFILE.TrimEnd('\', '/')) {
+        Write-ErrorMsg "Refusing to restore into your home directory ($resolved)"
+        Write-Host "Restoring clears the workspace first, which would delete everything"
+        Write-Host "in your user folder. Point your workspace at a dedicated subfolder:"
+        Write-Host "  ccpath `"$env:USERPROFILE\cc-workspace`""
+        exit 1
+    }
+}
+
 # Warning about existing workspace
-if (Test-Path "workspace") {
-    Write-Warn "This will REPLACE your current workspace directory!"
+if (Test-Path $workspaceDir) {
+    Write-Warn "This will REPLACE the contents of your workspace!"
+    Write-Host "  Folder: $(Get-CcWorkspaceLabel)" -ForegroundColor Blue
     Write-Host ""
     $response = Read-Host "Continue? (y/N)"
 
@@ -81,33 +111,40 @@ if (Test-Path "workspace") {
         New-Item -Path "backups" -ItemType Directory | Out-Null
     }
     try {
-        Compress-Archive -Path "workspace\*" -DestinationPath "backups\workspace_before_restore_$timestamp.zip" -CompressionLevel Optimal 2>$null
+        Compress-Archive -Path (Join-Path $workspaceDir "*") -DestinationPath "backups\workspace_before_restore_$timestamp.zip" -CompressionLevel Optimal 2>$null
     }
     catch {
         # Ignore errors if workspace is empty
     }
 }
 
-# Remove existing workspace
-if (Test-Path "workspace") {
-    Write-Info "Removing current workspace..."
-    Remove-Item -Path "workspace" -Recurse -Force
+# Clear the workspace, but keep the directory itself. It's a live bind-mount
+# source: deleting and recreating it detaches the running container's mount, and
+# on a relocated path it may also carry sharing permissions we can't restore.
+if (Test-Path $workspaceDir) {
+    Write-Info "Clearing current workspace contents..."
+    Get-ChildItem -Path $workspaceDir -Force | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+} else {
+    New-Item -Path $workspaceDir -ItemType Directory -Force | Out-Null
 }
 
-# Create workspace directory
-New-Item -Path "workspace" -ItemType Directory | Out-Null
-
-# Extract backup
+# Extract backup.
+#
+# Into the workspace folder, NOT the install directory. backup.ps1 archives
+# `workspace\*`, so the zip holds the workspace CONTENTS at its root - extracting
+# to "." scattered them across the install folder and then reported 0 files
+# restored, because it counted the freshly-emptied workspace. Fixed here.
 Write-Info "Restoring from backup..."
 try {
-    Expand-Archive -Path $BackupFile -DestinationPath "." -Force
+    Expand-Archive -Path $BackupFile -DestinationPath $workspaceDir -Force
 
     Write-Host ""
     Write-Success "Restore completed successfully!"
     Write-Host ""
 
-    $fileCount = (Get-ChildItem -Path "workspace" -Recurse -File).Count
+    $fileCount = (Get-ChildItem -Path $workspaceDir -Recurse -File).Count
     Write-Host "  Files restored: $fileCount" -ForegroundColor Green
+    Write-Host "  Location:       $workspaceDir" -ForegroundColor Green
     Write-Host ""
 }
 catch {

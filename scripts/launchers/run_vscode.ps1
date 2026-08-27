@@ -2,6 +2,8 @@
 
 $ErrorActionPreference = "Stop"
 
+. (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\lib\Workspace.ps1")
+
 function Write-ErrorMsg { param([string]$m) Write-Host "[ERROR] $m" -ForegroundColor Red }
 function Write-Info     { param([string]$m) Write-Host "[INFO] $m" -ForegroundColor Blue }
 function Write-Success  { param([string]$m) Write-Host "[SUCCESS] $m" -ForegroundColor Green }
@@ -65,12 +67,17 @@ if (-not $signedIn) {
 # Drop a sign-in cheat sheet into the workspace. It's the first thing the user
 # sees in the IDE's file explorer, which makes it the right place to explain
 # something the browser IDE itself can't prompt for.
-if (-not (Test-Path "workspace")) { New-Item -Path "workspace" -ItemType Directory | Out-Null }
+$wsDir = Get-CcWorkspaceDir
+if (-not (Test-Path $wsDir)) { New-Item -Path $wsDir -ItemType Directory -Force | Out-Null }
+
+# Literal here-string on purpose: the body contains backticks, which an
+# interpolating @"..."@ would eat as escape characters. The host path is
+# substituted afterwards via the placeholder.
 $startHere = @'
 # Start here
 
 You're in **VS Code Server**, running inside the Claude Code container. Your
-files live in this folder and are also on your computer at `workspace\`.
+files live in this folder and are also on your computer at `__CC_WORKSPACE__`.
 
 ## How to use Claude Code in here
 
@@ -109,7 +116,8 @@ and it survives updates.
 
 Full detail: `docs\CREDENTIALS.md` in the cc-install folder.
 '@
-Set-Content -Path "workspace\START-HERE.md" -Value $startHere -Encoding utf8
+$startHere = $startHere.Replace('__CC_WORKSPACE__', $wsDir)
+Set-Content -Path (Join-Path $wsDir "START-HERE.md") -Value $startHere -Encoding utf8
 
 Write-Info "Starting VS Code Server..."
 
@@ -156,7 +164,7 @@ Write-Host "===========================================================" -Foregr
 Write-Host ""
 Write-Host "  Open in your browser: " -ForegroundColor Blue -NoNewline
 Write-Host $url -ForegroundColor Yellow
-Write-Host "  Your files:           workspace\" -ForegroundColor Blue
+Write-Host "  Your files:           $(Get-CcWorkspaceLabel)" -ForegroundColor Blue
 Write-Host ""
 
 # The bit people get stuck on: there is no Claude Code button in the IDE.

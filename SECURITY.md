@@ -52,7 +52,7 @@ CC_VSCODE_PASSWORD=something-long-and-random
 `apt install` what they need for their work. It grants root *in the container
 only* — with no socket mount and no privileged flag, that is not a path to the
 host. Users already have a shell there, so this is convenience rather than a new
-privilege. Remove the `/etc/sudoers.d/claudeuser` line in the `Dockerfile` if
+privilege. Remove the `/etc/sudoers.d/claudeuser` line in the `docker/Dockerfile` if
 your environment can't accept it.
 
 **Install scripts are piped from the network.** `curl … | bash` and `irm … | iex`
@@ -75,7 +75,7 @@ CC_INSTALL_REF=v1.3.0 bash install.sh
 **Third-party skills are cloned at build time** from `anthropics/skills`,
 `multica-ai/andrej-karpathy-skills` and `obra/superpowers`, unpinned (`--depth 1`
 of the default branch). You inherit whatever those repositories contain at build
-time. Remove the skills block from the `Dockerfile` if that's not acceptable.
+time. Remove the skills block from the `docker/Dockerfile` if that's not acceptable.
 
 ## What to check on your own install
 

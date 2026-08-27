@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-# Quick launcher for Claude Code
-# Usage: ./claude [args]
-cd "$(dirname "$0")" && ./scripts/launchers/run_claude.sh "$@"

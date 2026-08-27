@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/workspace.sh
+. "$SCRIPT_DIR/../lib/workspace.sh"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -70,7 +74,7 @@ fi
 echo ""
 log_warn "Step 3/4: Remove Docker volumes?"
 echo "  This will DELETE your Claude Code settings and configuration."
-echo "  Your workspace/ directory will NOT be affected."
+echo "  Your files ($(cc_workspace_dir)) will NOT be affected."
 echo ""
 echo -n "Remove volumes? (y/N): "
 read -r response
@@ -89,8 +93,16 @@ fi
 echo ""
 log_warn "Step 4/4: Remove installation directory?"
 echo "  This will DELETE the entire cc-install directory, including:"
-echo "    • workspace/ (YOUR FILES)"
-echo "    • All scripts and configuration"
+if cc_workspace_is_relocated; then
+    echo "    • All scripts and configuration"
+    echo ""
+    echo "  Your files are NOT in here — ccpath points your workspace at:"
+    echo "    $(cc_workspace_dir)"
+    echo "  That folder is left completely untouched."
+else
+    echo "    • workspace/ (YOUR FILES)"
+    echo "    • All scripts and configuration"
+fi
 echo ""
 echo -n "Remove installation directory? (y/N): "
 read -r response
@@ -118,7 +130,7 @@ else
     echo "  • Image: cc-install:latest"
     echo ""
     echo -e "${BLUE}Preserved:${NC}"
-    echo "  • Installation directory (including workspace/)"
+    echo "  • Installation directory (including $(cc_workspace_dir))"
     echo "  • Scripts (install.sh, run_claude.sh, etc.)"
     echo ""
     echo -e "${YELLOW}To reinstall:${NC}"

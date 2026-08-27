@@ -117,7 +117,7 @@ license, and we claim no ownership.
 
 Clones are unpinned (`--depth 1` of the default branch), so an image reflects
 whatever those repositories contained at build time. Consult each repository for
-its license and terms. Remove the skills block from the `Dockerfile` if you need
+its license and terms. Remove the skills block from the `docker/Dockerfile` if you need
 to exclude them.
 
 ## License for This Project

@@ -3,6 +3,8 @@
 
 $ErrorActionPreference = "Stop"
 
+. (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\lib\Workspace.ps1")
+
 # Logging functions
 function Write-ErrorMsg {
     param([string]$Message)
@@ -81,7 +83,7 @@ catch {
 Write-Host ""
 Write-Warn "Step 3/4: Remove Docker volumes?"
 Write-Host "  This will DELETE your Claude Code settings and configuration."
-Write-Host "  Your workspace\ directory will NOT be affected."
+Write-Host "  Your files ($(Get-CcWorkspaceDir)) will NOT be affected."
 Write-Host ""
 $response = Read-Host "Remove volumes? (y/N)"
 
@@ -107,8 +109,16 @@ else {
 Write-Host ""
 Write-Warn "Step 4/4: Remove installation directory?"
 Write-Host "  This will DELETE the entire cc-install directory, including:"
-Write-Host "    • workspace\ (YOUR FILES)"
-Write-Host "    • All scripts and configuration"
+if (Test-CcWorkspaceRelocated) {
+    Write-Host "    • All scripts and configuration"
+    Write-Host ""
+    Write-Host "  Your files are NOT in here - ccpath points your workspace at:"
+    Write-Host "    $(Get-CcWorkspaceDir)"
+    Write-Host "  That folder is left completely untouched."
+} else {
+    Write-Host "    • workspace\ (YOUR FILES)"
+    Write-Host "    • All scripts and configuration"
+}
 Write-Host ""
 $response = Read-Host "Remove installation directory? (y/N)"
 
@@ -143,7 +153,7 @@ else {
     Write-Host "  • Image: cc-install:latest"
     Write-Host ""
     Write-Host "Preserved:" -ForegroundColor Blue
-    Write-Host "  • Installation directory (including workspace\)"
+    Write-Host "  • Installation directory (including $(Get-CcWorkspaceDir))"
     Write-Host "  • Scripts (install.ps1, run_claude.ps1, etc.)"
     Write-Host ""
     Write-Host "To reinstall:" -ForegroundColor Yellow

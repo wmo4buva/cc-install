@@ -3,6 +3,8 @@
 
 $ErrorActionPreference = "Continue"
 
+. (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\lib\Workspace.ps1")
+
 Write-Host "╔═══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "║                                                           ║" -ForegroundColor Cyan
 Write-Host "║   Claude Code Installation Diagnostics                   ║" -ForegroundColor Cyan
@@ -165,14 +167,26 @@ Write-Host ""
 
 # Workspace Check
 Write-Host "═══ Workspace ═══" -ForegroundColor Blue
-if (Test-Path "workspace") {
+$wsDir = Get-CcWorkspaceDir
+Write-Host "  Host folder: $wsDir"
+if (Test-CcWorkspaceRelocated) {
+    Write-Host "  Relocated via ccpath (the bundled .\workspace is not in use)" -ForegroundColor Blue
+}
+
+# A bad CC_WORKSPACE is worth catching here rather than letting it surface as an
+# empty folder in the IDE with no explanation.
+if (-not (Test-CcWorkspaceValid)) {
+    Write-Host "[ERROR] CC_WORKSPACE in .env is not usable" -ForegroundColor Red
+    Write-Host "[WARNING] Solution: Reset it with: ccpath -Reset" -ForegroundColor Yellow
+}
+elseif (Test-Path $wsDir) {
     Write-Host "[SUCCESS] Workspace directory exists" -ForegroundColor Green
     try {
-        $wsSize = (Get-ChildItem workspace -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+        $wsSize = (Get-ChildItem $wsDir -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
         $wsSizeMB = [math]::Round($wsSize / 1MB, 2)
         Write-Host "  Size: ${wsSizeMB}MB"
 
-        $wsFiles = (Get-ChildItem workspace -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
+        $wsFiles = (Get-ChildItem $wsDir -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
         Write-Host "  Files: $wsFiles"
     }
     catch {
@@ -181,7 +195,36 @@ if (Test-Path "workspace") {
 }
 else {
     Write-Host "[WARNING] Workspace directory not found" -ForegroundColor Yellow
-    Write-Host "[WARNING] Solution: Will be created on first run" -ForegroundColor Yellow
+    if (Test-CcWorkspaceRelocated) {
+        Write-Host "[WARNING] Solution: The folder ccpath points at is missing." -ForegroundColor Yellow
+        Write-Host "          Recreate it, or repoint with: ccpath" -ForegroundColor Yellow
+    } else {
+        Write-Host "[WARNING] Solution: Will be created on first run" -ForegroundColor Yellow
+    }
+}
+
+# Cross-check against what the container actually mounted. These can disagree if
+# .env changed without a container recreate - a bind mount is fixed at creation.
+try {
+    docker info 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        $fmt = '{{range .Mounts}}{{if eq .Destination "/home/claudeuser/workspace"}}{{.Source}}{{end}}{{end}}'
+        $mounted = (docker inspect cc-install --format $fmt 2>$null)
+        if (-not [string]::IsNullOrWhiteSpace($mounted)) {
+            $expected = if (Test-CcWorkspaceRelocated) { $wsDir } else { Join-Path (Get-Location).Path "workspace" }
+            if (Test-CcMountMatches $mounted.Trim() $expected) {
+                Write-Host "[SUCCESS] Container is mounting this folder" -ForegroundColor Green
+            } else {
+                Write-Host "[ERROR] Container is mounting a DIFFERENT folder" -ForegroundColor Red
+                Write-Host "  Configured: $expected"
+                Write-Host "  Mounted:    $($mounted.Trim())"
+                Write-Host "[WARNING] Solution: Recreate the container: ccrestart" -ForegroundColor Yellow
+            }
+        }
+    }
+}
+catch {
+    # Docker unavailable; the checks above already covered the host side.
 }
 Write-Host ""
 
@@ -328,8 +371,9 @@ Write-Host "1. Docker not running:" -ForegroundColor Yellow
 Write-Host "   Start Docker Desktop and wait ~30 seconds"
 Write-Host ""
 Write-Host "2. Port 8080 in use:" -ForegroundColor Yellow
-Write-Host "   Copy docker-compose.override.yml.example to docker-compose.override.yml"
-Write-Host "   and uncomment the 'ports: !override' block (the !override tag is"
+Write-Host "   Copy docs\docker-compose.override.yml.example to docker-compose.override.yml"
+Write-Host "   here in the install folder, then uncomment the 'ports: !override' block"
+Write-Host "   (the !override tag is"
 Write-Host "   required - without it Compose publishes BOTH ports)"
 Write-Host ""
 Write-Host "3. Container won't start:" -ForegroundColor Yellow

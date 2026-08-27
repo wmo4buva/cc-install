@@ -8,7 +8,7 @@ You get Claude Code in your terminal, VS Code in your browser, and a folder on
 your computer that both of them share.
 
 **Inspired by the [DAAF project](https://github.com/DAAF-Contribution-Community/daaf)** —
-credit to their Docker-based installation approach. See [ATTRIBUTION.md](ATTRIBUTION.md).
+credit to their Docker-based installation approach. See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md).
 
 ---
 
@@ -24,6 +24,7 @@ No technical background required.
 | [📝 Install Guide (Markdown)](docs/INSTALL_GUIDE.md) | Longer plain-language version, readable on GitHub |
 | [⚡ Quick Reference](docs/QUICK_REFERENCE.md) | Command cheat-sheet |
 | [🔑 Signing in](docs/CREDENTIALS.md) | **How to set up credentials** |
+| [📕 Runbook](RUNBOOK.md) | Operational procedures — workspace folder, model picker, troubleshooting |
 
 ---
 
@@ -201,6 +202,7 @@ Available from anywhere after installation:
 | `cclogs` | View container logs |
 | `ccdiagnose` | Check the install for problems |
 | `ccbackup` | Back up your workspace |
+| `ccpath` | Change which folder on your computer is your workspace |
 | `ccupdate` | Update to the latest version |
 
 <details>
@@ -210,12 +212,13 @@ From inside the `cc-install` directory:
 
 | | macOS / Linux | Windows |
 |---|---|---|
-| Claude Code | `./claude` | `claude.cmd` |
-| VS Code Server | `./vscode` | `vscode.cmd` |
+| Claude Code | `./bin/claude` | `bin\claude.cmd` |
+| VS Code Server | `./bin/vscode` | `bin\vscode.cmd` |
 | Sign-in setup | `./scripts/installers/setup-credentials.sh` | `.\scripts\installers\setup-credentials.ps1` |
 | Diagnostics | `./scripts/maintenance/diagnose.sh` | `.\scripts\maintenance\diagnose.ps1` |
 | Update | `./scripts/maintenance/update.sh` | `.\scripts\maintenance\update.ps1` |
 | Backup | `./scripts/maintenance/backup.sh` | `.\scripts\maintenance\backup.ps1` |
+| Change workspace folder | `./scripts/maintenance/set-workspace.sh` | `.\scripts\maintenance\set-workspace.ps1` |
 | Restore | `./scripts/maintenance/restore.sh <file>` | `.\scripts\maintenance\restore.ps1 <file>` |
 | Uninstall | `./scripts/maintenance/uninstall.sh` | `.\scripts\maintenance\uninstall.ps1` |
 
@@ -276,12 +279,42 @@ inside the container but every file under it reads as "No such file or
 directory". The container can't follow a link to a path that was never mounted.
 Copy or move the folder instead.
 
+### Using a different folder for your files
+
+To make an existing folder your workspace instead of the bundled `workspace/`:
+
+```bash
+ccpath ~/Dev/projects     # point your workspace there
+ccpath --show             # check where it currently points
+ccpath --reset            # go back to ./workspace
+```
+
+Run it with no arguments and it shows the current folder, then prompts. It offers
+to copy your existing files across, never deletes the originals, and recreates the
+container so the new mount takes effect — a bind mount is fixed at container
+creation, so a plain restart isn't enough.
+
+Inside the browser IDE your files are always at `/home/claudeuser/workspace`, so
+nothing moves around in the editor. `ccbackup`, `ccrestore` and `ccdiagnose` all
+follow the new location automatically.
+
+Two things it will warn you about, because both fail silently otherwise:
+- **Folders Docker Desktop can't share.** On macOS it only shares `/Users`,
+  `/Volumes`, `/private` and `/tmp` by default; elsewhere you get an *empty* folder
+  in the IDE rather than an error. Add the path under Docker Desktop → Settings →
+  Resources → File sharing.
+- **Cloud-synced folders** (Dropbox, OneDrive, iCloud, Google Drive). The sync
+  client and the container both write to the same files, which corrupts saves
+  mid-write. Keep the workspace local and sync a backup instead.
+
+Full detail: **[RUNBOOK.md](RUNBOOK.md)**.
+
 ### Keeping a project where it already lives
 
 If a project can't move — it's in OneDrive, or a Git repo you'd rather not
 relocate — mount it as a second folder:
 
-1. Copy `docker-compose.override.yml.example` to `docker-compose.override.yml`
+1. Copy `docs/docker-compose.override.yml.example` to `docker-compose.override.yml`
 2. Uncomment the "Mount an extra folder" block and set your path:
 
    ```yaml
@@ -337,7 +370,7 @@ and fetches the latest Claude Code), restarts the container, refreshes your
 shortcuts, and prints the new versions.
 
 There's no way to pin a specific Claude Code version without editing the
-`Dockerfile`.
+`docker/Dockerfile`.
 
 **About the "update available" notice:** it refers to a new version of *this
 installer*. Running `ccupdate` gets you both that and the latest Claude Code.
@@ -382,7 +415,7 @@ Open a *new* terminal window. If it persists, run
 Start Docker Desktop, wait for it to finish loading, try again.
 
 **`port 8080 is already allocated`**
-Copy `docker-compose.override.yml.example` to `docker-compose.override.yml` and
+Copy `docs/docker-compose.override.yml.example` to `docker-compose.override.yml` and
 uncomment the port block, which uses `ports: !override`. The `!override` tag
 matters — without it Compose appends and you end up publishing both ports.
 `ccvscode` reads the new port back from Compose automatically.
@@ -430,26 +463,39 @@ Image size is roughly **1.5-2 GB**.
 
 ```
 cc-install/
-├── Dockerfile                          # image definition
-├── docker-compose.yml                  # container orchestration
-├── docker-compose.override.yml.example # optional local tweaks (ports, ~/.aws)
-├── .env.example                         # credential template → copy to .env
-├── VERSION
-├── claude / claude.cmd                  # root launcher: Claude Code
-├── vscode / vscode.cmd                  # root launcher: VS Code Server
-├── workspace/                           # your files (persisted, gitignored)
+├── docker-compose.yml       # container orchestration (must stay at root —
+│                            #   every `docker compose` call resolves it from cwd)
+├── VERSION                  # update-check reads this over raw.githubusercontent
+├── .env.example             # credential template → copy to .env
+├── README.md  CHANGELOG.md  ROADMAP.md  SECURITY.md
+├── RUNBOOK.md               # operational procedures (ccpath, model picker, ...)
+├── CLAUDE.md                # guidance for Claude Code in this repo
+├── bin/
+│   ├── claude / claude.cmd  # launcher: Claude Code
+│   └── vscode / vscode.cmd  # launcher: VS Code Server
+├── docker/
+│   └── Dockerfile           # image definition
+├── workspace/               # your files by default (persisted, gitignored)
+│                            #   — relocatable with `ccpath`
 ├── scripts/
 │   ├── container/   entrypoint.sh                       # runs inside the image
+│   ├── lib/         workspace.sh, Workspace.ps1         # shared path resolution
 │   ├── installers/  install, setup-shortcuts, setup-credentials
 │   ├── launchers/   run_claude, run_vscode
-│   └── maintenance/ update, backup, restore, uninstall, check-update, diagnose
+│   └── maintenance/ update, backup, restore, uninstall, check-update,
+│                    diagnose, set-workspace
 └── docs/
     ├── CREDENTIALS.md      # signing in
     ├── INSTALL_GUIDE.md    # step-by-step for non-technical users
     ├── QUICK_REFERENCE.md  # cheat sheet
     ├── DEVELOPMENT.md      # for maintainers
+    ├── ATTRIBUTION.md      # credits and licenses
+    ├── docker-compose.override.yml.example  # optional local tweaks (ports, ~/.aws)
     └── installGuides/      # PDF / HTML guides
 ```
+
+The launchers live in `bin/` but `cd` to the repo root before doing anything, so
+they work from any directory.
 
 Every script exists in both `.sh` (macOS/Linux) and `.ps1` (Windows) form.
 
@@ -477,9 +523,9 @@ it's fully containerized with its own config.
 (`claude-config` volume) live outside it. `ccupdate` rebuilds and everything's
 still there.
 
-**Can I customise the environment?** Yes — edit the `Dockerfile` and run
+**Can I customise the environment?** Yes — edit the `docker/Dockerfile` and run
 `ccupdate`. For ports, extra mounts or resource limits, use
-`docker-compose.override.yml.example` instead, which survives updates.
+`docs/docker-compose.override.yml.example` instead, which survives updates.
 
 **Can several people use one computer?** Yes, but each person should install
 under their own user account so they get their own workspace and settings.

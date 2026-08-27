@@ -13,6 +13,7 @@ ccrestart     # restart it (applies .env changes)
 cclogs        # view container logs
 ccdiagnose    # check the install for problems
 ccbackup      # back up your workspace
+ccpath        # change which folder is your workspace
 ccupdate      # update to the latest version
 ```
 
@@ -54,12 +55,13 @@ optional; `claude` in the terminal works without it.
 From inside the `cc-install` directory:
 
 ```bash
-./claude                                          # Claude Code       (Windows: claude.cmd)
-./vscode                                          # VS Code Server    (Windows: vscode.cmd)
+./bin/claude                                          # Claude Code       (Windows: claude.cmd)
+./bin/vscode                                          # VS Code Server    (Windows: vscode.cmd)
 ./scripts/installers/setup-credentials.sh         # same as ccauth
 ./scripts/maintenance/diagnose.sh                 # same as ccdiagnose
 ./scripts/maintenance/update.sh                   # same as ccupdate
 ./scripts/maintenance/backup.sh                   # archive workspace/ (same as ccbackup)
+./scripts/maintenance/set-workspace.sh            # change workspace folder (same as ccpath)
 ./scripts/maintenance/restore.sh backup.tar.gz    # restore one
 ./scripts/maintenance/uninstall.sh                # remove everything
 ```
@@ -121,7 +123,7 @@ docker compose logs
 docker compose down && docker compose up -d
 ```
 
-**Port 8080 in use** — copy `docker-compose.override.yml.example` to
+**Port 8080 in use** — copy `docs/docker-compose.override.yml.example` to
 `docker-compose.override.yml` and uncomment the port block. It uses
 `ports: !override`; without that tag Compose appends and publishes both ports.
 `ccvscode` picks up the new port automatically.
