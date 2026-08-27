@@ -92,9 +92,17 @@ function Test-CcWorkspaceValid {
     $dir = Get-CcWorkspaceDir
 
     if ($dir.StartsWith("~")) {
+        # Suggest the actual resolved path, not a literal "...", so the fix is
+        # copy-pasteable. Mirrors cc_workspace_validate in workspace.sh.
+        # Plain concatenation, not Join-Path: Join-Path resolves against PowerShell
+        # drives and throws "Cannot find drive" if the profile's drive isn't
+        # mounted. A validator must not throw while explaining a bad value.
+        $rest = ($dir.TrimStart('~', '\', '/')) -replace '/', '\'
+        $home = "$env:USERPROFILE".TrimEnd('\', '/')
+        $suggested = if ($rest) { "$home\$rest" } else { $home }
         Write-Host "CC_WORKSPACE in .env starts with '~': $dir" -ForegroundColor Red
         Write-Host "Docker Compose does not expand ~, so this would mount a folder"
-        Write-Host "literally named '~'. Fix it with: ccpath `"$env:USERPROFILE\...`""
+        Write-Host "literally named '~'. Fix it with: ccpath `"$suggested`""
         return $false
     }
 
