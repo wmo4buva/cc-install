@@ -92,6 +92,11 @@ Signing in from the IDE: [docs/CREDENTIALS.md](docs/CREDENTIALS.md).
 
 ## Installing extensions
 
+Installing the Claude Code extension for the first time is walked through in
+[README § Claude Code in VS Code](README.md#claude-code-in-vs-code). This section
+is the reference: how extensions behave here, fleet builds, and what to do when one
+won't install.
+
 Open the **Extensions** panel (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>),
 search, click **Install**. They persist in the `code-server-data` volume, so they
 survive restarts and `ccupdate`.

@@ -134,20 +134,63 @@ ccvscode     # VS Code in your browser (http://localhost:8088)
 
 ---
 
-## The one thing everyone misses
+## Claude Code in VS Code
 
-`ccvscode` opens VS Code in your browser, and **there is no Claude Code button**.
-VS Code Server is just the editor. To use Claude Code in it:
+`ccvscode` opens VS Code in your browser. **Out of the box there is no Claude Code
+button** — VS Code Server is just the editor. There are two ways to use Claude
+Code in it, and you can use both.
+
+### Option 1 — the terminal (works immediately, nothing to install)
 
 1. **Terminal → New Terminal** (or <kbd>Ctrl</kbd>+<kbd>`</kbd>)
 2. Type `claude`
 
 That terminal runs inside the container, so it shares the same sign-in as
-`ccdocker`.
+`ccdocker`. This is the fastest route and it always works.
+
+### Option 2 — the Claude Code extension (sidebar panel and inline diffs)
+
+The extension adds a proper Claude panel and shows edits as inline diffs instead
+of terminal text. It's optional, and takes under a minute:
+
+1. In the browser IDE, click the **Extensions** icon in the left sidebar
+   (or press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>)
+2. Type **claude** in the search box
+3. Find **Claude Code** by Anthropic and click **Install**
+4. When it finishes, click the **Claude** icon that appears in the left sidebar
+
+That's it — it picks up the sign-in you already set with `ccauth`, so there's
+nothing further to configure.
+
+Prefer to do it from a terminal? One command:
+
+```bash
+docker compose exec claude-code code-server --install-extension Anthropic.claude-code
+```
+
+A few things worth knowing:
+
+- **It survives updates.** Extensions live in a Docker volume, so `ccupdate` and
+  restarts don't remove them. You install it once.
+- **You still need `claude` in the terminal for some things** — the extension is a
+  front-end, not a replacement.
+- **If you can't find it in the search results,** the browser IDE uses
+  [Open VSX](https://open-vsx.org) rather than Microsoft's marketplace. Claude Code
+  is published there, so it will appear — but some other extensions you're used to
+  may not exist.
+
+→ Extension troubleshooting, and how IT can bake it into the image for a fleet:
+**[RUNBOOK.md § Installing extensions](RUNBOOK.md#installing-extensions)**.
 
 ---
 
 ## Everyday commands
+
+**Run these in a terminal on your own computer** — Terminal on macOS, PowerShell on
+Windows. Not inside the browser IDE, and not inside the container: these commands
+drive Docker from the outside, so they only work from your own shell.
+
+You can run them from any folder; they find your install themselves.
 
 | Command | What it does |
 |---|---|
@@ -157,6 +200,9 @@ That terminal runs inside the container, so it shares the same sign-in as
 | `ccpath` | Change which folder on your computer is your workspace |
 | `ccdiagnose` | Check the install for problems |
 | `ccupdate` | Update to the latest version |
+
+If a command isn't found, open a **new** terminal window — they're added to your
+shell profile, and windows you already had open won't see them.
 
 → Full list with explanations, plus updating, backup, the model picker and
 troubleshooting: **[RUNBOOK.md](RUNBOOK.md)**. For a printable card:

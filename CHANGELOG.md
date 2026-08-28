@@ -20,6 +20,15 @@ each, and command lists existed in three places.
 - **docs/QUICK_REFERENCE.md** stays as the deliberately terse one-page card, now
   clearly framed as such. Commands live in exactly two places with distinct roles
   rather than three overlapping ones.
+- **README § "Claude Code in VS Code"** (was "The one thing everyone misses") now
+  presents both routes: the terminal, which works immediately with nothing to
+  install, and a step-by-step walkthrough of installing the Claude Code extension
+  for the sidebar panel and inline diffs. RUNBOOK keeps the reference detail —
+  fleet builds and troubleshooting — and the two cross-link so it's clear which to
+  follow.
+- **README § "Everyday commands"** now says explicitly to run them in a terminal on
+  your own computer, not inside the browser IDE or the container. They drive Docker
+  from the outside, so that distinction matters and wasn't stated anywhere.
 - The install guides in `docs/installGuides/` and the quick reference are now
   signposted from a "Where to look for what" table at the top of the README,
   including the Visual Guide's editable Markdown source which wasn't linked before.
