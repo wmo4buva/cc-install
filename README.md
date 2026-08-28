@@ -71,20 +71,43 @@ icon should say "Docker Desktop is running".
 Windows Subsystem for Linux lets Docker run Linux containers. Docker Desktop
 requires it.
 
-Check whether you already have it:
+Check whether you already have it (normal PowerShell, no admin needed):
 
 ```powershell
 wsl --status
 ```
 
-If that prints version information, you're set — skip to Step 2. Otherwise open
-**PowerShell as Administrator** (Windows+X → Terminal (Admin)), run:
+If that prints version information and shows WSL 2 as the default, you're set —
+skip to Step 2.
+
+Otherwise open **PowerShell as Administrator** (Windows+X → Terminal (Admin)) and
+check whether the Windows feature itself is enabled:
 
 ```powershell
-wsl --update
+Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 ```
 
-then **restart your computer** and install Docker Desktop.
+If `State` is `Disabled`, enable it (still in the elevated window):
+
+```powershell
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -All
+```
+
+Restart when prompted — the feature doesn't activate until after a reboot.
+
+After restarting, set WSL 2 as the default in a normal PowerShell window:
+
+```powershell
+wsl --set-default-version 2
+```
+
+Then install Docker Desktop.
+
+> **Note:** Docker Desktop's "WSL not installed" error and the `wsl --install` /
+> `wsl --update` commands all operate at the *distro* layer. If they don't resolve
+> the problem, the Windows feature flag is the layer to check — that's what the
+> steps above address.
+
 </details>
 
 ### Step 2 — Run one command

@@ -55,6 +55,13 @@ function Test-PreflightChecks {
         Write-Host "  - Start it and wait ~30 seconds"
         Write-Host "  - Look for the Docker icon in your system tray"
         Write-Host ""
+        Write-Host "If Docker Desktop says 'WSL not installed', the Windows Subsystem for Linux" -ForegroundColor Yellow
+        Write-Host "feature may be disabled. Run this in an elevated PowerShell (Run as Administrator):" -ForegroundColor Yellow
+        Write-Host "  Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux" -ForegroundColor Yellow
+        Write-Host "If State is Disabled, run:" -ForegroundColor Yellow
+        Write-Host "  Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -All" -ForegroundColor Yellow
+        Write-Host "Then restart your computer and run this installer again." -ForegroundColor Yellow
+        Write-Host ""
         exit 1
     }
     Write-VerboseMsg "Docker daemon is running"

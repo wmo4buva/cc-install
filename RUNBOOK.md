@@ -490,13 +490,45 @@ problem it finds.
 <details>
 <summary>Commands and container</summary>
 
-**`ccdocker: command not found`**
-Open a *new* terminal window. If it persists, run
+**`ccauth` or `ccdocker: command not found`**
+
+There are two distinct causes that look identical. On Windows, run this to tell
+them apart:
+
+```powershell
+Select-String -Path $PROFILE -Pattern 'ccauth' -SimpleMatch
+```
+
+**No output** — the installer never finished (a Docker or WSL prerequisite failed
+before shortcuts were written). Fix the prerequisite, then re-run the installer.
+See *Docker won't start / WSL feature disabled* below if Docker Desktop wouldn't
+start.
+
+**Output found** — open a *new* terminal window (existing windows don't pick up
+profile changes). If the command still isn't found in a fresh window, run
 `bash scripts/installers/setup-shortcuts.sh` from your cc-install folder
 (`.\scripts\installers\setup-shortcuts.ps1` on Windows).
 
 **`[ERROR] Docker daemon is not running`**
 Start Docker Desktop, wait for it to finish loading, try again.
+
+**Docker won't start / WSL feature disabled (Windows)**
+If Docker Desktop shows "WSL not installed", check whether the Windows Subsystem
+for Linux *feature* is enabled — this is separate from having a WSL distro:
+
+```powershell
+# In an elevated PowerShell (Run as Administrator):
+Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+```
+
+If `State` is `Disabled`:
+
+```powershell
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -All
+```
+
+Restart your computer, then run `wsl --set-default-version 2` in a normal
+PowerShell window, then retry the installer.
 
 **`port 8080 is already allocated`**
 Copy `docs/docker-compose.override.yml.example` to `docker-compose.override.yml`
