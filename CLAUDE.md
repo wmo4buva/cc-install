@@ -157,7 +157,9 @@ is also root-only: Compose auto-loads it just from the compose file's own direct
 
 Adding a file needs no installer change — the installers download the whole repo
 as an archive. Do add new user-facing commands to **both** `setup-shortcuts`
-scripts, and document them in `README.md` and `docs/QUICK_REFERENCE.md`.
+scripts, and document them in `RUNBOOK.md` (canonical command list) and
+`docs/QUICK_REFERENCE.md` (one-page card). `README.md` is an overview and the
+install path only — operational detail belongs in `RUNBOOK.md`.
 
 ## Releasing
 

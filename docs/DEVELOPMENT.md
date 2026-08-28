@@ -196,7 +196,9 @@ available". Adding a file now requires no installer change.
 2. `chmod +x` the `.sh`.
 3. Use the existing logging helpers (`log_info`/`Write-Info`, etc.).
 4. Add a `cc*` shortcut in **both** `setup-shortcuts` files if users need it.
-5. Document it in `README.md` and `docs/QUICK_REFERENCE.md`.
+5. Document it in `RUNBOOK.md` (the canonical command list) and
+   `docs/QUICK_REFERENCE.md` (the one-page card). `README.md` only carries the
+   short everyday-commands teaser — add it there just if it belongs in that set.
 6. No installer change needed — the archive picks it up.
 
 ### Bash gotchas that have bitten this repo
@@ -259,7 +261,8 @@ always fetches the latest.
 - [ ] Port published on `127.0.0.1` only
 - [ ] Every bash script passes `bash -n`; every `.ps1` parses
 - [ ] `.ps1` files are CRLF in the committed tree
-- [ ] `README.md`, `QUICK_REFERENCE.md`, `CHANGELOG.md`, `VERSION` all updated
+- [ ] `RUNBOOK.md`, `QUICK_REFERENCE.md`, `CHANGELOG.md`, `VERSION` all updated
+      (and `README.md` if the change affects install or the overview)
 
 ## Bundled skills
 

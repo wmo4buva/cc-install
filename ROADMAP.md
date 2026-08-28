@@ -302,7 +302,7 @@ they're always instance-correct. **Verified.**
   always at `workspace/`. Today that needs `ccdocker bash`, `cd`, `claude`.
 - **`ccadd <path>`** — attach a host folder without hand-editing
   `docker-compose.override.yml`. Would make [Working on your own
-  projects](README.md#working-on-your-own-projects) a command rather than a YAML
+  projects](RUNBOOK.md#working-on-your-own-projects) a command rather than a YAML
   exercise.
 - **Pin bundled skills to commit SHAs** for reproducible builds, at the cost of
   manual bumps. See [SECURITY.md](SECURITY.md).

@@ -2,6 +2,41 @@
 
 All notable changes to the Claude Code Installer (cc-install) project.
 
+## [Unreleased]
+
+### Changed — README and RUNBOOK now have distinct jobs
+
+Operational content was spread across both files, with genuine duplication: the
+"use a different folder" instructions and a `## Troubleshooting` section existed in
+each, and command lists existed in three places.
+
+- **README** is now an overview and the install path: what this is, why it exists,
+  the one-line install, the "there is no Claude Code button" warning, how it works,
+  and a signposted index of every other document. ~550 → ~285 lines.
+- **RUNBOOK** is the operations manual and owns the canonical command list, plus
+  everything day-two: the browser IDE, extensions, working on your own projects,
+  `ccpath`, updating, backup/restore, the Bedrock model picker, troubleshooting,
+  uninstalling, and file locations. ~370 → ~615 lines.
+- **docs/QUICK_REFERENCE.md** stays as the deliberately terse one-page card, now
+  clearly framed as such. Commands live in exactly two places with distinct roles
+  rather than three overlapping ones.
+- The install guides in `docs/installGuides/` and the quick reference are now
+  signposted from a "Where to look for what" table at the top of the README,
+  including the Visual Guide's editable Markdown source which wasn't linked before.
+
+Cross-references updated so nothing points at a section that moved:
+`ROADMAP.md`, `docs/INSTALL_GUIDE.md`, `docs/QUICK_REFERENCE.md`,
+`docs/DEVELOPMENT.md` (including the pre-release checklist and the
+"adding a command" steps) and `CLAUDE.md`.
+
+### Fixed — RUNBOOK described credentials that are no longer there
+
+Its "Security Note" and "File Locations Reference" both stated that
+`~/.claude/settings.json` holds your AWS credentials. That stopped being true when
+those keys were removed in favour of `.env` as the single source. The guidance is
+now the opposite, and says why: anything in that file's `env` block overrides the
+environment, so a stale key there silently shadows the good one in `.env`.
+
 ## [1.4.1] - 2026-08-27
 
 ### Fixed — `ccvscode` no longer writes into a relocated workspace

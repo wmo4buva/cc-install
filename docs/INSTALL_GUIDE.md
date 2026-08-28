@@ -237,7 +237,7 @@ away, and any change you make in either place appears in the other instantly.
 **Need to leave a project where it is?** If a folder can't be moved — it's synced
 by OneDrive, say — it can be attached as a second folder instead. That takes a
 one-time config change, so **ask Batten IT to set it up**; see "Keeping a project
-where it already lives" in the [README](../README.md).
+where it already lives" in the [Runbook](../RUNBOOK.md#keeping-a-project-where-it-already-lives).
 
 ---
 
@@ -335,8 +335,9 @@ ccdiagnose
 - **First stop:** run the diagnostic tool (above) and note what it reports.
 - **Support:** contact **Batten IT** — include your operating system (Mac/Windows)
   and, if possible, a copy of the diagnostic output or a screenshot of the error.
-- **Reference:** the full technical [README](../README.md) has additional detail
-  and a command cheat-sheet ([Quick Reference](QUICK_REFERENCE.md)).
+- **Reference:** the [Runbook](../RUNBOOK.md) explains every command in detail;
+  the [Quick Reference](QUICK_REFERENCE.md) is a one-page card. The
+  [README](../README.md) covers what this is and how to install it.
 
 ---
 

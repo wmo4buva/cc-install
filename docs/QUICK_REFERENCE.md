@@ -179,7 +179,8 @@ If something broke: `./scripts/maintenance/restore.sh backups/<file>`
 
 ## Docs
 
-- [README.md](../README.md) — install and usage
+- [RUNBOOK.md](../RUNBOOK.md) — the manual: every command explained
+- [README.md](../README.md) — what this is, and how to install it
 - [CREDENTIALS.md](CREDENTIALS.md) — signing in
 - [INSTALL_GUIDE.md](INSTALL_GUIDE.md) — step-by-step, non-technical
 - [../SECURITY.md](../SECURITY.md) — security posture and trade-offs

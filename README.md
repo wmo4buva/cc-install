@@ -7,24 +7,47 @@ Docker knowledge needed.
 You get Claude Code in your terminal, VS Code in your browser, and a folder on
 your computer that both of them share.
 
+**Why it exists:** installing Claude Code normally means dealing with Node
+versions, PATH problems and per-machine differences. This packages the whole
+environment into one container so a person with no Docker knowledge can install it,
+sign in, and get working without help. Everything is scripted for both macOS/Linux
+and Windows.
+
 **Inspired by the [DAAF project](https://github.com/DAAF-Contribution-Community/daaf)** —
-credit to their Docker-based installation approach. See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md).
+credit to their Docker-based installation approach. See
+[docs/ATTRIBUTION.md](docs/ATTRIBUTION.md).
 
 ---
 
-## New here? Start with a guide
+## Where to look for what
 
-No technical background required.
+**Getting started — no technical background required**
 
 | Guide | Best for |
-|-------|----------|
-| [📘 Visual Guide (PDF)](docs/installGuides/Claude%20Code%20Visual%20Guide.pdf) | **Start here** — one-page printable walkthrough |
+|---|---|
+| [📘 Visual Guide (PDF)](docs/installGuides/Claude%20Code%20Visual%20Guide.pdf) | **Start here** — printable illustrated walkthrough |
 | [🖥️ Visual Guide (HTML)](docs/installGuides/Claude%20Code%20Visual%20Guide.html) | The same guide on-screen |
+| [📄 Visual Guide (Markdown)](docs/installGuides/Claude%20Code%20Visual%20Guide.md) | The editable source of that guide |
 | [💡 Tip Sheet (PDF)](docs/installGuides/ClaudeCodeTipSheet.pdf) | Everyday usage once you're running |
-| [📝 Install Guide (Markdown)](docs/INSTALL_GUIDE.md) | Longer plain-language version, readable on GitHub |
-| [⚡ Quick Reference](docs/QUICK_REFERENCE.md) | Command cheat-sheet |
-| [🔑 Signing in](docs/CREDENTIALS.md) | **How to set up credentials** |
-| [📕 Runbook](RUNBOOK.md) | Operational procedures — workspace folder, model picker, troubleshooting |
+| [📝 Install Guide](docs/INSTALL_GUIDE.md) | Longer plain-language version, readable here on GitHub |
+
+**Using it day to day**
+
+| Document | What's in it |
+|---|---|
+| [📕 **RUNBOOK.md**](RUNBOOK.md) | **The manual.** Every command explained, changing your workspace folder, updating, backup, the Bedrock model picker, troubleshooting |
+| [⚡ Quick Reference](docs/QUICK_REFERENCE.md) | One-page command card — print it or pin it up |
+| [🔑 Signing in](docs/CREDENTIALS.md) | Credentials: Claude account, API key, or AWS Bedrock |
+
+**Project detail**
+
+| Document | What's in it |
+|---|---|
+| [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
+| [ROADMAP.md](ROADMAP.md) | Planned work — multiple instances, dual auth backends |
+| [SECURITY.md](SECURITY.md) | Security posture and reporting |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | For maintainers — architecture, gotchas, release process |
+| [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) | Credits and licenses |
 
 ---
 
@@ -111,228 +134,33 @@ ccvscode     # VS Code in your browser (http://localhost:8088)
 
 ---
 
-## Using the browser IDE
+## The one thing everyone misses
 
-`ccvscode` opens VS Code in your browser. **There's no Claude Code button** — VS
-Code Server is just the editor. To use Claude Code in it:
+`ccvscode` opens VS Code in your browser, and **there is no Claude Code button**.
+VS Code Server is just the editor. To use Claude Code in it:
 
 1. **Terminal → New Terminal** (or <kbd>Ctrl</kbd>+<kbd>`</kbd>)
 2. Type `claude`
 
-That terminal runs inside the container, so it shares the same sign-in and
-settings as `ccdocker`. `ccvscode` also drops a **START-HERE.md** into your
-workspace with these instructions.
-
-→ [docs/CREDENTIALS.md](docs/CREDENTIALS.md) covers signing in from the IDE.
-
-### Installing extensions (including the Claude Code extension)
-
-Open the **Extensions** panel in the browser IDE
-(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>), search, click **Install**. They
-persist in the `code-server-data` volume, so they survive restarts and `ccupdate`.
-
-Two things to know:
-
-**code-server uses [Open VSX](https://open-vsx.org), not the Microsoft
-Marketplace.** Microsoft's marketplace terms restrict it to Microsoft products, so
-code-server ships with Open VSX instead. Most extensions are on both, but not all
-— if something you want is missing, that's why.
-
-**The Claude Code extension is on Open VSX** as `Anthropic.claude-code`, so it
-installs normally. It is **optional** — running `claude` in the IDE terminal works
-without it. The extension adds the sidebar panel and inline diffs.
-
-From a terminal instead of the panel:
-
-```bash
-docker compose exec claude-code code-server --install-extension Anthropic.claude-code
-docker compose exec claude-code code-server --list-extensions
-```
-
-<details>
-<summary>Baking the Claude Code extension into the image (for IT / fleet builds)</summary>
-
-Off by default because it adds **~670 MB**: the extension ships its own
-per-platform Claude binary (~326 MB in `resources/native-binary/`), duplicating
-the CLI this image already installs at the same version.
-
-To include it anyway, add to `.env` and rebuild:
-
-```bash
-CC_INSTALL_VSCODE_EXTENSION=1
-```
-
-```bash
-ccupdate
-```
-
-Or for a one-off build: `docker compose build --build-arg INSTALL_VSCODE_EXTENSION=1`
-
-**Caveat:** this only reaches machines whose `code-server-data` volume is still
-empty — i.e. new installs. Docker seeds a named volume from the image only once,
-so an existing install won't pick up a baked-in extension. Those users install it
-from the Extensions panel (which takes seconds). Verified both ways.
-</details>
-
-<details>
-<summary>Extensions won't install, or the IDE won't start</summary>
-
-Run `ccdiagnose` — it checks whether the extensions directory is writable.
-
-Installs failing with a permission error, or code-server dying with
-`EACCES: permission denied, mkdir .../coder-logs`, was a **bug in v1.3.0-1.3.1**:
-the `code-server-data` volume was created root-owned, locking the container user
-out. Fixed in 1.3.2 — `ccrestart` repairs it, and `ccupdate` prevents it
-recurring.
-</details>
+That terminal runs inside the container, so it shares the same sign-in as
+`ccdocker`.
 
 ---
 
-## Commands
-
-Available from anywhere after installation:
+## Everyday commands
 
 | Command | What it does |
 |---|---|
 | `ccauth` | Set up or change how you sign in |
 | `ccdocker` | Claude Code in your terminal |
 | `ccvscode` | VS Code in your browser |
-| `ccstop` | Stop the container |
-| `ccrestart` | Restart the container (applies `.env` changes) |
-| `cclogs` | View container logs |
-| `ccdiagnose` | Check the install for problems |
-| `ccbackup` | Back up your workspace |
 | `ccpath` | Change which folder on your computer is your workspace |
+| `ccdiagnose` | Check the install for problems |
 | `ccupdate` | Update to the latest version |
 
-<details>
-<summary>Running the scripts directly instead</summary>
-
-From inside the `cc-install` directory:
-
-| | macOS / Linux | Windows |
-|---|---|---|
-| Claude Code | `./bin/claude` | `bin\claude.cmd` |
-| VS Code Server | `./bin/vscode` | `bin\vscode.cmd` |
-| Sign-in setup | `./scripts/installers/setup-credentials.sh` | `.\scripts\installers\setup-credentials.ps1` |
-| Diagnostics | `./scripts/maintenance/diagnose.sh` | `.\scripts\maintenance\diagnose.ps1` |
-| Update | `./scripts/maintenance/update.sh` | `.\scripts\maintenance\update.ps1` |
-| Backup | `./scripts/maintenance/backup.sh` | `.\scripts\maintenance\backup.ps1` |
-| Change workspace folder | `./scripts/maintenance/set-workspace.sh` | `.\scripts\maintenance\set-workspace.ps1` |
-| Restore | `./scripts/maintenance/restore.sh <file>` | `.\scripts\maintenance\restore.ps1 <file>` |
-| Uninstall | `./scripts/maintenance/uninstall.sh` | `.\scripts\maintenance\uninstall.ps1` |
-
-`run_claude.sh` / `.ps1` also accept `bash`, `logs`, `stop`, `restart`, `auth`.
-</details>
-
----
-
-## Your files
-
-Everything lives in `cc-install/workspace/` on your computer. It's a normal
-folder — open it in Finder or Explorer, back it up, sync it. Inside the container
-it appears at `/home/claudeuser/workspace`, and the two stay in sync
-automatically.
-
-It survives container restarts, rebuilds and updates.
-
----
-
-## Working on your own projects
-
-Claude Code can only see what's mounted into the container. By default that's
-exactly one folder: `cc-install/workspace/`. So to work on an existing project,
-it has to be reachable there.
-
-### The easy way — move or copy it into `workspace/`
-
-Drag your project folder into `cc-install/workspace/` in Finder or Explorer.
-That's it. **No restart needed** — it appears inside Claude Code immediately, and
-edits flow both ways in real time.
-
-```
-cc-install/workspace/my-research-paper/
-cc-install/workspace/thesis-data/
-```
-
-Then open it:
-
-**In the browser editor (`ccvscode`)**
-**File → Open Folder**, then enter `/home/claudeuser/workspace/my-research-paper`
-and press OK. VS Code reloads rooted at your project.
-
-**In the terminal (`ccdocker`)**
-`ccdocker` starts you in `workspace/`, which means Claude Code sees *all* your
-projects at once. To root it on one project:
-
-```bash
-ccdocker bash                  # opens a shell in the container
-cd my-research-paper
-claude
-```
-
-### ⚠️ Symlinks do not work
-
-Creating a shortcut/alias/symlink inside `workspace/` that points somewhere else
-on your computer **will not work**, and fails confusingly: the link shows up
-inside the container but every file under it reads as "No such file or
-directory". The container can't follow a link to a path that was never mounted.
-Copy or move the folder instead.
-
-### Using a different folder for your files
-
-To make an existing folder your workspace instead of the bundled `workspace/`:
-
-```bash
-ccpath ~/Dev/projects     # point your workspace there
-ccpath --show             # check where it currently points
-ccpath --reset            # go back to ./workspace
-```
-
-Run it with no arguments and it shows the current folder, then prompts. It offers
-to copy your existing files across, never deletes the originals, and recreates the
-container so the new mount takes effect — a bind mount is fixed at container
-creation, so a plain restart isn't enough.
-
-Inside the browser IDE your files are always at `/home/claudeuser/workspace`, so
-nothing moves around in the editor. `ccbackup`, `ccrestore` and `ccdiagnose` all
-follow the new location automatically.
-
-Two things it will warn you about, because both fail silently otherwise:
-- **Folders Docker Desktop can't share.** On macOS it only shares `/Users`,
-  `/Volumes`, `/private` and `/tmp` by default; elsewhere you get an *empty* folder
-  in the IDE rather than an error. Add the path under Docker Desktop → Settings →
-  Resources → File sharing.
-- **Cloud-synced folders** (Dropbox, OneDrive, iCloud, Google Drive). The sync
-  client and the container both write to the same files, which corrupts saves
-  mid-write. Keep the workspace local and sync a backup instead.
-
-Full detail: **[RUNBOOK.md](RUNBOOK.md)**.
-
-### Keeping a project where it already lives
-
-If a project can't move — it's in OneDrive, or a Git repo you'd rather not
-relocate — mount it as a second folder:
-
-1. Copy `docs/docker-compose.override.yml.example` to `docker-compose.override.yml`
-2. Uncomment the "Mount an extra folder" block and set your path:
-
-   ```yaml
-   services:
-     claude-code:
-       volumes:
-         - /Users/you/Documents/research:/home/claudeuser/research
-   ```
-
-   Windows paths use forward slashes: `C:/Users/you/Documents/research`.
-3. `ccrestart`
-
-It then appears at `/home/claudeuser/research`, read **and** write, alongside
-`workspace/`. Compose merges the two mounts, so `workspace/` keeps working.
-`docker-compose.override.yml` is gitignored, so it survives `ccupdate`.
-
-> Editing YAML is more than most people want to do. If you're setting this up for
-> someone else, do it for them once — they won't need to touch it again.
+→ Full list with explanations, plus updating, backup, the model picker and
+troubleshooting: **[RUNBOOK.md](RUNBOOK.md)**. For a printable card:
+[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md).
 
 ---
 
@@ -349,106 +177,6 @@ List them with `/skills`, invoke with `/<skill-name>`. They're refreshed on ever
 
 ---
 
-## Updating
-
-```bash
-ccupdate
-```
-
-This updates **both** the cc-install scripts and the Docker image (which pulls
-the latest Claude Code and code-server). Your `workspace/`, sign-in and settings
-are untouched.
-
-<details>
-<summary>Why you can't use Claude Code's built-in updater here</summary>
-
-Claude Code is baked into the Docker image, not stored in a persistent volume.
-An update applied inside a running container is discarded the next time the image
-is rebuilt. `ccupdate` is the durable path: it re-downloads the cc-install files,
-rebuilds the image from scratch (`--no-cache`, so the official installer re-runs
-and fetches the latest Claude Code), restarts the container, refreshes your
-shortcuts, and prints the new versions.
-
-There's no way to pin a specific Claude Code version without editing the
-`docker/Dockerfile`.
-
-**About the "update available" notice:** it refers to a new version of *this
-installer*. Running `ccupdate` gets you both that and the latest Claude Code.
-</details>
-
----
-
-## Backup and restore
-
-```bash
-ccbackup                                     # timestamped archive of workspace/
-./scripts/maintenance/restore.sh <file>      # restore from one
-```
-
-`ccbackup` works from anywhere. Restoring is deliberately not a shortcut — it
-overwrites files, so you run it from inside `cc-install` with the backup you mean.
-Windows: `.\scripts\maintenance\restore.ps1 <file>`.
-
----
-
-## Troubleshooting
-
-**Run this first:**
-
-```bash
-ccdiagnose
-```
-
-It checks Docker, the container, the port, disk space, volumes, your sign-in
-setup, and whether the browser IDE is exposed to your network — and suggests a
-fix for each problem it finds.
-
-<details>
-<summary>Common problems</summary>
-
-**`ccdocker: command not found`**
-Open a *new* terminal window. If it persists, run
-`bash scripts/installers/setup-shortcuts.sh` from your cc-install folder
-(`.\scripts\installers\setup-shortcuts.ps1` on Windows).
-
-**`[ERROR] Docker daemon is not running`**
-Start Docker Desktop, wait for it to finish loading, try again.
-
-**`port 8080 is already allocated`**
-Copy `docs/docker-compose.override.yml.example` to `docker-compose.override.yml` and
-uncomment the port block, which uses `ports: !override`. The `!override` tag
-matters — without it Compose appends and you end up publishing both ports.
-`ccvscode` reads the new port back from Compose automatically.
-
-**Container won't start**
-`docker compose logs` to see why, then `ccupdate` to rebuild.
-
-**`claude: command not found` inside the container**
-Give the container ~10 seconds to finish starting. If it persists, `ccupdate`.
-
-**Build fails**
-Check your internet connection, confirm you have ~3 GB of free disk space, and
-check Docker Desktop has enough resources (Settings → Resources). Then retry.
-
-**Claude Code keeps asking me to sign in**
-See [docs/CREDENTIALS.md](docs/CREDENTIALS.md) — usually a leftover
-`ANTHROPIC_API_KEY` in `.env` overriding your account login.
-</details>
-
----
-
-## Uninstalling
-
-```bash
-./scripts/maintenance/uninstall.sh      # or uninstall.ps1 on Windows
-```
-
-Stops and removes the container, removes the image, and removes the Docker
-volumes (with confirmation). Your `workspace/` is **not** deleted unless you
-explicitly confirm.
-
----
-
 ## How it works
 
 A single Docker container running:
@@ -461,6 +189,10 @@ A single Docker container running:
 
 Image size is roughly **1.5-2 GB**.
 
+Your files live in a folder on your computer that's mounted into the container, so
+both sides see the same files in real time. Your sign-in and editor settings live
+in Docker volumes, which is why they survive rebuilds and updates.
+
 ```
 cc-install/
 ├── docker-compose.yml       # container orchestration (must stay at root —
@@ -468,8 +200,8 @@ cc-install/
 ├── VERSION                  # update-check reads this over raw.githubusercontent
 ├── .env.example             # credential template → copy to .env
 ├── README.md  CHANGELOG.md  ROADMAP.md  SECURITY.md
-├── RUNBOOK.md               # operational procedures (ccpath, model picker, ...)
-├── CLAUDE.md                # guidance for Claude Code in this repo
+├── RUNBOOK.md               # the operations manual
+├── CLAUDE.md                # guidance for Claude Code working in this repo
 ├── bin/
 │   ├── claude / claude.cmd  # launcher: Claude Code
 │   └── vscode / vscode.cmd  # launcher: VS Code Server
@@ -487,11 +219,11 @@ cc-install/
 └── docs/
     ├── CREDENTIALS.md      # signing in
     ├── INSTALL_GUIDE.md    # step-by-step for non-technical users
-    ├── QUICK_REFERENCE.md  # cheat sheet
+    ├── QUICK_REFERENCE.md  # one-page command card
     ├── DEVELOPMENT.md      # for maintainers
     ├── ATTRIBUTION.md      # credits and licenses
     ├── docker-compose.override.yml.example  # optional local tweaks (ports, ~/.aws)
-    └── installGuides/      # PDF / HTML guides
+    └── installGuides/      # printable visual guide + tip sheet
 ```
 
 The launchers live in `bin/` but `cd` to the repo root before doing anything, so
@@ -501,14 +233,17 @@ Every script exists in both `.sh` (macOS/Linux) and `.ps1` (Windows) form.
 
 ### Security
 
-- Container runs as a non-root user, isolated from your host filesystem apart
-  from `workspace/`.
+- The container runs as a non-root user, isolated from your host filesystem apart
+  from your workspace folder.
 - The browser IDE is published on **`127.0.0.1` only** — reachable from your
   computer and nothing else. It runs without a password on that basis; anyone who
   can open the page gets a shell in the container, so if you expose the port to
   your network, set `CC_VSCODE_PASSWORD` in `.env` first.
-- `.env` holds credentials in plain text, `chmod 600`, and is gitignored.
+- `.env` is the only place credentials belong. Plain text, `chmod 600`, gitignored.
 - `ccdiagnose` flags an exposed port or loose `.env` permissions.
+
+→ More detail in [SECURITY.md](SECURITY.md) and
+[RUNBOOK.md § Security](RUNBOOK.md#security).
 
 ---
 
@@ -519,22 +254,24 @@ Every script exists in both `.sh` (macOS/Linux) and `.ps1` (Windows) form.
 **Will this conflict with Claude Code already installed on my machine?** No —
 it's fully containerized with its own config.
 
-**What if I delete the container?** Your files (`workspace/`) and settings
-(`claude-config` volume) live outside it. `ccupdate` rebuilds and everything's
-still there.
+**What if I delete the container?** Your files and settings live outside it.
+`ccupdate` rebuilds and everything's still there.
 
-**Can I customise the environment?** Yes — edit the `docker/Dockerfile` and run
+**Can I customise the environment?** Yes — edit `docker/Dockerfile` and run
 `ccupdate`. For ports, extra mounts or resource limits, use
 `docs/docker-compose.override.yml.example` instead, which survives updates.
 
-**Can several people use one computer?** Yes, but each person should install
-under their own user account so they get their own workspace and settings.
+**Can several people use one computer?** Yes, but each person should install under
+their own user account so they get their own workspace and settings.
+
+**Can I run more than one instance, with different credentials?** Not yet
+supported. See [ROADMAP.md](ROADMAP.md) for the plan and the current manual recipe.
 
 ---
 
 ## Support
 
-- **[ROADMAP.md](ROADMAP.md)** — what's planned, including multi-instance and dual auth backends
+- **[RUNBOOK.md](RUNBOOK.md)** — start here for anything operational
 - **Claude Code docs** — <https://docs.claude.com/en/docs/claude-code>
 - **code-server docs** — <https://coder.com/docs/code-server/>
 - **Docker docs** — <https://docs.docker.com/>
